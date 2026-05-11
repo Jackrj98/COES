@@ -1,0 +1,12 @@
+-r base.txt
+
+# --- SERVIDOR DE APLICACIONES ---
+# Gunicorn es el servidor WSGI que manejará las peticiones detrás de Nginx
+gunicorn==23.0.0
+
+# --- STATIC FILES ---
+# Recomendado si no quieres que Nginx sirva los archivos estáticos directamente
+whitenoise==6.9.0
+
+# --- MONITORING & LOGGING ---
+# sentry-sdk==2.20.0

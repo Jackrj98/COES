@@ -1,0 +1,82 @@
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: coes_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_NAME}
+      POSTGRES_USER:     ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432" # HOST EXTERN:INTERN
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: coes_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379" # HOST EXTERN:INTERN
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile
+    container_name: coes_web
+    command: make run-prod
+    restart: unless-stopped
+    environment:
+      DOCKER:        "1"
+      PORT:          ${PORT:-8000}
+    env_file:
+      - .env
+    volumes:
+      - .:/app/coes
+      - static_volume:/app/coes/staticfiles
+      - media_volume:/app/coes/media
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}" # HOST EXTERN:INTERN
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  celery:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile
+    container_name: coes_celery
+    restart: unless-stopped
+    command: make celery
+    environment:
+      DOCKER: "1"
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+    env_file:
+      - .env
+    volumes:
+      - .:/app/coes
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

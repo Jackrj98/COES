@@ -1,0 +1,32 @@
+# Django Core
+asgiref==3.11.1
+Django==5.2
+python-decouple==3.8
+sqlparse==0.5.5
+
+# Database & Storage
+psycopg==3.2.3
+psycopg-binary==3.2.3
+pillow==11.2.1
+
+# Forms & UI
+django-crispy-forms==2.6
+crispy-bootstrap5==2026.3
+django-widget-tweaks==1.5.1
+
+# Async Tasks (Celery & Redis)
+celery==5.6.2
+django-celery-beat==2.8.1
+django-redis==5.4.0
+redis==5.0.8
+amqp==5.3.1
+kombu==5.6.2
+billiard==4.2.1
+vine==5.1.0
+
+# Utilities & Security
+django-auditlog==2.3.0
+django-crum==0.7.9
+django-timezone-field==7.2.1
+django-cors-headers==4.7.0
+

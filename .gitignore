@@ -1,0 +1,118 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# DJANGO & PYTHON CORE
+# ──────────────────────────────────────────────────────────────────────────────
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ENTORNOS VIRTUALES (¡CRÍTICO PARA TU ERROR DE RUFF!)
+# ──────────────────────────────────────────────────────────────────────────────
+coes-env/
+.venv/
+venv/
+ENV/
+env/
+bin/
+lib/
+include/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SEGURIDAD Y VARIABLES DE ENTORNO
+# ──────────────────────────────────────────────────────────────────────────────
+# NUNCA subas estos archivos al repositorio
+.env
+.env.local
+.env.*.local
+*.env
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CACHÉ DE HERRAMIENTAS DE DESARROLLO
+# ──────────────────────────────────────────────────────────────────────────────
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+.cache/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# IDEs & EDITORES (PYCHARM / VS CODE)
+# ──────────────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# DISTRIBUCIÓN & BUILD
+# ──────────────────────────────────────────────────────────────────────────────
+dist/
+*.egg-info/
+.eggs/
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SISTEMA OPERATIVO
+# ──────────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+downloads/
+eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+
+# Tests
+.nox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+cover/
+
+# Django
+*.mo
+*.sqlite3
+instance/
+.webassets-cache
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Migrations
+**/migrations/*.pyc
+**/migrations/00*
+**/migrations/__pycache__/

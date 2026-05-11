@@ -1,0 +1,86 @@
+services:
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: coes_mailhog
+    restart: unless-stopped
+    ports:
+      - "8026:8025"   # UI web
+      - "1026:1025"   # SMTP
+
+  web:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile.dev
+    command: make run-dev
+    volumes:
+      - .:/app/coes
+    environment:
+      ENVIRONMENT: develop
+      DOCKER: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  celery:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile.dev
+    container_name: coes_celery
+    restart: unless-stopped
+    command: make celery
+    environment:
+      DOCKER: "1"
+      ENVIRONMENT: develop
+    env_file:
+      - .env
+    volumes:
+      - .:/app/coes
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile.dev
+    container_name: coes_celery_beat
+    command: make celery-beat
+    restart: unless-stopped
+    environment:
+      DOCKER: "1"
+      ENVIRONMENT: develop
+    env_file:
+      - .env
+    volumes:
+      - .:/app/coes
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  flower:
+    build:
+      context: .
+      dockerfile: build/docker/Dockerfile.dev
+    container_name: coes_flower
+    command: make celery-flower
+    ports:
+      - "5555:5555"
+    environment:
+      DOCKER: "1"
+      ENVIRONMENT: develop
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery:
+        condition: service_started
