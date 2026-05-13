@@ -1,0 +1,28 @@
+{% extends 'layouts/blank.html' %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'assets/compiled/css/error.css' %}">
+{% endblock extra_css %}
+
+{% block body %}
+    <body>
+    <script src="{% static 'assets/static/js/initTheme.js' %}"></script>
+    <div id="error">
+        <div class="error-page container">
+            <div class="col-md-8 col-12 offset-md-2">
+                <div class="text-center">
+                    <img class="img-error" src="{% static 'assets/compiled/svg/error-403.svg' %}" alt="Forbidden">
+                    <h1 class="error-title">{% trans 'Forbidden' %}</h1>
+                    <p class='fs-5 text-gray-600'>{% trans 'You are unauthorized to see this page.' %}.</p>
+                    <a href="{% url 'home' %}" class="btn btn-lg btn-outline-primary mt-3">{% trans 'Go Home' %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts and custom scripts -->
+    <script src="{% static 'assets/extensions/sweetalert2/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'assets/extensions/jquery/jquery.min.js' %}"></script>
+    {% include 'partials/messages.html' %}
+    </body>
+{% endblock %}

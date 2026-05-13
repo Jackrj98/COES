@@ -1,8 +1,8 @@
-from django.db import models
-from crum import get_current_user
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 import uuid
+
+from crum import get_current_user
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class AuditModel(models.Model):

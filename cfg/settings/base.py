@@ -13,7 +13,7 @@ from pathlib import Path
 
 from decouple import config
 
-from cfg.database import DATABASES_CONFIG
+from cfg.settings.database import DATABASES_CONFIG
 
 # ------------------------------------------------------------------------------
 # BASE PATHS
@@ -54,7 +54,10 @@ THIRD_APPS = [
     "django_celery_beat",
 ]
 
-LOCAL_APPS = []
+LOCAL_APPS = [
+    "apps.core",
+    "apps.security",
+]
 
 INSTALLED_APPS = BASE_APPS + THIRD_APPS + LOCAL_APPS
 

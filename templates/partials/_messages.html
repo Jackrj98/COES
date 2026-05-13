@@ -1,0 +1,31 @@
+<script type="application/javascript">
+    {% if messages %}
+        {% for message in messages %}
+            {% if "toast" in message.tags %}
+                Swal.fire({
+                    toast: true,
+                    timer: 5000,
+                    position: 'top-end',
+                    icon: "{{ message.level_tag }}",
+                    title: "{{ message|escapejs }}",
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    customClass: {
+                        popup: 'mt-4'
+                    }
+                });
+            {% else %}
+                Swal.fire({
+                    timer: 3000,
+                    title: "Información",
+                    html: "{{ message|safe }}",
+                    icon: "{{ message.level_tag }}",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#4e73df",
+                    allowOutsideClick: false
+                });
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</script>

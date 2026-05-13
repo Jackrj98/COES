@@ -1,13 +1,12 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from apps.core.models import AuditModel
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.models import AuditModel
 
 
 class Person(AbstractBaseUser, AuditModel, PermissionsMixin):
-
-
     class Meta:
         db_table = "person"
         verbose_name = _("Person")
@@ -17,7 +16,6 @@ class Person(AbstractBaseUser, AuditModel, PermissionsMixin):
 
 
 class User(AbstractBaseUser, AuditModel, PermissionsMixin):
-
     email = models.EmailField()
     username = models.CharField()
 
