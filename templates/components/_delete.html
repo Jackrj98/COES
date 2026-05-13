@@ -1,0 +1,84 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_tags core_tags %}
+
+{% block content %}
+    <div class="row">
+        <div class="card collapse-icon accordion-icon-rotate">
+            <div class="card-header">
+                <h4 class="card-title pl-1">{{ title|capfirst }}</h4>
+            </div>
+            <div class="card-body">
+                {% with object|object_verbose_name|lower as object_name %}
+                    {% if protected %}
+                        <div class="mb-3">
+                            <i class="bi bi-info-circle-fill text-warning fs-6 mb-2"></i>
+                            <strong>
+                                {% blocktrans with obj_name=object_name %}
+                                    You cannot delete the record for {{ obj_name }}.
+                                {% endblocktrans %}
+                            </strong>
+                            <p>
+                                {% blocktrans with obj_name=object_name %}
+                                    Deleting the {{ obj_name }} <b>“{{ object }}”</b> would require
+                                    deleting the following protected objects:
+                                {% endblocktrans %}
+                            </p>
+                            <ul class="ms-4">{{ protected|unordered_list }}</ul>
+                        </div>
+                    {% else %}
+                        <p>
+                            {% blocktrans with obj_name=object_name %}
+                                Are you sure you want to delete the {{ obj_name }}
+                                “<b>{{ object }}</b>”? The following related items will be deleted:
+                            {% endblocktrans %}
+                        </p>
+                    {% endif %}
+                {% endwith %}
+                {% if not protected %}
+                    {% if deletable_objects %}
+                        <span class="fw-bold">{% trans 'Summary' %}:</span>
+                        <ul class="p-0 ms-4">
+                            {% for model_name, object_count in model_count %}
+                                <li>
+                                    <b>{% trans model_name|capfirst %}:</b> {{ object_count }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="accordion" id="accordionDelete">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingDelete">
+                                    <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseDelete" aria-expanded="true"
+                                            aria-controls="collapseDelete">
+                                        {% trans 'Detail Objects' %}
+                                    </button>
+                                </h2>
+                                <div id="collapseDelete" class="accordion-collapse collapse show"
+                                     aria-labelledby="headingDelete" data-bs-parent="#accordionDelete">
+                                    <div class="accordion-body">
+                                        <ul class="ms-3">{{ deletable_objects|unordered_list }}</ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <form class="form mt-4" method="post" id="deleteForm">
+                        {% csrf_token %}
+                        <div class="form-actions d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary me-2" id="btnDelete">
+                                {% trans 'Submit' %}
+                            </button>
+                            <a href="{{ cancel_url }}" class="btn btn-outline-secondary">
+                                {% trans 'Cancel' %}
+                            </a>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block second_javascript %}
+    <script src="{% static 'assets/static/js/helper/actions.js' %}"></script>
+{% endblock second_javascript %}
