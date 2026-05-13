@@ -6,7 +6,9 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.models import AuditModel
 
 
-class Person(AbstractBaseUser, AuditModel, PermissionsMixin):
+class Person(AuditModel):
+    code = models.SlugField(_("Person code"), unique=True)
+
     class Meta:
         db_table = "person"
         verbose_name = _("Person")

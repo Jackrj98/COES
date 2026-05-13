@@ -1,0 +1,82 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_filters %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'assets/extensions/datatables.net-bs5/css/dataTables.bootstrap5.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/extensions/datatables-responsive/css/responsive.bootstrap5.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/compiled/css/table-datatable-jquery.css' %}">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="{% static 'assets/extensions/flatpickr/flatpickr.min.css' %}">
+    {% block head_list %}{% endblock head_list %}
+{% endblock extra_css %}
+
+{% block content %}
+    <section class="section">
+        <div class="row d-flex justify-content-center g-0">
+            <div class="col-xl-12 col-md-12 mb-4">
+                {% block filters %}
+                    {% if filter_form %}
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <div class="collapse show" id="filterCollapse">
+                                    <form method="GET" id="filter">
+                                        <div class="row align-items-end">
+                                            {% for field in filter_form %}
+                                                <div class="col-12 col-sm-6 col-md-4">
+                                                    {{ field|as_crispy_field }}
+                                                </div>
+                                            {% endfor %}
+                                            <div class="col-12 text-end">
+                                                <button type="button" id="clear-filters"
+                                                        class="btn bg-transparent btn-sm">
+                                                    <i class="bi bi-trash me-1"></i> {% trans 'Clean filters' %}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endblock filters %}
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="table-responsive w-100 mt-3">
+                            <table id="datatable-list" class="table w-100">
+                                <thead>
+                                <tr>{% block columns %}{% endblock %}</tr>
+                                </thead>
+                                <tbody>{% block rows %}{% endblock %}</tbody>
+                                <caption>{% block caption %}{% endblock %}</caption>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% block extra_content %} {% endblock %}
+{% endblock content %}
+
+{% block javascript %}
+    {% if  status_choices %}
+        <script type="application/javascript">
+            const statusChoices = {{ status_choices|safe }};
+            const statusColorChoices = {{ status_color_choices|safe }};
+        </script>
+    {% endif %}
+    <script src="{% static 'assets/extensions/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js' %}"></script>
+    <!-- datatables-responsive -->
+    <script src="{% static 'assets/extensions/datatables-responsive/js/dataTables.responsive.js' %}"></script>
+    <script src="{% static 'assets/extensions/datatables-responsive/js/responsive.bootstrap5.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/datatables.js' %}"></script>
+    <!-- date-range-picker -->
+    <script src="{% static 'assets/extensions/flatpickr/flatpickr.min.js' %}"></script>
+    <script src="{% static 'assets/extensions/flatpickr/l10n/es.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/date-picker.js' %}"></script>
+
+    <script src="{% static 'assets/static/js/cookie.js' %}"></script>
+
+    {% block dt_javascript %}{% endblock dt_javascript %}
+{% endblock javascript %}
