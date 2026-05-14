@@ -18,7 +18,6 @@ from cfg.settings.database import DATABASES_CONFIG
 # ------------------------------------------------------------------------------
 # BASE PATHS
 # ------------------------------------------------------------------------------
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR.parent / "media"
@@ -55,7 +54,10 @@ THIRD_APPS = [
 ]
 
 LOCAL_APPS = [
+    "apps.catalogs",
     "apps.core",
+    "apps.inventory",
+    "apps.purchasing",
     "apps.security",
 ]
 
@@ -89,7 +91,6 @@ MIDDLEWARE = BASE_MIDDLEWARE + LOCAL_MIDDLEWARE + THIRD_MIDDLEWARE
 # ------------------------------------------------------------------------------
 DB_ENGINE_SELECTED = config("DB_ENGINE", default="sqlite").lower()
 DATABASES = {"default": DATABASES_CONFIG.get(DB_ENGINE_SELECTED, DATABASES_CONFIG["sqlite"])}
-
 
 # ------------------------------------------------------------------------------
 # TEMPLATES & URLS
@@ -136,6 +137,10 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+# ------------------------------------------------------------------------------
+# USER & AUTH
+# ------------------------------------------------------------------------------
+AUTH_USER_MODEL = "security.User"
 
 # ------------------------------------------------------------------------------
 # SESSIONS
