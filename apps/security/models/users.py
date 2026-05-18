@@ -20,12 +20,6 @@ from apps.security.management.management import UserManager
 class Person(AuditModel):
     """Represents a person with personal, identification, and contact details."""
 
-    class DocumentChoices(models.IntegerChoices):
-        """List of document choices."""
-
-        DNI = 1, _("DNI")
-        PASSPORT = 2, _("Passport")
-
     class GenderChoices(models.IntegerChoices):
         """List of gender choices."""
 

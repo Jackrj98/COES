@@ -106,7 +106,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "django.template.context_processors.request",
             ],
             "builtins": [
                 "django.templatetags.static",
@@ -141,6 +140,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # USER & AUTH
 # ------------------------------------------------------------------------------
 AUTH_USER_MODEL = "security.User"
+LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # ------------------------------------------------------------------------------
 # SESSIONS

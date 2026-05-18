@@ -1,0 +1,53 @@
+{% extends 'layouts/blank.html' %}
+{% load  crispy_forms_filters widget_tweaks %}
+
+{% block content %}
+	<div class="page page-center">
+		<div class="container container-tight py-4">
+			<!-- BEGIN NAVBAR LOGO -->
+			<div class="text-center mb-3">
+				<img src="{% static 'dist/img/logo.png' %}" alt="{% trans 'logo' %}"
+				     style="height: 10rem; width: auto;">
+			</div>
+			<!-- END NAVBAR LOGO -->
+			<div class="card card-md">
+				<div class="card-body">
+					<h2 class="h2 text-center mb-4">{% trans title|capfirst %}</h2>
+					<form method="POST" autocomplete="off">
+						{% csrf_token %}
+						<div class="mb-3">
+							{{ form.username|as_crispy_field }}
+						</div>
+						<div class="form-group position-relative has-icon-right mb-4">
+							<label class="form-label text-sm">
+								{{ form.password.label }}
+								<span class="form-label-description">
+										<a href="#">I forgot password</a>
+									</span>
+							</label>
+							<div class="position-relative">
+								{% render_field form.password class="form-control" id="id_password" %}
+								<div id="toggle-password" class="form-control-icon"
+								     style="top: 50%; transform: translateY(-50%); right: 15px; position: absolute; cursor: pointer; z-index: 10;">
+									<i class="bi bi-eye toggle-password text-muted"></i>
+								</div>
+							</div>
+							{% if form.password.errors %}
+								<div class="text-danger text-xs mt-1">
+									{{ form.password.errors|first }}
+								</div>
+							{% endif %}
+						</div>
+						<div class="form-footer">
+							<button type="submit" class="btn btn-primary w-100">{% trans 'Sign in' %}</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="text-center text-secondary mt-3">
+				{% trans 'Is this your first time visiting us?' %}
+				<a href="https://orgaepsi.com/" target="_blank" class="font-bold">{% trans 'Contact us' %}</a>
+			</div>
+		</div>
+	</div>
+{% endblock %}
