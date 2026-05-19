@@ -1,12 +1,14 @@
-# ─────────────────────────────────────────
-# Vars
-# ─────────────────────────────────────────
-ROOT_DIR      := $(shell pwd)
-SETTINGS      := cfg.settings
-PORT          ?= 8000
-ENV           ?= develop
-GUNICORN_CONF := build/gunicorn/conf.py
+# =============================================================================
+# Global Variables
+# =============================================================================
+ROOT_DIR       := $(shell pwd)
+SETTINGS       := cfg.settings
+PORT           ?= 8000
+ENV            ?= develop
+GUNICORN_CONF  := build/gunicorn/conf.py
+PYTHON_VERSION := $(shell python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
+# Environment Control (Docker vs Local Virtualenv)
 ifdef DOCKER
     PYTHON := python
     PIP    := pip
@@ -20,48 +22,57 @@ endif
 
 MANAGE := $(PYTHON) manage.py
 
-# ─────────────────────────────────────────
-# Colors
-# ─────────────────────────────────────────
+# =============================================================================
+# Terminal Color Palette
+# =============================================================================
 RED    := \033[0;31m
 YELLOW := \033[1;33m
 GREEN  := \033[0;32m
 NC     := \033[0m
 
-# ─────────────────────────────────────────
-# Phony
-# ─────────────────────────────────────────
-.PHONY: help venv install-dev install-prod setup migrate superuser run-dev run-prod shell celery celery-beat lint format check-format clean docker-up docker-down docker-debug
+# =============================================================================
+# Phony Directives
+# =============================================================================
+.PHONY: help venv install-dev install-prod setup migrate superuser superuser-dev \
+        run-dev run-prod shell celery celery-beat celery-flower lint format \
+        docker-build docker-build-no-cache docker-up docker-up-build docker-down docker-logs \
+        seed clean
 
-# ─────────────────────────────────────────
-# Help
-# ─────────────────────────────────────────
+# =============================================================================
+# Help / Documentation
+# =============================================================================
 help:
 	@echo "Commands available for CORE:"
 	@echo "  make venv                     - Creates the virtual environment (skips if already exists)"
+	@echo "  make install-dev              - Install development dependencies"
+	@echo "  make install-prod             - Install production dependencies"
 	@echo "  make run-dev                  - Start Django dev server"
 	@echo "  make run-prod                 - Start production (gunicorn)"
 	@echo "  make celery                   - Start Celery worker"
 	@echo "  make celery-beat              - Start Celery Beat"
-	@echo "  make docker-up                - Start docker"
-	@echo "  make docker-debug             - Start docker with PyCharm debug"
+	@echo "  make celery-flower            - Start Celery Flower Dashboard"
+	@echo "  make docker-up                - Start docker containers"
+	@echo "  make docker-down              - Stop docker containers"
 	@echo "  make shell                    - Opens the Django shell"
-	@echo "  make lint                     - Runs pylint and flake8"
-	@echo "  make format                   - Formats the code with Black and Isort"
-	@echo "  make check-format             - Checks formatting without applying changes"
-	@echo "  make clean                    - Removes cache files and migrations"
-	@echo "  make seed                      - Run seeds interactively"
-	@echo "  make seed NUMBER=50            - Run seeds with custom number"
+	@echo "  make lint                     - Runs ruff, pylint and mypy"
+	@echo "  make format                   - Formats the code with Ruff"
+	@echo "  make seed                     - Run seeds interactively"
+	@echo "  make clean                    - Removes cache files safely"
 
-# ─────────────────────────────────────────
-# Virtualenv
-# ─────────────────────────────────────────
+# =============================================================================
+# Virtual Environment Management
+# =============================================================================
 venv:
+	@python3 -c "import venv" 2>/dev/null || { \
+		echo "Error: 'python3-venv' is not installed for your environment."; \
+		echo "Attempting to install system dependency for Python $(PYTHON_VERSION)..."; \
+		sudo apt update && sudo apt install python3-venv -y; \
+	}
 	@if [ ! -d "$(VENV)" ]; then \
 		python3 -m venv $(VENV); \
 		echo "Virtual environment created at $(VENV)"; \
 	else \
-		echo "Virtual environment already exists"; \
+		echo "Virtual environment already exists."; \
 	fi
 
 install-dev: venv
@@ -72,16 +83,16 @@ install-prod: venv
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements/prod.txt
 
-# ─────────────────────────────────────────
-# Setup
-# ─────────────────────────────────────────
+# =============================================================================
+# Initial Configuration (Setup)
+# =============================================================================
 setup:
-	mkdir -p static staticfiles
+	@mkdir -p static staticfiles
 	@printf "${GREEN}Directories ready${NC}\n"
 
-# ─────────────────────────────────────────
-# Database
-# ─────────────────────────────────────────
+# =============================================================================
+# Database and Migrations
+# =============================================================================
 migrate:
 	@printf "${YELLOW}Applying migrations ($(ENV))...${NC}\n"
 	$(MANAGE) makemigrations --settings=$(SETTINGS).$(ENV) --noinput
@@ -92,15 +103,15 @@ superuser:
 
 superuser-dev:
 	@printf "${YELLOW}Creating default dev superuser...${NC}\n"
-	DJANGO_SUPERUSER_PASSWORD=develop \
+	@DJANGO_SUPERUSER_PASSWORD=develop \
 	DJANGO_SUPERUSER_USERNAME=develop \
 	DJANGO_SUPERUSER_EMAIL=develop@coes.com \
 	$(MANAGE) createsuperuser --noinput --settings=$(SETTINGS).$(ENV) || true
 
-# ─────────────────────────────────────────
-# Run Dev
-# ─────────────────────────────────────────
-run-dev: setup migrate superuser-dev
+# =============================================================================
+# Application Execution (Run)
+# =============================================================================
+run-dev: install-dev setup migrate superuser-dev
 	@printf "${YELLOW}Using settings: $(SETTINGS).$(ENV)${NC}\n"
 	@if [ -n "$$PYCHARM_DEBUG" ]; then \
 		printf "${GREEN}Connecting to PyCharm debugger on port $$PYCHARM_PORT...${NC}\n"; \
@@ -109,20 +120,16 @@ run-dev: setup migrate superuser-dev
 	@printf "${GREEN}Starting Django on port $(PORT)...${NC}\n"
 	$(MANAGE) runserver 0.0.0.0:$(PORT) --settings=$(SETTINGS).$(ENV)
 
-# ─────────────────────────────────────────
-# Run Prod
-# ─────────────────────────────────────────
-run-prod: setup migrate
-	@printf "${YELLOW}Collecting static...${NC}\n"
+run-prod: install-prod setup migrate
+	@printf "${YELLOW}Collecting static files...${NC}\n"
 	$(MANAGE) collectstatic --settings=$(SETTINGS).production --noinput
-
 	@printf "${GREEN}Starting Gunicorn...${NC}\n"
-	DJANGO_SETTINGS_MODULE=$(SETTINGS).production \
+	@DJANGO_SETTINGS_MODULE=$(SETTINGS).production \
 	$(PYTHON) -m gunicorn -c $(GUNICORN_CONF) cfg.wsgi:application
 
-# ─────────────────────────────────────────
-# Celery
-# ─────────────────────────────────────────
+# =============================================================================
+# Celery Services
+# =============================================================================
 celery:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) $(CELERY) -A cfg worker -l info
 
@@ -134,17 +141,17 @@ celery-flower:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) \
 	$(CELERY) -A cfg flower --port=5555 -l info
 
-# ─────────────────────────────────────────
-# Shell
-# ─────────────────────────────────────────
+# =============================================================================
+# Django Shell
+# =============================================================================
 shell:
 	$(MANAGE) shell --settings=$(SETTINGS).$(ENV)
 
-# ─────────────────────────────────────────
-# Lint & Format
-# ─────────────────────────────────────────
+# =============================================================================
+# Code Quality (Lint & Format)
+# =============================================================================
 lint:
-	@printf "${YELLOW}Running Linters...${NC}\n"
+	@printf "${YELLOW}Running Linters (Ruff, Pylint, Mypy)...${NC}\n"
 	$(PYTHON) -m ruff check .
 	$(PYTHON) -m pylint cfg apps
 	$(PYTHON) -m mypy .
@@ -154,9 +161,9 @@ format:
 	$(PYTHON) -m ruff check . --fix
 	$(PYTHON) -m ruff format .
 
-# ─────────────────────────────────────────
-# Docker
-# ─────────────────────────────────────────
+# =============================================================================
+# Docker Orchestration
+# =============================================================================
 docker-build:
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml build
 
@@ -175,9 +182,9 @@ docker-down:
 docker-logs:
 	docker compose logs -f
 
-# ─────────────────────────────────────────
-# Seeds
-# ─────────────────────────────────────────
+# =============================================================================
+# Test Data (Seeds)
+# =============================================================================
 seed:
 	@printf "${YELLOW}Select seed to run:${NC}\n"
 	@printf "  4) all\n"
@@ -187,9 +194,9 @@ seed:
 		*) printf "${RED}Invalid option${NC}\n";; \
 	esac
 
-# ─────────────────────────────────────────
-# Clean
-# ─────────────────────────────────────────
+# =============================================================================
+# Workspace Cleanup
+# =============================================================================
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete

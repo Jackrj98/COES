@@ -1,0 +1,51 @@
+{% extends 'layouts/blank.html' %}
+{% load crispy_forms_filters widget_tweaks %}
+
+{% block content %}
+    <div class="container container-tight d-flex flex-column justify-content-center min-vh-100 py-4">
+        <section class="w-100">
+            <div class="row match-height justify-content-center align-items-center">
+                <div class="col-md-6 col-10">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h2 class="h2 text-center">{% trans title|capfirst %}</h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-justify text-sm">{% trans description %}</p>
+                            <form method="POST" autocomplete="off">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    {{ form.username|as_crispy_field }}
+                                </div>
+                                <div class="form-group position-relative has-icon-right mb-4">
+                                    <label class="form-label text-sm">
+                                        {{ form.password.label }}
+                                    </label>
+                                    <div class="position-relative">
+                                        {% render_field form.password class="form-control" id="id_password" %}
+                                        <div id="toggle-password" class="form-control-icon"
+                                             style="top: 50%; transform: translateY(-50%); right: 15px; position: absolute; cursor: pointer; z-index: 10;">
+                                            <i class="bi bi-eye toggle-password text-muted"></i>
+                                        </div>
+                                    </div>
+                                    {% if form.password.errors %}
+                                        <div class="text-danger text-xs mt-1">
+                                            {{ form.password.errors|first }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-footer">
+                                    <button type="submit" class="btn btn-primary w-100">{% trans 'Sign in' %}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock content %}
+
+{% block javascript %}
+    <script src="{% static 'js/auth/utils.js' %}"></script>
+{% endblock javascript %}

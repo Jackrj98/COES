@@ -106,7 +106,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "django.template.context_processors.request",
             ],
             "builtins": [
                 "django.templatetags.static",
@@ -141,12 +140,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # USER & AUTH
 # ------------------------------------------------------------------------------
 AUTH_USER_MODEL = "security.User"
+LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # ------------------------------------------------------------------------------
 # SESSIONS
 # ------------------------------------------------------------------------------
 SESSION_COOKIE_NAME = "coes_session_id"
-SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_COOKIE_AGE = 1800  # 30 min
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
