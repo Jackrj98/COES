@@ -48,14 +48,18 @@ class SignInView(LoginView):
 
         auth_user = authenticate(request, username=user.email, password=password)
         if auth_user:
-            if not user.email_verified:
-                messages.warning(request, MessagesEnum.EMAIL_UNVERIFIED.value, extra_tags="toast")
-                return self.render_to_response(self.get_context_data(form=form))
-
             login(request, auth_user)
             return self.handle_login_success(user)
 
-        messages.warning(request, MessagesEnum.INVALID_CREDENTIALS.value, extra_tags="toast")
+        if user.is_locked:
+            messages.warning(request, MessagesEnum.USER_BLOCKED.value, extra_tags="toast")
+
+        attempts = int(5 - user.failed_login_attempts)
+        messages.warning(
+            request,
+            MessagesEnum.INVALID_CREDENTIALS_WITH_ATTEMPTS.value.format(number=attempts),
+            extra_tags="toast",
+        )
         return self.render_to_response(self.get_context_data(form=form))
 
     def handle_login_success(self, user):

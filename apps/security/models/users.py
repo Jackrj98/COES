@@ -110,6 +110,10 @@ class User(AbstractBaseUser, AuditModel, PermissionsMixin):
     force_password = models.BooleanField(_("Force password change"), default=False)
     last_password_change = models.DateField(_("Last password change"), default=timezone.now)
 
+    failed_login_attempts = models.IntegerField(_("Failed login attempts"), default=0)
+    is_locked = models.BooleanField(_("Is locked"), default=False)
+    locked_at = models.DateTimeField(_("Locked at"), null=True, blank=True)
+
     # Relationship
     person = models.OneToOneField(
         Person, on_delete=models.CASCADE, null=True, blank=True, related_name="user"

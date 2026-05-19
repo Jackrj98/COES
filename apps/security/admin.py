@@ -75,6 +75,7 @@ class UserAdmin(UserAdmin, BaseAdminMixin):
         ),
     )
 
+
 @admin.register(Person)
 class PersonAdmin(BaseAdminMixin):
     ordering = ("-created_at",)
@@ -93,13 +94,10 @@ class PersonAdmin(BaseAdminMixin):
         "is_active",
     )
 
-
     @admin.display(description=_("Full Name"), ordering="last_name")
     def full_name_display(self, obj):
         return obj.full_name
 
-
     @admin.display(description=_("Age"))
     def age_display(self, obj):
         return obj.age_display
-
