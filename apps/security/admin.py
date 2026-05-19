@@ -79,17 +79,13 @@ class UserAdmin(UserAdmin, BaseAdminMixin):
 @admin.register(Person)
 class PersonAdmin(BaseAdminMixin):
     ordering = ("-created_at",)
-    readonly_fields = ("age_display",)
     search_fields = ("last_name", "document_number", "external_id")
-    list_filter = ("gender", "is_active")
+    list_filter = ("is_active",)
 
     list_display = (
         "external_id",
         "full_name_display",
         "document_number",
-        "age_display",
-        "birth_date",
-        "gender",
         "phone",
         "is_active",
     )
@@ -97,7 +93,3 @@ class PersonAdmin(BaseAdminMixin):
     @admin.display(description=_("Full Name"), ordering="last_name")
     def full_name_display(self, obj):
         return obj.full_name
-
-    @admin.display(description=_("Age"))
-    def age_display(self, obj):
-        return obj.age_display

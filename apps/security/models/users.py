@@ -1,9 +1,9 @@
 import secrets
-from datetime import date, timedelta
+from datetime import timedelta
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
-from django.core.validators import MaxLengthValidator, MaxValueValidator, MinLengthValidator
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.text import capfirst
@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AuditModel
 from apps.security.management.management import UserManager
+from apps.security.utils.validators import text_only
 
 # ─────────────────────────────────────────
 # Person Model
@@ -20,22 +21,13 @@ from apps.security.management.management import UserManager
 class Person(AuditModel):
     """Represents a person with personal, identification, and contact details."""
 
-    class GenderChoices(models.IntegerChoices):
-        """List of gender choices."""
-
-        MALE = 1, _("Male")
-        FEMALE = 2, _("Female")
-        OTHER = 3, _("Other")
-
     # Personal information
     first_name = models.CharField(
-        _("First name"), max_length=155, validators=[MinLengthValidator(2)]
+        _("First name"), max_length=155, validators=[MinLengthValidator(2), text_only]
     )
-    last_name = models.CharField(_("Last name"), max_length=155, validators=[MinLengthValidator(2)])
-    birth_date = models.DateField(
-        _("Birth date"), blank=True, null=True, validators=[MaxValueValidator(date.today())]
+    last_name = models.CharField(
+        _("Last name"), max_length=155, validators=[MinLengthValidator(2), text_only]
     )
-    gender = models.PositiveSmallIntegerField(_("Gender"), choices=GenderChoices)
 
     # Document information
     document_number = models.CharField(
@@ -55,7 +47,6 @@ class Person(AuditModel):
         verbose_name_plural = _("People")
         ordering = ["last_name", "-created_at"]
         indexes = [
-            models.Index(fields=["gender"]),
             models.Index(fields=["document_number"]),
             models.Index(fields=["last_name", "first_name"]),
         ]
@@ -76,22 +67,6 @@ class Person(AuditModel):
     @property
     def initials(self):
         return f"{self.first_name[0]}{self.last_name[0]}".upper()
-
-    @property
-    def age(self):
-        if not self.birth_date:
-            return None
-
-        today = date.today()
-        return (
-            today.year
-            - self.birth_date.year
-            - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
-        )
-
-    @property
-    def age_display(self):
-        return f"{self.age} years" if self.age else "-"
 
 
 # ─────────────────────────────────────────
