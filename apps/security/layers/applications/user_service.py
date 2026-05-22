@@ -74,6 +74,16 @@ class UserAppService(BaseAppService):
             logger.error(f"Error update user: {e}", exc_info=True)
             raise
 
+    def update_status(self, user):
+        try:
+            return self.builder(user=user).change_status().build()
+        except ValidationError as e:
+            logger.warning(f"Validation error for payload: {e.json()}")
+            raise
+        except Exception as e:
+            logger.error(f"Error update status of user: {e}", exc_info=True)
+            raise
+
     def update_password(self, request_user, payload):
         data = payload.copy()
         target_user = data.get("user", request_user)

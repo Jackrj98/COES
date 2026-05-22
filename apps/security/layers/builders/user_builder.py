@@ -42,17 +42,28 @@ class UserBuilder:
         self.user.groups.set(groups)
         return self
 
-    def change_status(self, status):
+    def change_status(self):
+        current = self.user.status
+        Status = self.user.Status
+
         statuses = {
-            self.user.ACTIVE: {"status": self.user.INACTIVE, "is_active": False},
-            self.user.INACTIVE: {"status": self.user.ACTIVE, "is_active": True},
-            self.user.LOCKED: {"status": self.user.ACTIVE, "is_active": True},
+            Status.ENABLED: {"status": Status.DISABLED.value, "is_active": False},
+            Status.DISABLED: {"status": Status.ENABLED.value, "is_active": True},
+            Status.LOCKED: {"status": Status.ENABLED.value, "is_active": True, "locked_at": None, "failed_login_attempts": 0},
         }
 
-        self.user.status = statuses[status]["status"]
-        self.user.is_active = statuses[status]["is_active"]
-        self.user.save(update_fields=["is_active", "status"])
-        return self
+        transition = statuses[current]
+        self.user.status = transition["status"]
+        self.user.is_active = transition["is_active"]
+
+        update_fields = ["is_active", "status"]
+        if "locked_at" in transition:
+            self.user.locked_at = transition["locked_at"]
+            self.user.failed_login_attempts = transition["failed_login_attempts"]
+            update_fields.append("locked_at")
+            update_fields.append("failed_login_attempts")
+
+        self.user.save(update_fields=update_fields)
         return self
 
     def update_person_details(self, first_name, last_name, document_number, phone):

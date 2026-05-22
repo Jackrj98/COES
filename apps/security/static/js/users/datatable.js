@@ -141,8 +141,6 @@ const userColumns = [
                 true: {icon: "bi bi-toggle-on"},
                 false: {icon: "bi bi-toggle-off"},
             };
-            const activeValue = row.is_active ? 1 : 0;
-            console.log(statusChoices[activeValue], row.is_active, statusMeta[row.is_active].icon);
 
             const actions = Object.entries(tableActions);
             const menuItems = actions.map(([key, action]) => {
@@ -159,13 +157,14 @@ const userColumns = [
                     const status = row.is_active ? 0 : 1;
                     return `
                         <li>
-                            <a class="dropdown-item ${key}-btn ${dangerClass}"
-                               href="${actionUrl}"
-                               data-id="${data}">
-                                <i class="${icon} me-2"></i>${statusChoices[status]}
+                            <a class="dropdown-item status-toggle-btn ${dangerClass}" 
+                               href="javascript:void(0)" 
+                               data-id="${data}"
+                               data-url="${actionUrl}">
+                                <i class="${icon} me-2"></i>${action.label}
                             </a>
                         </li>
-                    `
+                    `;
                 }
 
                 return `
@@ -192,3 +191,60 @@ const userColumns = [
         }
     }
 ];
+
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.status-toggle-btn');
+    if (!btn) return;
+    e.preventDefault();
+
+    const url = btn.dataset.url;
+
+    fetch(url, {
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+        .then(r => r.json())
+        .then(data => {
+            Swal.fire({
+                title: data.title,
+                html: `<p class="text-muted mb-1">${data.description}</p>
+                   <small class="text-muted">${data.email}</small><br>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4e73df',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Confirm',
+                cancelButtonText: 'Cancel',
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                    .then(r => r.json())
+                    .then(response => {
+                        Swal.fire({
+                            title: 'Information',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            confirmButtonColor: '#4e73df',
+                        }).then(() => window.location.reload());
+                    })
+                    .catch((error) => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: error.message,
+                            icon: 'error',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            confirmButtonColor: '#4e73df',
+                        }).then(() => window.location.reload());
+                    });
+            });
+        });
+});

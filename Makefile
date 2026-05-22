@@ -226,7 +226,7 @@ clean:
 translate:
 	$(MANAGE) makemessages -l es --ignore="coes-env/*"
 
-compilemessages:
+compile-messages:
 	$(MANAGE) compilemessages
 
 

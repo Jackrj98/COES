@@ -66,7 +66,6 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             logger.error(f"[{self.__class__.__name__}] Error en Datatable: {e}", exc_info=True)
             return JsonResponse(params.result([]))
 
-
     def get_table_actions(self, user):
         all_actions = {
             "edit": {
@@ -78,6 +77,7 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             "status": {
                 "label": LabelEnum.STATUS.value,
                 "icon": "",
+                "url": reverse_lazy("security:users:status", kwargs={"external_id": uuid4()}),
                 "perm": user.has_perms(["security.change_user", "security.change_person"]),
             },
             "view": {
@@ -98,6 +98,40 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             for key, action in all_actions.items()
             if action.get("perm") is True
         }
+
+
+class UserStatusUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = DEFAULT_MODEL
+    slug_field = "external_id"
+    slug_url_kwarg = "external_id"
+    success_url = DEFAULT_LIST_URL
+    success_message = MessageEnum.SUCCESS.value
+    failure_message = MessageEnum.FAILURE.value
+    permission_required = ["security.change_user"]
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        return JsonResponse(
+            {
+                "title": _("Change Status"),
+                "description": _("Are you sure you want to change the status of this user?"),
+                "name": user.person.full_name,
+                "email": user.email,
+                "status": user.get_status_display(),
+                "is_active": user.is_active,
+            }
+        )
+
+    def post(self, request, *args, **kwargs):
+        try:
+            user = self.get_object()
+            UserAppService().update_status(user)
+            return JsonResponse({"success": True, "message": str(_(MessageEnum.SUCCESS.value))})
+        except Exception as e:
+            logger.error(f"Error updating status: {e}", exc_info=True)
+            return JsonResponse(
+                {"success": False, "message": str(_(MessageEnum.FAILURE.value))}, status=500
+            )
 
 
 class UserCreateView(LoginRequiredMixin, PermissionRequiredMixin, FormView):

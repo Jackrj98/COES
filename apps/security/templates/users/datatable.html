@@ -27,6 +27,11 @@
     </tr>
 {% endblock columns %}
 
+{% block extra_content %}
+    {% include 'users/_status_form.html' %}
+
+{% endblock extra_content %}
+
 {% block rows %} {% endblock rows %}
 
 {% block dt_javascript %}
