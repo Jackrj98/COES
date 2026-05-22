@@ -71,7 +71,6 @@
     {% if status_choices %}
         <script type="application/javascript">
             const statusChoices = {{ status_choices|safe }};
-            const statusColorChoices = {{ status_color_choices|safe }};
         </script>
     {% endif %}
     <script src="{% static 'assets/extensions/datatables.net/js/jquery.dataTables.min.js' %}"></script>

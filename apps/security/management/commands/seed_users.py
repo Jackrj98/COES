@@ -1,10 +1,12 @@
 import random
 import uuid
 
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from faker import Faker
 
-from apps.security.layers.applications import UserAppService
+from apps.security.models import Person, User
 from apps.security.utils.utils import generate_ecuadorian_id
 
 
@@ -15,24 +17,41 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fake = Faker()
         count = options["number"]
-        service = UserAppService()
-        groups = ["specialist", "administrator"]
+        group_names = ["specialist", "administrator"]
+        groups = list(Group.objects.filter(name__in=group_names))
 
-        for _ in range(count):
-            unique_suffix = uuid.uuid4().hex[:6]
-            raw_document_number = generate_ecuadorian_id()
+        # 1. Bulk create persons
+        persons = Person.objects.bulk_create(
+            [
+                Person(
+                    first_name=f"{fake.first_name()} {fake.first_name()}",
+                    last_name=f"{fake.last_name()} {fake.last_name()}",
+                    document_number=generate_ecuadorian_id(),
+                    phone=fake.numerify(text="+5939########"),
+                )
+                for _ in range(count)
+            ]
+        )
 
-            service.register_user(
-                payload={
-                    "username": raw_document_number,
-                    "email": f"{unique_suffix}_{fake.email()}",
-                    "password": raw_document_number,
-                    "first_name": fake.first_name(),
-                    "last_name": fake.last_name(),
-                    "document_number": raw_document_number,
-                    "phone": fake.numerify(text="+5939########"),
-                    "groups": [random.choice(groups)],
-                }
-            )
+        # 2. Bulk create users
+        users = User.objects.bulk_create(
+            [
+                User(
+                    username=person.document_number,
+                    email=f"{uuid.uuid4().hex[:6]}_{fake.email()}",
+                    password=make_password(person.document_number),
+                    person=person,
+                    is_active=random.choice([True, False]),
+                    status=random.choice([1, 2, 3]),
+                )
+                for person in persons
+            ]
+        )
+
+        # 3. Bulk assign groups (M2M)
+        UserGroups = User.groups.through
+        UserGroups.objects.bulk_create(
+            [UserGroups(user=user, group=random.choice(groups)) for user in users]
+        )
 
         self.stdout.write(self.style.SUCCESS(f"{count} records have been successfully created."))

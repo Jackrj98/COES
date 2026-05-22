@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AuditModel
 from apps.security.management.management import UserManager
-from apps.security.utils.validators import text_only
+from apps.security.utils.validators import django_id_validator, text_only
 
 # ─────────────────────────────────────────
 # Person Model
@@ -23,22 +23,22 @@ class Person(AuditModel):
 
     # Personal information
     first_name = models.CharField(
-        _("First name"), max_length=155, validators=[MinLengthValidator(2), text_only]
+        _("First name"), max_length=75, validators=[MinLengthValidator(3), text_only]
     )
     last_name = models.CharField(
-        _("Last name"), max_length=155, validators=[MinLengthValidator(2), text_only]
+        _("Last name"), max_length=75, validators=[MinLengthValidator(3), text_only]
     )
 
     # Document information
     document_number = models.CharField(
         _("Document number"),
-        max_length=13,
         unique=True,
-        validators=[MinLengthValidator(10), MaxLengthValidator(13)],
+        max_length=13,
+        validators=[MinLengthValidator(10), django_id_validator],
     )
 
     # Contact information
-    phone = models.CharField(_("Phone number"), max_length=15, validators=[MinLengthValidator(5)])
+    phone = models.CharField(_("Phone number"), max_length=15, validators=[MinLengthValidator(10)])
 
     class Meta:
         db_table = "person"
@@ -84,10 +84,6 @@ class User(AbstractBaseUser, AuditModel, PermissionsMixin):
 
         @property
         def style(self) -> dict:
-            """Returns the style dictionary for the current instance.
-            Usage in Python: type_instance.style[‘color’]
-            Usage in Template: {{ object.type.style.icon }}.
-            """
             configs = {
                 self.ENABLED.value: {"color": "success"},
                 self.DISABLED.value: {"color": "secondary"},
@@ -104,7 +100,9 @@ class User(AbstractBaseUser, AuditModel, PermissionsMixin):
             return {item.value: {"color": item.color, "label": item.label} for item in cls}
 
     email = models.EmailField(_("Email address"), unique=True, max_length=255)
-    username = models.CharField(_("Username"), max_length=50, unique=True)
+    username = models.CharField(
+        _("Username"), unique=True, max_length=50, validators=[MinLengthValidator(5)]
+    )
 
     is_staff = models.BooleanField(default=False)
     email_verified = models.BooleanField(_("Email verified"), default=False)

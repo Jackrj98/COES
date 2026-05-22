@@ -24,7 +24,7 @@ const userColumns = [
     {
         orderable: false,
         data: "external_id",
-        width: "5%",
+        width: "4%",
         className: DataTableFactory.classes.center,
         render: (data, type, row, meta) => {
             return meta.settings._iDisplayStart + meta.row + 1;
@@ -33,37 +33,31 @@ const userColumns = [
     {
         orderable: false,
         data: "email",
-        width: "20%",
+        width: "22%",
         className: DataTableFactory.classes.justify,
         render: (data, type, row) => {
-            let {person__last_name: lastName, person__first_name: firstName, email_verified: emailVerified} = row;
+            const {person__last_name: lastName, person__first_name: firstName, email_verified: emailVerified} = row;
             const fullName = lastName ? `${firstName} ${lastName}`.trim() : "-";
-            const shortNames = capitalize(`${fullName}`);
-
             const iconClass = emailVerified ? "bi bi-envelope-check" : "bi bi-envelope-exclamation";
             const iconColor = emailVerified ? "text-primary" : "text-secondary";
-            const icon = `<i class="${iconClass} ${iconColor} me-2"></i>`;
 
-            let html = '<div class="d-flex flex-column" style="max-width: 200px;">';
-            html += `<h6 class="font-weight-bold text-gray-800 mb-0">${shortNames}</h6>`;
-            html += '<span class="text-sm">';
-            html += `
-                    <a class="text-muted d-inline-block text-truncate" 
-                       style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
-                       href="mailto:${data}">
-                       ${icon}${data}
+            return `
+                <div class="d-flex flex-column" style="max-width: 22vw; min-width: 0;">
+                    <h6 class="fw-semibold mb-0 text-truncate">${capitalize(fullName)}</h6>
+                    <a class="text-muted text-truncate text-sm d-block" 
+                       href="mailto:${data}" 
+                       title="${data}"
+                       style="max-width: 100%;">
+                        <i class="${iconClass} ${iconColor} me-1"></i>${data}
                     </a>
-                `;
-            html += '</span>';
-            html += '</div>';
-            return html;
+                </div>
+            `;
         }
-
     },
     {
         orderable: false,
         data: "person__document_number",
-        width: "15%",
+        width: "12%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
             return data ? data : "-";
@@ -72,7 +66,7 @@ const userColumns = [
     {
         orderable: false,
         data: "person__phone",
-        width: "15%",
+        width: "12%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
             return data ? data : "-";
@@ -81,7 +75,7 @@ const userColumns = [
     {
         orderable: false,
         data: "group_name",
-        width: "15%",
+        width: "16%",
         className: DataTableFactory.classes.center,
         render: function (data, type, row) {
             if (!data) return '';
@@ -96,7 +90,7 @@ const userColumns = [
             return groups.map(g => `
                 <span class="badge bg-transparent border border-${g.color}
                       text-truncate py-2 px-2 rounded-3 text-sm"
-                      style="width: 100px; display: inline-block;"
+                      style="max-width: 16vw; min-width: 0; width: 120px;"
                       data-bs-toggle="tooltip" 
                       title="${g.label}">
                     ${g.label}
@@ -107,10 +101,10 @@ const userColumns = [
     {
         orderable: false,
         data: "status",
-        width: "15%",
+        width: "12%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
-            const {label, color} = statusChoices[data];
+            const {label, color} = mapStatus[data];
             return `
                 <span class="badge bg-transparent border border-${color} border-1 text-${color} 
                     text-truncate py-2 px-2 rounded-3" 
@@ -126,7 +120,7 @@ const userColumns = [
     {
         orderable: true,
         data: "created_at",
-        width: "10%",
+        width: "18%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
             const {full} = parseDateTime(data);
@@ -139,7 +133,7 @@ const userColumns = [
     },
     {
         data: "external_id",
-        width: "5%",
+        width: "4%",
         orderable: false,
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
@@ -147,6 +141,8 @@ const userColumns = [
                 true: {icon: "bi bi-toggle-on"},
                 false: {icon: "bi bi-toggle-off"},
             };
+            const activeValue = row.is_active ? 1 : 0;
+            console.log(statusChoices[activeValue], row.is_active, statusMeta[row.is_active].icon);
 
             const actions = Object.entries(tableActions);
             const menuItems = actions.map(([key, action]) => {
@@ -154,9 +150,29 @@ const userColumns = [
                 const isStatusAction = key === 'status';
                 const icon = isStatusAction ? statusMeta[row.is_active].icon : action.icon;
 
+                let actionUrl = action.url;
+                const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+                if (uuidPattern.test(actionUrl)) {
+                    actionUrl = actionUrl.replace(uuidPattern, data);
+                }
+                if (isStatusAction) {
+                    const status = row.is_active ? 0 : 1;
+                    return `
+                        <li>
+                            <a class="dropdown-item ${key}-btn ${dangerClass}"
+                               href="${actionUrl}"
+                               data-id="${data}">
+                                <i class="${icon} me-2"></i>${statusChoices[status]}
+                            </a>
+                        </li>
+                    `
+                }
+
                 return `
                     <li>
-                        <a class="dropdown-item ${key}-btn ${dangerClass}" href="#" data-id="${data}">
+                        <a class="dropdown-item ${key}-btn ${dangerClass}" 
+                           href="${actionUrl}" 
+                           data-id="${data}">
                             <i class="${icon} me-2"></i>${action.label}
                         </a>
                     </li>

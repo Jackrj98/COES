@@ -9,12 +9,12 @@
         {% include 'partials/sidebar/_sidebar.html' %}
         {# END SIDEBAR #}
 
-        <div id="main" class='layout-navbar navbar-fixed'>
+        <div id="main" class='layout-navbar navbar-fixed d-flex flex-column min-vh-100'>
             {# INIT NAVBAR #}
             {% include 'partials/navbar/_navbar.html' %}
             {# END NAVBAR #}
 
-            <div id="main-content">
+            <div id="main-content" class="flex-grow-1">
                 <div class="page-heading">
                     <div class="page-title">
                         <div class="row">
@@ -307,10 +307,10 @@
                 </div>
                 {# END BLOCK CONTENT #}
             </div>
+            {# INIT FOOTER #}
+            {% include 'partials/_footer.html' %}
+            {# END FOOTER #}
         </div>
-        {# INIT FOOTER #}
-        {% include 'partials/_footer.html' %}
-        {# END FOOTER #}
     </div>
 
     {# INIT SCRIPTS #}
@@ -331,4 +331,7 @@
 
     {% block javascript %}{% endblock javascript %}
     </body>
+
 {% endblock body %}
+
+

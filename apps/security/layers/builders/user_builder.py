@@ -9,7 +9,7 @@ from apps.security.models import Person, User
 class UserBuilder:
     def __init__(self, user=None):
         self.user = user
-        self.person = None
+        self.person = getattr(user, "person", None)
 
     @staticmethod
     def _normalize_string(value: str) -> str:
@@ -40,6 +40,27 @@ class UserBuilder:
     def assign_groups(self, group_names):
         groups = Group.objects.filter(name__in=group_names)
         self.user.groups.set(groups)
+        return self
+
+    def change_status(self, status):
+        statuses = {
+            self.user.ACTIVE: {"status": self.user.INACTIVE, "is_active": False},
+            self.user.INACTIVE: {"status": self.user.ACTIVE, "is_active": True},
+            self.user.LOCKED: {"status": self.user.ACTIVE, "is_active": True},
+        }
+
+        self.user.status = statuses[status]["status"]
+        self.user.is_active = statuses[status]["is_active"]
+        self.user.save(update_fields=["is_active", "status"])
+        return self
+        return self
+
+    def update_person_details(self, first_name, last_name, document_number, phone):
+        self.person.first_name = first_name.strip().title()
+        self.person.last_name = last_name.strip().title()
+        self.person.document_number = document_number.strip().upper()
+        self.person.phone = phone.strip()
+        self.person.save(update_fields=["first_name", "last_name", "document_number", "phone"])
         return self
 
     def update_password(self, new_password):

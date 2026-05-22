@@ -31,3 +31,4 @@ django-timezone-field==7.2.1
 django-cors-headers==4.7.0
 
 pydantic==2.13.4
+pydantic[email]==2.13.4

@@ -1,18 +1,16 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from django.core.exceptions import PermissionDenied
 from pydantic import ValidationError
-from redis.commands.search import document
 
 from apps.security.layers.applications import UserAppService
-from apps.security.utils.utils import generate_ecuadorian_id
 
 
 class TestUserAppService:
     @pytest.fixture
     def service(self):
         return UserAppService()
-
 
     @pytest.mark.django_db
     @patch("apps.security.layers.applications.user_service.UserBuilder")
@@ -36,12 +34,12 @@ class TestUserAppService:
 
         result = service.register_user(payload)
         assert result == "new_user_object"
+
     @pytest.mark.django_db
     def test_register_user_invalid_payload(self, service, caplog):
         with pytest.raises(ValidationError):
             service.register_user({})
         assert "Validation error" in caplog.text
-
 
     @patch("apps.security.layers.applications.user_service.UserBuilder")
     def test_update_password_permission_denied(self, mock_builder_class, service):

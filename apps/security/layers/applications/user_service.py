@@ -8,7 +8,12 @@ from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
 from apps.security.layers.builders.user_builder import UserBuilder
-from apps.security.layers.dto import DatatableSearch, UserPasswortDTO, UserRegistrationDTO
+from apps.security.layers.dto import (
+    BaseUserDTO,
+    DatatableSearch,
+    UserPasswortDTO,
+    UserRegistrationDTO,
+)
 from apps.security.models import Person, User
 
 logger = logging.getLogger(__name__)
@@ -20,6 +25,7 @@ class UserAppService(BaseAppService):
     def __init__(self):
         super().__init__(User)
         self.person = Person
+        self.builder = UserBuilder
 
     @transaction.atomic
     def register_user(self, payload):
@@ -48,20 +54,39 @@ class UserAppService(BaseAppService):
             logger.error(f"Error creating user: {e}", exc_info=True)
             raise
 
+    def update_user(self, user, payload):
+        try:
+            dto = BaseUserDTO(**payload)
+            return (
+                self.builder(user=user)
+                .update_person_details(
+                    first_name=dto.first_name,
+                    last_name=dto.last_name,
+                    document_number=dto.document_number,
+                    phone=dto.phone,
+                )
+                .build()
+            )
+        except ValidationError as e:
+            logger.warning(f"Validation error for payload: {e.json()}")
+            raise
+        except Exception as e:
+            logger.error(f"Error update user: {e}", exc_info=True)
+            raise
+
     def update_password(self, request_user, payload):
         data = payload.copy()
+        target_user = data.get("user", request_user)
 
         try:
-            target_user = data.get("user", request_user)
             if not (request_user == target_user):
                 raise PermissionDenied(_("You are not authorized to change this password"))
 
             data["user"] = target_user
             dto = UserPasswortDTO(**data)
-
-            builder = UserBuilder(user=dto.user)
-
-            return builder.update_password(dto.new_password).build()
+            return (
+                self.builder(user=dto.user).update_password(new_password=dto.new_password).build()
+            )
         except ValidationError as e:
             logger.warning(f"Validation error: {e.errors()}")
             raise

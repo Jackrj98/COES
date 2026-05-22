@@ -16,6 +16,10 @@ class AuditModel(models.Model):
         DISABLED = 0, "secondary"
         ENABLED = 1, "success"
 
+    class StatusChoices(models.IntegerChoices):
+        ACTIVE = 1, _("Disable")
+        INACTIVE = 0, _("Enable")
+
     external_id = models.UUIDField(
         _("External ID"), default=uuid.uuid4, unique=True, editable=False
     )
@@ -54,3 +58,4 @@ class AuditModel(models.Model):
             self.updated_by = user_identifier
 
         super().save(*args, **kwargs)
+

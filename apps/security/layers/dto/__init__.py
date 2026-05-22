@@ -1,4 +1,4 @@
 from .datatable_dto import DatatableSearch
-from .user_dto import UserPasswortDTO, UserRegistrationDTO
+from .user_dto import BaseUserDTO, UserPasswortDTO, UserRegistrationDTO
 
-__all__ = [DatatableSearch, UserRegistrationDTO, UserPasswortDTO]
+__all__ = [DatatableSearch, UserRegistrationDTO, UserPasswortDTO, BaseUserDTO]

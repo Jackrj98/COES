@@ -111,7 +111,7 @@ superuser-dev:
 # =============================================================================
 # Application Execution (Run)
 # =============================================================================
-run-dev: install-dev setup migrate superuser-dev
+run-dev: setup migrate superuser-dev
 	@printf "${YELLOW}Using settings: $(SETTINGS).$(ENV)${NC}\n"
 	@if [ -n "$$PYCHARM_DEBUG" ]; then \
 		printf "${GREEN}Connecting to PyCharm debugger on port $$PYCHARM_PORT...${NC}\n"; \
@@ -120,7 +120,7 @@ run-dev: install-dev setup migrate superuser-dev
 	@printf "${GREEN}Starting Django on port $(PORT)...${NC}\n"
 	$(MANAGE) runserver 0.0.0.0:$(PORT) --settings=$(SETTINGS).$(ENV)
 
-run-prod: install-prod setup migrate
+run-prod: setup migrate
 	@printf "${YELLOW}Collecting static files...${NC}\n"
 	$(MANAGE) collectstatic --settings=$(SETTINGS).production --noinput
 	@printf "${GREEN}Starting Gunicorn...${NC}\n"
@@ -217,3 +217,16 @@ clean:
 	find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 	find . -path "*/migrations/*.pyc" -delete
 	@printf "${RED}Note: Cache cleaned. Migrations were NOT deleted for safety.${NC}\n"
+
+
+# =============================================================================
+# Translations
+# =============================================================================
+
+translate:
+	$(MANAGE) makemessages -l es --ignore="coes-env/*"
+
+compilemessages:
+	$(MANAGE) compilemessages
+
+

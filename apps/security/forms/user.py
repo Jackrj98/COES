@@ -6,19 +6,35 @@ from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
 from apps.security.models import Person, User
 
 
-class UserCreateForm(forms.ModelForm):
-    email = forms.EmailField(
-        required=True,
-        label=_("Email"),
-        widget=forms.TextInput(attrs={"placeholder": "Ej:. jhon.doe@example.com"}),
+class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
+    status = forms.ChoiceField(
+        label=_("Status"),
+        required=False,
+        choices=BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices),
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        search_text = _("Search")
+        if "search" in self.fields:
+            self.fields["search"].label = search_text
+            self.fields["search"].widget.attrs.update(
+                {"placeholder": search_text, "class": "form-control"}
+            )
+
+        self.setup_form_helper(
+            label_class="form-label text-sm text-muted", form_class="needs-validation"
+        )
+
+
+class PersonBaseForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = ["first_name", "last_name", "document_number", "phone"]
         widgets = {
-            "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "jon"}),
-            "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "doe"}),
+            "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Jon"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Doe"}),
             "document_number": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "12345"}
             ),
@@ -40,26 +56,21 @@ class UserCreateForm(forms.ModelForm):
         self.helper.form_class = "needs-validation"
 
 
-class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
-    status = forms.ChoiceField(
-        label=_("Status"),
-        required=False,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices),
-        widget=forms.Select(attrs={"class": "form-select"}),
+class UserCreateForm(PersonBaseForm):
+    email = forms.EmailField(
+        required=True,
+        label=_("Email"),
+        widget=forms.TextInput(attrs={"placeholder": "Ej: jhon.doe@example.com"}),
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        search_text = _("Search")
-        if "search" in self.fields:
-            self.fields["search"].label = search_text
-            self.fields["search"].widget.attrs.update(
-                {"placeholder": search_text, "class": "form-control"}
-            )
 
-        self.setup_form_helper(
-            label_class="form-label text-sm text-muted", form_class="needs-validation"
-        )
+class UserUpdateForm(PersonBaseForm):
+    email = forms.EmailField(
+        required=False,
+        label=_("Email"),
+        disabled=True,
+        widget=forms.EmailInput(),
+    )
 
 
 class PasswordUpdateForm(forms.ModelForm):

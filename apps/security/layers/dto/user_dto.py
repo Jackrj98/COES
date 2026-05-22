@@ -1,65 +1,26 @@
-import re
-
 from django.utils.translation import gettext_lazy as _
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+from apps.security.utils.validators import validate_ecuadorian_id_or_ruc
 
 
-class UserRegistrationDTO(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50)
-    email: str
-    password: str = Field(..., min_length=8)
+class BaseUserDTO(BaseModel):
     first_name: str = Field(..., min_length=3, max_length=75)
     last_name: str = Field(..., min_length=3, max_length=75)
     document_number: str = Field(..., min_length=10, max_length=13)
-    phone: str = Field(..., min_length=13, max_length=13)
-    groups: list[str] = Field(default_factory=list)
+    phone: str = Field(..., min_length=10, max_length=15)
 
-    @field_validator("document_number", mode="after")
+    @field_validator("document_number")
     @classmethod
-    def validate_document(cls, value: str) -> str:
-        # 1. Clean spaces and hyphens
-        clean_id = re.sub(r"[\s\-]", "", value)
+    def validate_document(cls, v: str) -> str:
+        return validate_ecuadorian_id_or_ruc(v)
 
-        # 2. Verify it contains exactly 10 numeric digits
-        if not clean_id.isdigit() or len(clean_id) != 10:
-            raise ValueError(_("The ID card must contain exactly 10 numeric digits."))
 
-        # 3. Validate province code (first two digits)
-        province = int(clean_id[0:2])
-        if not (1 <= province <= 24 or province == 30):
-            raise ValueError(_("The province code of the ID card is invalid."))
-
-        # 4. Validate the third digit (must be less than 6 for regular ID cards)
-        third_digit = int(clean_id[2])
-        if third_digit >= 6:
-            raise ValueError(_("The entered document does not match a valid ID card."))
-
-        # 5. Luhn / Modulo 10 Algorithm (Check digit)
-        digits = [int(d) for d in clean_id]
-        provided_check_digit = digits[9]
-
-        # Coefficients set by the Civil Registry of Ecuador
-        coefficients = [2, 1, 2, 1, 2, 1, 2, 1, 2]
-        total_sum = 0
-
-        for i in range(9):
-            product = digits[i] * coefficients[i]
-            if product >= 10:
-                product -= 9
-            total_sum += product
-
-        modulo_remainder = total_sum % 10
-
-        if modulo_remainder == 0:
-            calculated_check_digit = 0
-        else:
-            calculated_check_digit = 10 - modulo_remainder
-
-        # 6. Compare check digits
-        if calculated_check_digit != provided_check_digit:
-            raise ValueError(_("The ID number you entered is invalid."))
-
-        return clean_id
+class UserRegistrationDTO(BaseUserDTO):
+    email: EmailStr
+    username: str = Field(..., min_length=5, max_length=50)
+    password: str = Field(..., min_length=8, max_length=50)
+    groups: list[str] = Field(default_factory=list)
 
 
 class UserPasswortDTO(BaseModel):

@@ -1,4 +1,5 @@
 import logging
+from uuid import uuid4
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -12,8 +13,8 @@ from pydantic import ValidationError
 
 from apps.core.layers.dto import DataTableParams
 from apps.core.utils.constants import LabelEnum, MessageEnum
-from apps.security.forms.user import PasswordUpdateForm, UserCreateForm, UserFilterForm
-from apps.security.layers.applications.user_service import UserAppService
+from apps.security.forms import PasswordUpdateForm, UserCreateForm, UserFilterForm, UserUpdateForm
+from apps.security.layers.applications import UserAppService
 from apps.security.models import Person, User
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                 "title": self.model._meta.verbose_name_plural,
                 "ui_map": self.model.Status.get_ui_map(),
                 "table_actions": self.get_table_actions(user),
+                "status_choices": self.model.StatusChoices.choices,
             }
         )
         return context
@@ -64,12 +66,13 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             logger.error(f"[{self.__class__.__name__}] Error en Datatable: {e}", exc_info=True)
             return JsonResponse(params.result([]))
 
-    @staticmethod
-    def get_table_actions(user):
+
+    def get_table_actions(self, user):
         all_actions = {
             "edit": {
                 "label": LabelEnum.EDIT.value,
                 "icon": "bi bi-pencil-square",
+                "url": reverse_lazy("security:users:update", kwargs={"external_id": uuid4()}),
                 "perm": user.has_perms(["security.change_user", "security.change_person"]),
             },
             "status": {
@@ -108,6 +111,7 @@ class UserCreateView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["title"] = _("Create User")
+        context["cancel_url"] = self.success_url
         if "form" not in context:
             context["form"] = self.get_form()
         return context
@@ -152,6 +156,62 @@ class UserCreateView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
+class UserUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = DEFAULT_MODEL
+    slug_field = "external_id"
+    slug_url_kwarg = "external_id"
+    form_class = UserUpdateForm
+    success_url = DEFAULT_LIST_URL
+    success_message = MessageEnum.SUCCESS.value
+    failure_message = MessageEnum.FAILURE.value
+    template_name = "users/create_or_update.html"
+    permission_required = ["security.change_user", "security.change_person"]
+    extra_context = {"title": _("Update User"), "cancel_url": DEFAULT_LIST_URL}
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["instance"] = self.get_object().person
+        return kwargs
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields["email"].initial = self.get_object().email
+        return form
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = _("Update User")
+        return ctx
+
+    def form_valid(self, form):
+        try:
+            service = UserAppService()
+            service.update_user(
+                user=self.get_object(),
+                payload=form.cleaned_data,
+            )
+            messages.success(self.request, self.success_message)
+            return redirect(str(self.success_url))
+        except ValidationError as e:
+            for error in e.errors():
+                loc = error.get("loc") or []
+                field = loc[0] if loc else None
+                message = error.get("msg", "").replace("Value error, ", "")
+                form.add_error(field if field and field in form.fields else None, message)
+            return self.form_invalid(form)
+        except ValueError as e:
+            form.add_error(None, str(e))
+            return self.form_invalid(form)
+        except Exception as e:
+            logger.error(f"Unexpected in {self.__class__.__name__}: {e}", exc_info=True)
+            messages.error(self.request, MessageEnum.FAILURE_REQUEST.value)
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        messages.warning(self.request, self.failure_message)
+        return self.render_to_response(self.get_context_data(form=form))
+
+
 class UserPasswordUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = DEFAULT_MODEL
     slug_field = "external_id"
@@ -162,28 +222,25 @@ class UserPasswordUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Update
     success_url = reverse_lazy("security:login")
     permission_required = "security.change_user"
     template_name = "users/password/password_reset_confirm.html"
-    http_method_names = ["get", "post"]
+    extra_context = {
+        "title": _("Update password"),
+        "password_title": _(
+            "To update your password, please keep the following security guidelines in mind:"
+        ),
+        "password_rules": [
+            _("Must be at least <strong>8</strong> characters long."),
+            _("Cannot be entirely numeric."),
+            _("Cannot be a commonly used password."),
+            _("Must include at least one special character (@, #, $, !)."),
+            _("Cannot be too similar to your other personal information."),
+        ],
+    }
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
         if obj != self.request.user:
             raise PermissionDenied(_("You do not have permission to edit other users' accounts."))
         return obj
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Update password")
-        ctx["password_title"] = _(
-            "To update your password, please keep the following security guidelines in mind:"
-        )
-        ctx["password_rules"] = [
-            _("Must be at least <strong>8</strong> characters long."),
-            _("Cannot be entirely numeric."),
-            _("Cannot be a commonly used password."),
-            _("Must include at least one special character (@, #, $, !)."),
-            _("Cannot be too similar to your other personal information."),
-        ]
-        return ctx
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()

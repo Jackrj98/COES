@@ -28,11 +28,12 @@
 {% endblock columns %}
 
 {% block rows %} {% endblock rows %}
+
 {% block dt_javascript %}
     <script>
         const baseHref = "{% get_base_href %}"
         const urlPaginator = "{{ list_url }}";
-        const statusChoices = {{ ui_map|safe }}
+        const mapStatus = {{ ui_map|safe }}
         const tableActions = {{ table_actions|safe }}
     </script>
     <script src="{% static 'js/users/datatable.js' %}"></script>
