@@ -6,4 +6,4 @@ class SecurityConfig(AppConfig):
     name = "apps.security"
 
     def ready(self):
-        pass  # no qa
+        import apps.security.signals  # noqa F401

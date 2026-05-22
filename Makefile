@@ -141,6 +141,7 @@ celery-flower:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) \
 	$(CELERY) -A cfg flower --port=5555 -l info
 
+
 # =============================================================================
 # Django Shell
 # =============================================================================
@@ -185,12 +186,25 @@ docker-logs:
 # =============================================================================
 # Test Data (Seeds)
 # =============================================================================
+
+test:
+	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest
+
+
+NUMBER ?= 10
+
 seed:
 	@printf "${YELLOW}Select seed to run:${NC}\n"
-	@printf "  4) all\n"
+	@printf "  1) users\n"
+	@printf "  0) all\n"
 	@printf "${GREEN}Enter option: ${NC}"; \
 	read option; \
+	printf "${GREEN}Enter number of records: ${NC}"; \
+	read num; \
+	count=$${num:-$(NUMBER)}; \
 	case $$option in \
+		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		0) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		*) printf "${RED}Invalid option${NC}\n";; \
 	esac
 

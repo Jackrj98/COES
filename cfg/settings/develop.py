@@ -56,4 +56,5 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="COES Dev <no-reply@co
 # ------------------------------------------------------------------------------
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG,
+    "IS_RUNNING_TESTS": False,
 }

@@ -13,7 +13,7 @@ pillow==11.2.1
 django-crispy-forms==2.6
 crispy-bootstrap5==2026.3
 django-widget-tweaks==1.5.1
-
+djangorestframework==3.17.1
 # Async Tasks (Celery & Redis)
 celery==5.6.2
 django-celery-beat==2.8.1
@@ -30,3 +30,4 @@ django-crum==0.7.9
 django-timezone-field==7.2.1
 django-cors-headers==4.7.0
 
+pydantic==2.13.4

@@ -32,9 +32,9 @@ class Person(AuditModel):
     # Document information
     document_number = models.CharField(
         _("Document number"),
-        max_length=10,
+        max_length=13,
         unique=True,
-        validators=[MinLengthValidator(5), MaxLengthValidator(10)],
+        validators=[MinLengthValidator(10), MaxLengthValidator(13)],
     )
 
     # Contact information
@@ -77,6 +77,32 @@ class Person(AuditModel):
 class User(AbstractBaseUser, AuditModel, PermissionsMixin):
     """Represents a user in the system."""
 
+    class Status(models.IntegerChoices):
+        ENABLED = 1, _("Enabled")
+        DISABLED = 2, _("Disabled")
+        LOCKED = 3, _("Locked")
+
+        @property
+        def style(self) -> dict:
+            """Returns the style dictionary for the current instance.
+            Usage in Python: type_instance.style[‘color’]
+            Usage in Template: {{ object.type.style.icon }}.
+            """
+            configs = {
+                self.ENABLED.value: {"color": "success"},
+                self.DISABLED.value: {"color": "secondary"},
+                self.LOCKED.value: {"color": "danger"},
+            }
+            return configs[self.value]
+
+        @property
+        def color(self) -> str:
+            return self.style["color"]
+
+        @classmethod
+        def get_ui_map(cls):
+            return {item.value: {"color": item.color, "label": item.label} for item in cls}
+
     email = models.EmailField(_("Email address"), unique=True, max_length=255)
     username = models.CharField(_("Username"), max_length=50, unique=True)
 
@@ -85,8 +111,8 @@ class User(AbstractBaseUser, AuditModel, PermissionsMixin):
     force_password = models.BooleanField(_("Force password change"), default=False)
     last_password_change = models.DateField(_("Last password change"), default=timezone.now)
 
+    status = models.PositiveSmallIntegerField(_("Status"), choices=Status, default=Status.ENABLED)
     failed_login_attempts = models.IntegerField(_("Failed login attempts"), default=0)
-    is_locked = models.BooleanField(_("Is locked"), default=False)
     locked_at = models.DateTimeField(_("Locked at"), null=True, blank=True)
 
     # Relationship

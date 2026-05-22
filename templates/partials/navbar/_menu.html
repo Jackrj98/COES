@@ -1,15 +1,17 @@
 <div class="dropdown">
     <a href="#" data-bs-toggle="dropdown" aria-expanded="false">
         <div class="user-menu d-flex">
-            <div class="user-name text-end me-3">
-                <h6 class="mb-0 text-gray-600">John Ducky</h6>
-                <p class="mb-0 text-sm text-gray-600">Administrator</p>
-            </div>
-            <div class="user-img d-flex align-items-center">
-                <div class="avatar avatar-md">
-                    <img src="{% static '/assets/compiled/jpg/1.jpg' %}" alt="profile">
+            {% with session=request.session %}
+                <div class="user-name text-end me-3">
+                    <h6 class="mb-0 text-gray-600">{{ session.session_name|title }}</h6>
+                    <p class="mb-0 text-sm text-gray-600">{% trans session.group|capfirst %}</p>
                 </div>
-            </div>
+                <div class="user-img d-flex align-items-center">
+                    <div class="avatar bg-warning me-3 py-1 px-1">
+                        <span class="avatar-content">{{ session.initials }}</span>
+                    </div>
+                </div>
+            {% endwith %}
         </div>
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton"

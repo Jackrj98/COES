@@ -11,14 +11,12 @@ def login_failed_handler(sender, credentials, **kwargs):
     username = credentials.get("username")
     try:
         user = User.objects.get(username=username)
-
-        if user.is_locked:
+        if user.status == User.Status.LOCKED:
             return
 
         user.failed_login_attempts += 1
-
         if user.failed_login_attempts >= 5:
-            user.is_locked = True
+            user.status = User.Status.LOCKED
             user.is_active = False
             user.locked_at = timezone.now()
 
@@ -31,6 +29,6 @@ def login_failed_handler(sender, credentials, **kwargs):
 def login_success_handler(sender, user, **kwargs):
     if user.failed_login_attempts > 0:
         user.failed_login_attempts = 0
-        user.is_locked = False
+        user.status = User.Status.ENABLED
         user.locked_at = None
         user.save()

@@ -51,6 +51,7 @@ THIRD_APPS = [
     "crispy_bootstrap5",
     "widget_tweaks",
     "django_celery_beat",
+    "rest_framework",
 ]
 
 LOCAL_APPS = [
@@ -82,7 +83,9 @@ THIRD_MIDDLEWARE = [
     "auditlog.middleware.AuditlogMiddleware",
 ]
 
-LOCAL_MIDDLEWARE = []
+LOCAL_MIDDLEWARE = [
+    "apps.security.middleware.force_password_middleware.ForcePasswordChangeMiddleware",
+]
 
 MIDDLEWARE = BASE_MIDDLEWARE + LOCAL_MIDDLEWARE + THIRD_MIDDLEWARE
 

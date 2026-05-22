@@ -1,71 +1,95 @@
 import logging
 
-from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
+from django.contrib.postgres.aggregates import StringAgg
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
+from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
+from apps.security.layers.builders.user_builder import UserBuilder
+from apps.security.layers.dto import DatatableSearch, UserPasswortDTO, UserRegistrationDTO
 from apps.security.models import Person, User
 
 logger = logging.getLogger(__name__)
 
 
 class UserAppService(BaseAppService):
+    """Service responsible for handling user-related operations."""
+
     def __init__(self):
         super().__init__(User)
         self.person = Person
 
-    def _clean_data(self, data):
-        required_fields = ["email", "first_name", "last_name", "document_number", "phone"]
-        self.validate_required_fields(required_fields, data)
-
-        return {
-            "email": self.normalize_data(data["email"], remove_spaces=True),
-            "first_name": self.normalize_data(data["first_name"]),
-            "last_name": self.normalize_data(data["last_name"]),
-            "document_number": str(
-                self.normalize_data(data["document_number"], remove_spaces=True)
-            ),
-            "phone": str(self.normalize_data(data["phone"], remove_spaces=True)),
-        }
-
-    def create_person(self, data):
-        try:
-            cleaned_data = self._clean_data(data)
-            return self.person.objects.create(
-                first_name=cleaned_data["first_name"],
-                last_name=cleaned_data["last_name"],
-                document_number=cleaned_data["document_number"],
-                phone=cleaned_data["phone"],
-            )
-        except ValidationError:
-            raise
-        except Exception as e:
-            logger.error(f"Error creating person: {e}")
-            raise
-
     @transaction.atomic
-    def create_user(self, data):
+    def register_user(self, payload):
+        builder = UserBuilder()
         try:
-            person = self.create_person(data)
-            cleaned_data = self._clean_data(data)
-            email = cleaned_data.get("email")
-            document_number = cleaned_data.get("document_number")
-            instance = self.model.objects.create_user(
-                username=document_number,
-                email=email,
-                password=document_number,
-                person_id=person.id,
+            dto = UserRegistrationDTO(**payload)
+            return (
+                builder.create_account(
+                    username=dto.username,
+                    email=dto.email,
+                    password=dto.password,
+                )
+                .add_person_details(
+                    first_name=dto.first_name,
+                    last_name=dto.last_name,
+                    document_number=dto.document_number,
+                    phone=dto.phone,
+                )
+                .assign_groups(dto.groups)
+                .build()
             )
-
-            group = Group.objects.get_or_create(name="specialist", defaults={"name": "specialist"})[
-                0
-            ]
-            instance.groups.add(group.pk)
-            instance.save()
-            return instance
-        except ValidationError:
+        except ValidationError as e:
+            logger.warning(f"Validation error for payload: {e.json()}")
             raise
         except Exception as e:
-            logger.error(f"Error creating user: {e}")
+            logger.error(f"Error creating user: {e}", exc_info=True)
             raise
+
+    def update_password(self, request_user, payload):
+        data = payload.copy()
+
+        try:
+            target_user = data.get("user", request_user)
+            if not (request_user == target_user):
+                raise PermissionDenied(_("You are not authorized to change this password"))
+
+            data["user"] = target_user
+            dto = UserPasswortDTO(**data)
+
+            builder = UserBuilder(user=dto.user)
+
+            return builder.update_password(dto.new_password).build()
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.errors()}")
+            raise
+        except Exception as e:
+            username = getattr(request_user, "username", "unknown")
+            logger.error(f"Error updating password for {username}: {e}", exc_info=True)
+            raise
+
+    @staticmethod
+    def retrieve_users(params):
+        fields = [
+            "external_id",
+            "username",
+            "email",
+            "status",
+            "is_active",
+            "created_at",
+            "created_by",
+            "updated_at",
+            "person__first_name",
+            "person__last_name",
+            "person__document_number",
+            "person__phone",
+        ]
+        try:
+            DatatableSearch.retrieve_users(params)
+            qs = params.items.annotate(group_name=StringAgg("groups__name", delimiter=", "))
+            return params.result(list(qs.values(*fields, "group_name")))
+        except Exception as e:
+            logger.exception(f"Failed to fetch users: {e}")
+            return []
