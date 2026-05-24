@@ -13,9 +13,6 @@ def get_base_href() -> str:
     return ""
 
 
-
-
-
 @register.filter
 def object_verbose_name(obj) -> str:
     """Returns the human-readable name of the model (singular)."""

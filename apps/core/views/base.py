@@ -144,7 +144,7 @@ class CustomDetailView(BaseView, DetailView):
                 "name": LabelEnum.DETAILS.value,
                 "url": "#",
                 "active": True,
-                "title": LabelEnum.DETAILS.value
+                "title": LabelEnum.DETAILS.value,
             }
         )
 

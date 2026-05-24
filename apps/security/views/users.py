@@ -1,11 +1,13 @@
 import logging
 from uuid import uuid4
-from django.utils import timezone
+
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
@@ -398,13 +400,13 @@ def send_reset_password(request, external_id):
 
     subject = _("Password Reset Request")
     now_local = timezone.localtime(timezone.now())
-
+    domain = settings.DOMAIN
     context = {
         "title": subject,
         "username": user.username,
         "password": new_password,
         "user": user.person.full_name,
-        "url": reverse_lazy("security:login"),
+        "url": f"{domain}{reverse_lazy('security:login')}",
         "formatted_date": now_local.strftime("%d/%m/%Y"),
         "formatted_time": now_local.strftime("%H:%M"),
     }
