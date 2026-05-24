@@ -87,10 +87,8 @@ const userColumns = [
             };
 
             const groups = data.split(', ').map(g => translations[g] || {label: g, color: 'secondary'});
-
             return groups.map(g => `
-                <span class="badge bg-transparent border border-${g.color}
-                      text-truncate py-2 px-2 rounded-3 text-sm"
+                <span class="badge bg-${g.color}-subtle text-${g.color}-emphasis border border-${g.color}-subtle text-truncate py-2 px-2 rounded-3"
                       style="max-width: 16vw; min-width: 0; width: 120px;"
                       data-bs-toggle="tooltip" 
                       title="${g.label}">
@@ -205,6 +203,10 @@ document.addEventListener('click', function (e) {
     })
         .then(r => r.json())
         .then(data => {
+            if (!data.success) {
+                return window.location.reload();
+            }
+
             Swal.fire({
                 title: data.title,
                 html: `<p class="text-muted mb-1">${data.description}</p>
@@ -237,6 +239,9 @@ document.addEventListener('click', function (e) {
                             timer: 3000,
                             timerProgressBar: true,
                             confirmButtonColor: '#4e73df',
+                            backdrop: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
                         }).then(() => window.location.reload());
                     })
                     .catch((error) => {

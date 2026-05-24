@@ -16,7 +16,6 @@ class BreadcrumbMixin:
             return []
 
         verbose_name_plural = _(self.model._meta.verbose_name_plural).title()  # noqa
-        print(self.get_success_url())
         breadcrumb = [
             {
                 "name": verbose_name_plural,
@@ -29,7 +28,6 @@ class BreadcrumbMixin:
         instance = getattr(self, "object", None)
         if instance:
             display_name = self.get_breadcrumb_display_name(instance)
-            print(instance.get_absolute_url())
             breadcrumb.append(
                 {
                     "name": display_name,

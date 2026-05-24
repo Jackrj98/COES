@@ -116,20 +116,33 @@ class UserDetailView(CustomDetailView):
         model_name = self.model._meta.model_name
         update_perm = f"{app_label}.change_{model_name}"
 
-        title = _("Update Password")
-        url_name = f"{app_label}:{self.app_name}:password_change"
-        if self.object != self.request.user:
-            title = _("Reset Password")
-            url_name = f"{app_label}:{self.app_name}:password_reset"
+        title = _("Reset Password")
+        action = "reset_password"
+        url_name = f"{app_label}:{self.app_name}:password_reset"
 
         pwd_action = self.get_actions_map(
             title=title,
             order=1,
-            action="update_password",
+            action=action,
             icon="bi bi-key",
             url_name=url_name,
             perm=update_perm,
         )
+
+        current_user = self.request.user
+        if self.object != current_user:
+            if not current_user.groups.filter(name="administrator").exists():
+                actions_list[-1]["url"] = reverse_lazy(
+                    "security:users:update",
+                    kwargs={"external_id": current_user.external_id},
+                )
+
+                title = _("Update Password")
+                action = "update_password"
+                url_name = f"{app_label}:{self.app_name}:password_change"
+                pwd_action["url"] = reverse_lazy(
+                    url_name, kwargs={"external_id": current_user.external_id}
+                )
 
         if pwd_action:
             actions_list.append(pwd_action)
@@ -202,9 +215,27 @@ class UserUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = UserUpdateForm
     second_form_class = PersonBaseForm
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/create_or_update.html"
     permission_required = ["security.change_user", "security.change_person"]
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.can_edit_user(request.user, self.object):
+            messages.error(request, _("You do not have permission to edit this user."))
+            return redirect(self.success_url)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    @staticmethod
+    def can_edit_user(current_user, target_user):
+        if current_user.is_superuser:
+            return True
+
+        if current_user.groups.filter(name="administrator").exists():
+            return True
+
+        return current_user == target_user
 
     def get_queryset(self):
         return self.model.objects.select_related("person")
@@ -281,13 +312,29 @@ class UserStatusUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     slug_field = "external_id"
     slug_url_kwarg = "external_id"
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     permission_required = ["security.change_user"]
+
+    @staticmethod
+    def can_edit_user(current_user, target_user):
+        if current_user.is_superuser:
+            return True
+
+        if current_user.groups.filter(name="administrator").exists():
+            return True
+
+        return current_user == target_user
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()
+
+        if not self.can_edit_user(request.user, user):
+            messages.error(request, _("You do not have permission to edit this user."))
+            return redirect(self.success_url)
+
         return JsonResponse(
             {
+                "success": True,
                 "title": _("Change Status"),
                 "description": _("Are you sure you want to change the status of this user?"),
                 "name": user.person.full_name,
