@@ -1,0 +1,46 @@
+{% extends 'layouts/email.html' %}
+
+{% block title %} {{ subject }} {% endblock %}
+
+{% block content %}
+    {% autoescape off %}
+        <p style="font-size: 14px; color: #333333; text-align: center; margin-bottom: 20px;">
+            Con ORGAEPSI, facilita la atención a los beneficiarios integrando el registro de
+            historias clínicas, gestión de pacientes, médicos y horarios de atención
+            personalizados.
+        </p>
+        <hr style="margin-top: 10px; margin-bottom: 10px; border: none; border-top: 1px solid #ccc;">
+        {% if password %}
+            <p style="font-size: 14px; color: #333333; text-align: center; margin-bottom: 20px; margin-top: 20px;">
+                Su contraseña temporal es la siguiente: <strong>{{ password }}</strong>
+            </p>
+        {% endif %}
+
+        <a href="{{ base_url }}/{{ url }}" target="_blank" class="btn-primary"
+           style="text-decoration: none;
+          color: #ffffff !important;
+          background-color: #0061f2;
+          border: 1px solid #0061f2;
+          padding: 10px 20px;
+          line-height: 1.5;
+          font-weight: bold;
+          font-family: Arial, sans-serif, 'Roboto', sans-serif;
+          margin-right: 10px;
+          text-align: center;
+          cursor: pointer;
+          display: inline-block;
+          border-radius: 25px;
+          box-sizing: border-box;">
+            Ir a ORGAEPSI
+        </a>
+        <br>
+        <p style="font-size: 12px; color: #333333; text-align: center; margin-bottom: 20px; margin-top: 20px;">
+            <span style="color: #4e73df; font-size: 16px; margin-right: 8px; display: inline-flex; align-items: center;">
+                &#9432;
+            </span>
+            <span style="line-height: 1.4; display: inline-flex; align-items: center;">
+                Haz clic en "Ir a ORGAEPSI" para crear tu cuenta y empezar a colaborar con tu equipo.
+            </span>
+        </p>
+    {% endautoescape off %}
+{% endblock content %}

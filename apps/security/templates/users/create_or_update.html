@@ -1,40 +1,43 @@
 {% extends 'components/_form.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
 
 {% block content %}
-    <section id="basic-vertical-layouts">
-        <div class="row match-height">
-            <div class="card">
-                <div class="card-content">
+    <section>
+        <div class="row d-flex justify-content-center g-0">
+            <div class="col-xl-12 col-md-12 mb-4">
+                <div class="card">
                     <div class="card-body">
                         <form class="form form-vertical" method="post">
                             {% csrf_token %}
-                            <div class="form-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        {{ person_form.first_name|as_crispy_field }}
-                                    </div>
-                                    <div class="col-6">
-                                        {{ person_form.last_name|as_crispy_field }}
-                                    </div>
-                                    <div class="col-4">
-                                        {{ user_form.email|as_crispy_field }}
-                                    </div>
-                                    <div class="col-4">
-                                        {{ person_form.document_number|as_crispy_field }}
-                                    </div>
-                                    <div class="col-4">
-                                        {{ person_form.phone|as_crispy_field }}
-                                    </div>
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    {{ form.email|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    {{ form.group|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    {{ person_form.document_number|as_crispy_field }}
+                                </div>
 
-                                    <div class="col-12 d-flex justify-content-end mt-3">
-                                        <button type="submit" class="btn btn-primary me-3 mb-1">
-                                            {% trans 'Submit'|title %}
-                                        </button>
-                                        <button type="reset" class="btn btn-light-secondary me-1 mb-1">
-                                            {% trans 'Cancel'|title %}
-                                        </button>
-                                    </div>
+                                <div class="col-12 col-md-4">
+                                    {{ person_form.last_name|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    {{ person_form.first_name|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    {{ person_form.phone|as_crispy_field }}
+                                </div>
+
+                                {# ACTIONS #}
+                                <div class="col-12 d-flex justify-content-end">
+                                    <a class="btn btn-light-secondary me-3" href="{{ cancel_url }}">
+                                        {% trans 'Cancel'|title %}
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        {% trans 'Submit'|title %}
+                                    </button>
                                 </div>
                             </div>
                         </form>

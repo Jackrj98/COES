@@ -9,12 +9,12 @@
         {% include 'partials/sidebar/_sidebar.html' %}
         {# END SIDEBAR #}
 
-        <div id="main" class='layout-navbar navbar-fixed'>
+        <div id="main" class='layout-navbar navbar-fixed d-flex flex-column min-vh-100'>
             {# INIT NAVBAR #}
             {% include 'partials/navbar/_navbar.html' %}
             {# END NAVBAR #}
 
-            <div id="main-content">
+            <div id="main-content" class="flex-grow-1">
                 <div class="page-heading">
                     <div class="page-title">
                         <div class="row">
@@ -25,9 +25,24 @@
                             <div class="col-12 col-md-6 order-md-2 order-first">
                                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                                     <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
-                                        <li class="breadcrumb-item active" aria-current="page">Layout Vertical Navbar
+                                        <li class="breadcrumb-item">
+                                            <a href="{% url 'core:home' %}">Dashboard</a>
                                         </li>
+                                        {% block breadcrumb %}
+                                            {% for bread in breadcrumb %}
+                                                {% if bread.active %}
+                                                    <li class="breadcrumb-item active" aria-current="page">
+                                                        {% trans bread.name|capfirst %}
+                                                    </li>
+                                                {% else %}
+                                                    <li class="breadcrumb-item">
+                                                        <a href="{{ bread.url }}">
+                                                            {% trans bread.name|capfirst %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endblock breadcrumb %}
                                     </ol>
                                 </nav>
                             </div>
@@ -50,8 +65,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">Profile Views</h6>
-                                                        <h6 class="font-extrabold mb-0">112.000</h6>
+                                                        <h6 class="text-muted font-semibold">
+                                                            Profile Views</h6>
+                                                        <h6 class="font-extrabold mb-0">
+                                                            112.000</h6>
                                                     </div>
                                                 </div>
                                             </div>
@@ -67,8 +84,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">Followers</h6>
-                                                        <h6 class="font-extrabold mb-0">183.000</h6>
+                                                        <h6 class="text-muted font-semibold">
+                                                            Followers</h6>
+                                                        <h6 class="font-extrabold mb-0">
+                                                            183.000</h6>
                                                     </div>
                                                 </div>
                                             </div>
@@ -84,8 +103,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">Following</h6>
-                                                        <h6 class="font-extrabold mb-0">80.000</h6>
+                                                        <h6 class="text-muted font-semibold">
+                                                            Following</h6>
+                                                        <h6 class="font-extrabold mb-0">
+                                                            80.000</h6>
                                                     </div>
                                                 </div>
                                             </div>
@@ -101,7 +122,8 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">Saved Post</h6>
+                                                        <h6 class="text-muted font-semibold">
+                                                            Saved Post</h6>
                                                         <h6 class="font-extrabold mb-0">112</h6>
                                                     </div>
                                                 </div>
@@ -131,7 +153,8 @@
                                                 <div class="row">
                                                     <div class="col-7">
                                                         <div class="d-flex align-items-center">
-                                                            <svg class="bi text-primary" width="32" height="32"
+                                                            <svg class="bi text-primary"
+                                                                 width="32" height="32"
                                                                  fill="blue"
                                                                  style="width:10px">
                                                                 <use
@@ -150,7 +173,8 @@
                                                 <div class="row">
                                                     <div class="col-7">
                                                         <div class="d-flex align-items-center">
-                                                            <svg class="bi text-success" width="32" height="32"
+                                                            <svg class="bi text-success"
+                                                                 width="32" height="32"
                                                                  fill="blue"
                                                                  style="width:10px">
                                                                 <use
@@ -169,7 +193,8 @@
                                                 <div class="row">
                                                     <div class="col-7">
                                                         <div class="d-flex align-items-center">
-                                                            <svg class="bi text-danger" width="32" height="32"
+                                                            <svg class="bi text-danger"
+                                                                 width="32" height="32"
                                                                  fill="blue"
                                                                  style="width:10px">
                                                                 <use
@@ -209,11 +234,13 @@
                                                                     <div class="avatar avatar-md">
                                                                         <img src="{% static 'assets/compiled/jpg/5.jpg' %}">
                                                                     </div>
-                                                                    <p class="font-bold ms-3 mb-0">Si Cantik</p>
+                                                                    <p class="font-bold ms-3 mb-0">
+                                                                        Si Cantik</p>
                                                                 </div>
                                                             </td>
                                                             <td class="col-auto">
-                                                                <p class=" mb-0">Congratulations on your
+                                                                <p class=" mb-0">Congratulations
+                                                                    on your
                                                                     graduation!</p>
                                                             </td>
                                                         </tr>
@@ -223,11 +250,13 @@
                                                                     <div class="avatar avatar-md">
                                                                         <img src="{% static 'assets/compiled/jpg/2.jpg' %}">
                                                                     </div>
-                                                                    <p class="font-bold ms-3 mb-0">Si Ganteng</p>
+                                                                    <p class="font-bold ms-3 mb-0">
+                                                                        Si Ganteng</p>
                                                                 </div>
                                                             </td>
                                                             <td class="col-auto">
-                                                                <p class=" mb-0">Wow amazing design! Can you make
+                                                                <p class=" mb-0">Wow amazing
+                                                                    design! Can you make
                                                                     another tutorial for
                                                                     this design?</p>
                                                             </td>
@@ -245,7 +274,8 @@
                                     <div class="card-body py-4 px-4">
                                         <div class="d-flex align-items-center">
                                             <div class="avatar avatar-xl">
-                                                <img src="{% static 'assets/compiled/jpg/1.jpg' %}" alt="Face 1">
+                                                <img src="{% static 'assets/compiled/jpg/1.jpg' %}"
+                                                     alt="Face 1">
                                             </div>
                                             <div class="ms-3 name">
                                                 <h5 class="font-bold">John Duck</h5>
@@ -307,10 +337,10 @@
                 </div>
                 {# END BLOCK CONTENT #}
             </div>
+            {# INIT FOOTER #}
+            {% include 'partials/_footer.html' %}
+            {# END FOOTER #}
         </div>
-        {# INIT FOOTER #}
-        {% include 'partials/_footer.html' %}
-        {# END FOOTER #}
     </div>
 
     {# INIT SCRIPTS #}
@@ -327,7 +357,11 @@
     <!-- Alerts and custom scripts -->
     {% include 'partials/_messages.html' %}
     {# END SCRIPTS #}
+    <script src="{% static 'assets/static/js/utilities.js' %}"></script>
 
     {% block javascript %}{% endblock javascript %}
     </body>
+
 {% endblock body %}
+
+

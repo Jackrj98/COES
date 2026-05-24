@@ -15,3 +15,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+function getCookie(name) {
+    let value = "; " + document.cookie;
+    let parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+
+function parseDateTime(data) {
+    const date = new Date(data);
+    if (!data || isNaN(date.getTime())) return {date: "---", time: "---", full: "---"};
+
+    const day = date.getDate();
+    const month = date.toLocaleString('es-ES', {month: 'short'});
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit', hour12: false});
+
+    const getOrdinal = (n) => {
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return s[(v - 20) % 10] || s[v] || s[0];
+    };
+
+    return {
+        date: `${day} ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`,
+        time: time,
+        full: `${month.charAt(0).toUpperCase() + month.slice(1)} ${day}${getOrdinal(day)} ${year}`,
+        raw: date
+    };
+}
+
+const capitalize = (str) =>
+    str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());

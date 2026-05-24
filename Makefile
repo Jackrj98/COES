@@ -111,7 +111,7 @@ superuser-dev:
 # =============================================================================
 # Application Execution (Run)
 # =============================================================================
-run-dev: install-dev setup migrate superuser-dev
+run-dev: setup migrate superuser-dev
 	@printf "${YELLOW}Using settings: $(SETTINGS).$(ENV)${NC}\n"
 	@if [ -n "$$PYCHARM_DEBUG" ]; then \
 		printf "${GREEN}Connecting to PyCharm debugger on port $$PYCHARM_PORT...${NC}\n"; \
@@ -120,7 +120,7 @@ run-dev: install-dev setup migrate superuser-dev
 	@printf "${GREEN}Starting Django on port $(PORT)...${NC}\n"
 	$(MANAGE) runserver 0.0.0.0:$(PORT) --settings=$(SETTINGS).$(ENV)
 
-run-prod: install-prod setup migrate
+run-prod: setup migrate
 	@printf "${YELLOW}Collecting static files...${NC}\n"
 	$(MANAGE) collectstatic --settings=$(SETTINGS).production --noinput
 	@printf "${GREEN}Starting Gunicorn...${NC}\n"
@@ -140,6 +140,7 @@ celery-flower:
 	@printf "${GREEN}Starting Flower on port 5555...${NC}\n"
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) \
 	$(CELERY) -A cfg flower --port=5555 -l info
+
 
 # =============================================================================
 # Django Shell
@@ -185,12 +186,25 @@ docker-logs:
 # =============================================================================
 # Test Data (Seeds)
 # =============================================================================
+
+test:
+	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest
+
+
+NUMBER ?= 10
+
 seed:
 	@printf "${YELLOW}Select seed to run:${NC}\n"
-	@printf "  4) all\n"
+	@printf "  1) users\n"
+	@printf "  0) all\n"
 	@printf "${GREEN}Enter option: ${NC}"; \
 	read option; \
+	printf "${GREEN}Enter number of records: ${NC}"; \
+	read num; \
+	count=$${num:-$(NUMBER)}; \
 	case $$option in \
+		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		0) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		*) printf "${RED}Invalid option${NC}\n";; \
 	esac
 
@@ -203,3 +217,16 @@ clean:
 	find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 	find . -path "*/migrations/*.pyc" -delete
 	@printf "${RED}Note: Cache cleaned. Migrations were NOT deleted for safety.${NC}\n"
+
+
+# =============================================================================
+# Translations
+# =============================================================================
+
+translate-generate:
+	$(MANAGE) makemessages -l es --ignore="coes-env/*"
+
+translate-compile:
+	$(MANAGE) compilemessages
+
+

@@ -10,36 +10,46 @@
     {% block head_list %}{% endblock head_list %}
 {% endblock extra_css %}
 
+
 {% block content %}
     <section class="section">
         <div class="row d-flex justify-content-center g-0">
             <div class="col-xl-12 col-md-12 mb-4">
                 {% block filters %}
                     {% if filter_form %}
-                        <div class="card mb-3 shadow-sm">
+                        <div class="card shadow-sm mb-4">
                             <div class="card-body">
-                                <div class="collapse show" id="filterCollapse">
-                                    <form method="GET" id="filter">
-                                        <div class="row align-items-end">
-                                            {% for field in filter_form %}
-                                                <div class="col-12 col-sm-6 col-md-4">
-                                                    {{ field|as_crispy_field }}
-                                                </div>
-                                            {% endfor %}
-                                            <div class="col-12 text-end">
-                                                <button type="button" id="clear-filters"
-                                                        class="btn bg-transparent btn-sm">
-                                                    <i class="bi bi-trash me-1"></i> {% trans 'Clean filters' %}
-                                                </button>
+                                <form method="GET" id="filter">
+                                    <div class="row align-items-end">
+                                        {% for field in filter_form %}
+                                            <div class="col-12 col-sm-6 col-md-4">
+                                                {{ field|as_crispy_field }}
                                             </div>
+                                        {% endfor %}
+                                        <div class="col-12 text-end">
+                                            <button type="button" id="clear-filters"
+                                                    class="btn btn-outline-secondary btn-sm rounded-pill py-2 px-2">
+                                                {% trans 'Clean filters' %}
+                                            </button>
                                         </div>
-                                    </form>
-                                </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     {% endif %}
                 {% endblock filters %}
+
                 <div class="card shadow">
+                    {% block card_actions %}
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="card-title">
+                                {% trans title|capfirst %}
+                            </div>
+                            <button class="btn btn-primary">
+                                <i class="ti ti-user-plus" aria-hidden="true"></i> New user
+                            </button>
+                        </div>
+                    {% endblock card_actions %}
                     <div class="card-body">
                         <div class="table-responsive w-100 mt-3">
                             <table id="datatable-list" class="table w-100">
@@ -59,10 +69,9 @@
 {% endblock content %}
 
 {% block javascript %}
-    {% if  status_choices %}
+    {% if status_choices %}
         <script type="application/javascript">
             const statusChoices = {{ status_choices|safe }};
-            const statusColorChoices = {{ status_color_choices|safe }};
         </script>
     {% endif %}
     <script src="{% static 'assets/extensions/datatables.net/js/jquery.dataTables.min.js' %}"></script>

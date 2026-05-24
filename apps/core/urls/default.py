@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.core.views import IndexView
+from apps.core.views.views import IndexView
 
 urlpatterns = [
     path("", IndexView.as_view(), name="home"),
