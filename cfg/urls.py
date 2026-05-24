@@ -35,6 +35,6 @@ if settings.DEBUG:
 
 
 # 5. Handlers
-handler403 = "apps.core.views.handler403"
-handler404 = "apps.core.views.handler404"
-handler500 = "apps.core.views.handler500"
+handler403 = "apps.core.views.views.handler403"
+handler404 = "apps.core.views.views.handler404"
+handler500 = "apps.core.views.views.handler500"

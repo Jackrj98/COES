@@ -1,8 +1,11 @@
 import logging
+import random
+import string
 
+from django.apps import apps
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
@@ -27,6 +30,15 @@ class UserAppService(BaseAppService):
         self.person = Person
         self.builder = UserBuilder
 
+    @staticmethod
+    def retrieve_groups():
+        try:
+            Group = apps.get_model("auth", "Group")
+            groups = Group.objects.all()
+            return [(group.name, _(group.name)) for group in groups]
+        except Exception:
+            return []
+
     @transaction.atomic
     def register_user(self, payload):
         builder = UserBuilder()
@@ -47,6 +59,8 @@ class UserAppService(BaseAppService):
                 .assign_groups(dto.groups)
                 .build()
             )
+        except IntegrityError:
+            raise
         except ValidationError as e:
             logger.warning(f"Validation error for payload: {e.json()}")
             raise
@@ -105,6 +119,17 @@ class UserAppService(BaseAppService):
             logger.error(f"Error updating password for {username}: {e}", exc_info=True)
             raise
 
+    def reset_password(self, request_user, password):
+        try:
+            return self.builder(user=request_user).reset_password(new_password=password).build()
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.errors()}")
+            raise
+        except Exception as e:
+            username = getattr(request_user, "username", "unknown")
+            logger.error(f"Error updating password for {username}: {e}", exc_info=True)
+            raise
+
     @staticmethod
     def retrieve_users(params):
         fields = [
@@ -128,3 +153,7 @@ class UserAppService(BaseAppService):
         except Exception as e:
             logger.exception(f"Failed to fetch users: {e}")
             return []
+
+    @staticmethod
+    def generate_password(length=8):
+        return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))

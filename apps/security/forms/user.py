@@ -3,6 +3,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
+from apps.security.layers.applications import UserAppService
 from apps.security.models import Person, User
 
 
@@ -11,6 +12,12 @@ class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
         label=_("Status"),
         required=False,
         choices=BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    group = forms.ChoiceField(
+        label=_("Group"),
+        required=False,
+        choices=BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups()),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
 
@@ -56,21 +63,56 @@ class PersonBaseForm(forms.ModelForm):
         self.helper.form_class = "needs-validation"
 
 
-class UserCreateForm(PersonBaseForm):
-    email = forms.EmailField(
+class UserCreateForm(forms.ModelForm):
+    group = forms.ChoiceField(
+        label=_("Group"),
         required=True,
-        label=_("Email"),
-        widget=forms.TextInput(attrs={"placeholder": "Ej: jhon.doe@example.com"}),
+        choices=BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups()),
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
 
+    class Meta:
+        model = User
+        fields = ["email"]
+        widgets = {
+            "email": forms.TextInput(attrs={"placeholder": "Ej: jhon.doe@example.com"}),
+        }
 
-class UserUpdateForm(PersonBaseForm):
-    email = forms.EmailField(
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.error_text_inline = True
+        self.helper.label_class = "form-label"
+        self.helper.form_class = "needs-validation"
+
+
+class UserUpdateForm(forms.ModelForm):
+    group = forms.ChoiceField(
+        label=_("Group"),
         required=False,
-        label=_("Email"),
         disabled=True,
-        widget=forms.EmailInput(),
+        choices=BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups()),
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
+
+    class Meta:
+        model = User
+        fields = ["email"]
+        widgets = {
+            "email": forms.TextInput(attrs={"placeholder": "Ej: jhon.doe@example.com"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.error_text_inline = True
+        self.helper.label_class = "form-label"
+        self.helper.form_class = "needs-validation"
+
+        self.fields["email"].required = False
+        self.fields["email"].disabled = True
 
 
 class PasswordUpdateForm(forms.ModelForm):

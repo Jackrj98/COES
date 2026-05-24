@@ -8,6 +8,7 @@ services:
       - "8026:8025"   # UI web
       - "1026:1025"   # SMTP
 
+
   web:
     build:
       context: .

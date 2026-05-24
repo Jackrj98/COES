@@ -18,7 +18,7 @@ from apps.security.utils.constants import MessagesEnum
 class SignInView(LoginView):
     model = User
     form_class = SignInForm
-    template_name = "authentication/sign_in.html"
+    template_name = "auth/sign_in.html"
     success_url = settings.LOGIN_REDIRECT_URL
     extra_context = {
         "title": _("Sign In"),

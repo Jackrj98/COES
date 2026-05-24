@@ -58,4 +58,3 @@ class AuditModel(models.Model):
             self.updated_by = user_identifier
 
         super().save(*args, **kwargs)
-

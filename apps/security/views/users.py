@@ -1,72 +1,65 @@
 import logging
 from uuid import uuid4
-
+from django.utils import timezone
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, ListView, UpdateView
 from pydantic import ValidationError
 
-from apps.core.layers.dto import DataTableParams
 from apps.core.utils.constants import LabelEnum, MessageEnum
-from apps.security.forms import PasswordUpdateForm, UserCreateForm, UserFilterForm, UserUpdateForm
-from apps.security.layers.applications import UserAppService
+from apps.core.views.base import (
+    CustomCreateView,
+    CustomDetailView,
+    CustomListView,
+    CustomUpdateView,
+)
+from apps.security.forms import (
+    PasswordUpdateForm,
+    PersonBaseForm,
+    UserCreateForm,
+    UserFilterForm,
+    UserUpdateForm,
+)
+from apps.security.layers.applications import EmailAppService, UserAppService
 from apps.security.models import Person, User
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = User
-DEFAULT_SECOND_MODEL = Person
+SECOND_MODEL = Person
 DEFAULT_LIST_URL = reverse_lazy("security:users:list")
 
 
-class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class UserListView(CustomListView):
     model = DEFAULT_MODEL
-    second_model = DEFAULT_SECOND_MODEL
+    second_model = SECOND_MODEL
+    form_class = UserFilterForm
     success_url = DEFAULT_LIST_URL
     template_name = "users/datatable.html"
     permission_required = ["security.view_user", "security.view_person"]
 
     def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
         user = self.request.user
-        context = super().get_context_data(**kwargs)
-        context.update(
-            {
-                "object": self.model,
-                "person": self.second_model,
-                "filter_form": UserFilterForm(),
-                "list_url": self.success_url,
-                "title": self.model._meta.verbose_name_plural,
-                "ui_map": self.model.Status.get_ui_map(),
-                "table_actions": self.get_table_actions(user),
-                "status_choices": self.model.StatusChoices.choices,
-            }
-        )
-        return context
 
-    def get(self, request, *args, **kwargs):
-        if self.is_ajax_request(request):
-            return self.handle_datatable_request(request)
-        return super().get(request, *args, **kwargs)
+        ctx["object"] = self.model
+        ctx["person"] = self.second_model
+        ctx["ui_map"] = self.model.Status.get_ui_map()
+        ctx["table_actions"] = self.get_table_actions(user)
+        ctx["status_choices"] = self.model.StatusChoices.choices
+        return ctx
+
+    def retrieve_data(self, params):
+        return UserAppService().retrieve_users(params)
+
+    def get_success_url(self):
+        return self.success_url
 
     @staticmethod
-    def is_ajax_request(request):
-        return request.headers.get("x-requested-with") == "XMLHttpRequest"
-
-    def handle_datatable_request(self, request):
-        params = DataTableParams(request, **request.GET)
-        try:
-            result = UserAppService().retrieve_users(params)
-            return JsonResponse(result, safe=True)
-        except Exception as e:
-            logger.error(f"[{self.__class__.__name__}] Error en Datatable: {e}", exc_info=True)
-            return JsonResponse(params.result([]))
-
-    def get_table_actions(self, user):
+    def get_table_actions(user):
         all_actions = {
             "edit": {
                 "label": LabelEnum.EDIT.value,
@@ -83,13 +76,8 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             "view": {
                 "label": LabelEnum.DETAILS.value,
                 "icon": "bi bi-eye",
+                "url": reverse_lazy("security:users:detail", kwargs={"external_id": uuid4()}),
                 "perm": user.has_perms(["security.view_user", "security.view_person"]),
-            },
-            "delete": {
-                "label": LabelEnum.DELETE.value,
-                "icon": "bi bi-trash",
-                "perm": user.has_perms(["security.delete_user", "security.delete_person"]),
-                "danger": 1,
             },
         }
 
@@ -100,13 +88,198 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         }
 
 
-class UserStatusUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class UserDetailView(CustomDetailView):
+    app_name = "users"
+    model = DEFAULT_MODEL
+    success_url = DEFAULT_LIST_URL
+    template_name = "users/detail.html"
+    permission_required = ["security.view_user", "security.view_person"]
+
+    def get_queryset(self):
+        return (
+            self.model.objects.select_related("person")
+            .prefetch_related("groups")
+            .filter(deleted_at__isnull=True)
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = _("User Details")
+        ctx["person"] = self.object.person
+        ctx["ui_map"] = self.model.Status.get_ui_map()
+
+        actions_list = ctx["actions"]["actions"]
+
+        app_label = self.model._meta.app_label
+        model_name = self.model._meta.model_name
+        update_perm = f"{app_label}.change_{model_name}"
+
+        title = _("Update Password")
+        url_name = f"{app_label}:{self.app_name}:password_change"
+        if self.object != self.request.user:
+            title = _("Reset Password")
+            url_name = f"{app_label}:{self.app_name}:password_reset"
+
+        pwd_action = self.get_actions_map(
+            title=title,
+            order=1,
+            action="update_password",
+            icon="bi bi-key",
+            url_name=url_name,
+            perm=update_perm,
+        )
+
+        if pwd_action:
+            actions_list.append(pwd_action)
+            actions_list.sort(key=lambda x: x["order"])
+
+        return ctx
+
+    def get_success_url(self):
+        return self.success_url
+
+
+class UserCreateView(CustomCreateView):
+    model = DEFAULT_MODEL
+    form_class = UserCreateForm
+    second_form_class = PersonBaseForm
+    success_url = DEFAULT_LIST_URL
+    template_name = "users/create_or_update.html"
+    permission_required = ["security.add_user", "security.add_person"]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        if "form" not in ctx:
+            ctx["form"] = self.get_form()
+
+        if "person_form" not in ctx:
+            ctx["person_form"] = self.second_form_class()
+
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        person_form = self.second_form_class(self.request.POST)
+
+        if all([form.is_valid(), person_form.is_valid()]):
+            return self.form_valid(form, person_form=person_form)
+        return self.form_invalid(form, person_form=person_form)
+
+    def form_valid(self, form, **kwargs):
+        service = UserAppService()
+        person_form = kwargs.get("person_form")
+
+        try:
+            user_data = form.cleaned_data
+            person_data = person_form.cleaned_data
+            user_data["groups"] = [user_data.pop("group")]
+            user_data["username"] = person_data["document_number"]
+            user_data["password"] = person_data["document_number"]
+
+            service.register_user(payload={**person_data, **user_data})
+            messages.success(
+                self.request,
+                self.success_message.format(model=self.model._meta.verbose_name),
+                extra_tags="toast",
+            )
+            return redirect(str(self.success_url))
+
+        except ValidationError as e:
+            self.handle_pydantic_error(e, form, person_form)
+            return self.form_invalid(form, person_form=person_form)
+        except Exception as e:
+            return self.handle_error(str(e), e)
+
+    def form_invalid(self, form, **kwargs):
+        person_form = kwargs.get("person_form")
+        messages.warning(self.request, self.failure_message.value)
+        return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
+
+
+class UserUpdateView(CustomUpdateView):
+    model = DEFAULT_MODEL
+    form_class = UserUpdateForm
+    second_form_class = PersonBaseForm
+    success_url = DEFAULT_LIST_URL
+    template_name = "users/create_or_update.html"
+    permission_required = ["security.change_user", "security.change_person"]
+
+    def get_queryset(self):
+        return self.model.objects.select_related("person")
+
+    def get_object(self, queryset=None):
+        if not hasattr(self, "_cached_object"):
+            self._cached_object = super().get_object(queryset)
+        return self._cached_object
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields["group"].initial = self.get_object().groups.first().name
+        return form
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = _("Update User")
+        referer = self.request.META.get("HTTP_REFERER", "")
+
+        if str(self.object.external_id) in referer:
+            ctx["cancel_url"] = self.object.get_absolute_url()
+        else:
+            ctx["cancel_url"] = self.success_url
+
+        if "form" not in ctx:
+            ctx["form"] = self.get_form()
+
+        if "person_form" not in ctx:
+            ctx["person_form"] = self.second_form_class(instance=self.get_object().person)
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        person_form = self.second_form_class(self.request.POST, instance=self.get_object().person)
+
+        if all([form.is_valid(), person_form.is_valid()]):
+            return self.form_valid(form, person_form=person_form)
+        return self.form_invalid(form, person_form=person_form)
+
+    def form_valid(self, form, **kwargs):
+        service = UserAppService()
+        person_form = kwargs.get("person_form")
+
+        try:
+            person_data = person_form.cleaned_data
+            service.update_user(
+                user=self.get_object(),
+                payload={**person_data},
+            )
+
+            messages.success(
+                self.request,
+                self.success_message.format(
+                    model=self.model._meta.verbose_name, instance=self.object.username
+                ),
+                extra_tags="toast",
+            )
+            return redirect(str(self.success_url))
+
+        except ValidationError as e:
+            self.handle_pydantic_error(e, form, person_form)
+            return self.form_invalid(form, person_form=person_form)
+        except Exception as e:
+            return self.handle_error(str(e), e)
+
+    def form_invalid(self, form, **kwargs):
+        person_form = kwargs.get("person_form")
+        messages.warning(self.request, self.failure_message.value)
+        return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
+
+
+class UserStatusUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     slug_field = "external_id"
     slug_url_kwarg = "external_id"
     success_url = DEFAULT_LIST_URL
-    success_message = MessageEnum.SUCCESS.value
-    failure_message = MessageEnum.FAILURE.value
     permission_required = ["security.change_user"]
 
     def get(self, request, *args, **kwargs):
@@ -134,141 +307,40 @@ class UserStatusUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVi
             )
 
 
-class UserCreateView(LoginRequiredMixin, PermissionRequiredMixin, FormView):
+class UserPasswordUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
-    form_class = UserCreateForm
-    success_url = DEFAULT_LIST_URL
-    failure_message = MessageEnum.FAILURE.value
-    template_name = "users/create_or_update.html"
-    permission_required = ["security.add_user", "security.add_person"]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = _("Create User")
-        context["cancel_url"] = self.success_url
-        if "form" not in context:
-            context["form"] = self.get_form()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-
-        if form.is_valid():
-            return self.form_valid(form)
-        return self.form_invalid(form)
-
-    def form_valid(self, form):
-        service = UserAppService()
-        try:
-            payload = {
-                **form.cleaned_data,
-                "username": form.cleaned_data["document_number"],
-                "password": form.cleaned_data["document_number"],
-                "groups": ["specialist"],
-            }
-
-            self.object = service.register_user(payload=payload)
-            messages.success(
-                self.request,
-                MessageEnum.CREATED.value.format(model=self.object.__class__.__name__.lower()),
-            )
-            return redirect(str(self.success_url))
-        except ValidationError as e:
-            for error in e.errors():
-                field = error.get("loc", [None])[0]
-                message = error.get("msg", "").replace("Value error, ", "")
-                form.add_error(field if field in form.fields else None, message)
-        except ValueError as e:
-            form.add_error(None, str(e))
-        except Exception as e:
-            logger.error(f"Unexpected in {self.__class__.__name__}: {e}", exc_info=True)
-            messages.error(self.request, MessageEnum.FAILURE_REQUEST.value)
-        return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        messages.warning(self.request, self.failure_message)
-        return self.render_to_response(self.get_context_data(form=form))
-
-
-class UserUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    model = DEFAULT_MODEL
-    slug_field = "external_id"
-    slug_url_kwarg = "external_id"
-    form_class = UserUpdateForm
-    success_url = DEFAULT_LIST_URL
-    success_message = MessageEnum.SUCCESS.value
-    failure_message = MessageEnum.FAILURE.value
-    template_name = "users/create_or_update.html"
-    permission_required = ["security.change_user", "security.change_person"]
-    extra_context = {"title": _("Update User"), "cancel_url": DEFAULT_LIST_URL}
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["instance"] = self.get_object().person
-        return kwargs
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.fields["email"].initial = self.get_object().email
-        return form
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Update User")
-        return ctx
-
-    def form_valid(self, form):
-        try:
-            service = UserAppService()
-            service.update_user(
-                user=self.get_object(),
-                payload=form.cleaned_data,
-            )
-            messages.success(self.request, self.success_message)
-            return redirect(str(self.success_url))
-        except ValidationError as e:
-            for error in e.errors():
-                loc = error.get("loc") or []
-                field = loc[0] if loc else None
-                message = error.get("msg", "").replace("Value error, ", "")
-                form.add_error(field if field and field in form.fields else None, message)
-            return self.form_invalid(form)
-        except ValueError as e:
-            form.add_error(None, str(e))
-            return self.form_invalid(form)
-        except Exception as e:
-            logger.error(f"Unexpected in {self.__class__.__name__}: {e}", exc_info=True)
-            messages.error(self.request, MessageEnum.FAILURE_REQUEST.value)
-            return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        messages.warning(self.request, self.failure_message)
-        return self.render_to_response(self.get_context_data(form=form))
-
-
-class UserPasswordUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    model = DEFAULT_MODEL
-    slug_field = "external_id"
-    slug_url_kwarg = "external_id"
     form_class = PasswordUpdateForm
-    success_message = MessageEnum.SUCCESS.value
-    failure_message = MessageEnum.FAILURE.value
     success_url = reverse_lazy("security:login")
     permission_required = "security.change_user"
     template_name = "users/password/password_reset_confirm.html"
-    extra_context = {
-        "title": _("Update password"),
-        "password_title": _(
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = _("Update password")
+        ctx["cancel_url"] = self.object.get_absolute_url()
+        ctx["password_title"] = _(
             "To update your password, please keep the following security guidelines in mind:"
-        ),
-        "password_rules": [
+        )
+        ctx["password_rules"] = [
             _("Must be at least <strong>8</strong> characters long."),
             _("Cannot be entirely numeric."),
             _("Cannot be a commonly used password."),
             _("Must include at least one special character (@, #, $, !)."),
             _("Cannot be too similar to your other personal information."),
-        ],
-    }
+        ]
+        return ctx
+
+    def build_breadcrumb(self, extra_breadcrumb=None):
+        parent_breadcrumb = super().build_breadcrumb()
+        parent_breadcrumb.pop(-1)
+        parent_breadcrumb.append(
+            {
+                "name": _("Update password"),
+                "active": True,
+                "title": _("Update password"),
+            }
+        )
+        return parent_breadcrumb
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
@@ -293,21 +365,56 @@ class UserPasswordUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Update
                 payload={"user": self.get_object(), **form.cleaned_data},
             )
 
-            messages.success(self.request, self.success_message)
+            messages.success(
+                self.request,
+                self.success_message.format(
+                    model=self.model._meta.verbose_name,
+                    instance=self.object.username,
+                ),
+                extra_tags="toast",
+            )
             return redirect(str(self.success_url))
+
         except ValidationError as e:
-            for error in e.errors():
-                field = error.get("loc", [None])[0]
-                message = error.get("msg", "").replace("Value error, ", "")
-                form.add_error(field if field in form.fields else None, message)
-        except ValueError as e:
-            form.add_error(None, str(e))
+            self.handle_pydantic_error(e, form)
+            return self.form_invalid(form)
         except PermissionDenied:
             messages.error(self.request, _("You do not have permission to perform this action."))
             return redirect("core:home")
-
-        return self.form_invalid(form)
+        except Exception as e:
+            self.handle_error(str(e), e)
 
     def form_invalid(self, form):
-        messages.warning(self.request, self.failure_message)
-        return super().form_invalid(form)
+        messages.warning(self.request, self.failure_message.value)
+        return self.render_to_response(self.get_context_data(form=form))
+
+
+def send_reset_password(request, external_id):
+    service = UserAppService()
+    user: User = service.retrieve_by_external(external_id)
+
+    new_password = service.generate_password()
+    service.reset_password(request_user=user, password=new_password)
+
+    subject = _("Password Reset Request")
+    now_local = timezone.localtime(timezone.now())
+
+    context = {
+        "title": subject,
+        "username": user.username,
+        "password": new_password,
+        "user": user.person.full_name,
+        "url": reverse_lazy("security:login"),
+        "formatted_date": now_local.strftime("%d/%m/%Y"),
+        "formatted_time": now_local.strftime("%H:%M"),
+    }
+
+    EmailAppService.send(
+        subj=str(subject),
+        recp=[user.email],
+        template="users/emails/reset_confirm_password.html",
+        ctx=context,
+    )
+
+    messages.success(request, _("Reset email sent successfully."), extra_tags="toast")
+    return redirect(user.get_absolute_url())

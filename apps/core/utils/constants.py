@@ -20,6 +20,7 @@ class LabelEnum(Enum):
     DETAILS = _("Details")
     IMPORT = _("Import")
     EXPORT = _("Export")
+    LIST = _("List")
 
     def format(self, **kwargs):
         return str(self.value).format(**kwargs)

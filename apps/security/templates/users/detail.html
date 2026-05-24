@@ -1,0 +1,141 @@
+{% extends 'layouts/base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+    <section>
+        <div class="row d-flex justify-content-center g-0">
+            <div class="col-xl-12 col-md-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        <h5 class="mb-0">{{ object.person.full_name }}</h5>
+                        <div class="ms-auto">
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-secondary dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    {% trans actions.title %}
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <h6 class="dropdown-header">Menu</h6>
+                                    {% for action in actions.actions %}
+                                        {% if action.title %}
+                                            <a class="dropdown-item" href="{{ action.url }}">
+                                                {% if action.icon %}<i class="{{ action.icon }} me-2"></i>{% endif %}
+                                                {{ action.title }}
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {# ── User info ── #}
+                        <h6 class="text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.5px">
+                            {% trans "Account information" %}
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object 'email' %}</div>
+                                <div class="fw-semibold">
+                                    <a href="mailto:{{ object.email }}" class="text-decoration-none">
+                                        <i class="bi {% if object.email_verified %}bi-envelope-check text-primary{% else %}bi-envelope-exclamation text-secondary{% endif %} me-1"></i>
+                                        {{ object.email }}
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object 'username' %}</div>
+                                <div class="fw-semibold">{{ object.username }}</div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object 'status' %}</div>
+                                <div>
+                                    <span class="badge  bg-light-{{ object.status_color }}  px-2 py-1 rounded-3">
+                                        {{ object.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object 'groups' %}</div>
+                                <div>
+                                    <span class="badge  bg-light-primary  px-2 py-1 rounded-3">
+                                        {% trans object.groups.all.0.name|capfirst %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object 'email_verified' %}</div>
+                                <div class="fw-semibold">
+                                    {% if object.email_verified %}
+                                        <i class="bi bi-check-circle text-success me-1"></i>{% trans "Verified" %}
+                                    {% else %}
+                                        <i class="bi bi-x-circle text-secondary me-1"></i>{% trans "Not verified" %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object 'force_password' %}</div>
+                                <div class="fw-semibold">
+                                    {% if object.force_password %}
+                                        <i class="bi bi-shield-exclamation text-warning me-1 lh-1"></i>{% trans "Yes" %}
+                                    {% else %}
+                                        <i class="bi bi-shield-check text-success me-1 lh-1"></i>{% trans "No" %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if request.user|has_group:"administrator" %}
+                                <div class="col-md-4 col-sm-6 col-12">
+                                    <div class="text-muted small">{% label object 'last_password_change' %}</div>
+                                    <div class="fw-semibold">{{ object.last_password_change|date:"d M Y" }}</div>
+                                </div>
+                                <div class="col-md-4 col-sm-6 col-12">
+                                    <div class="text-muted small">{% label object 'created_at' %}</div>
+                                    <div class="fw-semibold">{{ object.created_at|date:"d M Y - H:i" }}</div>
+                                </div>
+                                <div class="col-md-4 col-sm-6 col-12">
+                                    <div class="text-muted small">{% label object 'updated_at' %}</div>
+                                    <div class="fw-semibold">{{ object.updated_at|date:"d M Y - H:i" }}</div>
+                                </div>
+                                {% if object.locked_at %}
+                                    <div class="col-md-4 col-sm-6 col-12">
+                                        <div class="text-muted small">{% label object 'locked_at' %}</div>
+                                        <div class="fw-semibold text-danger">{{ object.locked_at|date:"d M Y - H:i" }}</div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <hr class="my-4">
+                        {# ── Person info ── #}
+                        <h6 class="text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.5px">
+                            {% trans "Personal information" %}
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object.person 'first_name' %}</div>
+                                <div class="fw-semibold">{{ object.person.first_name|default:"-" }}</div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object.person 'last_name' %}</div>
+                                <div class="fw-semibold">{{ object.person.last_name|default:"-" }}</div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object.person 'document_number' %}</div>
+                                <div class="fw-semibold">{{ object.person.document_number|default:"-" }}</div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-12">
+                                <div class="text-muted small">{% label object.person 'phone' %}</div>
+                                <div class="fw-semibold">
+                                    <a href="tel:{{ object.person.phone }}" class="text-decoration-none">
+                                        <i class="bi bi-telephone me-1"></i>{{ object.person.phone|default:"-" }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

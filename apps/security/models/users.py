@@ -5,6 +5,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
@@ -146,6 +147,10 @@ class User(AbstractBaseUser, AuditModel, PermissionsMixin):
     def primary_group(self):
         return self.groups.order_by("name").first()
 
+    @property
+    def status_color(self):
+        return self.Status(self.status).color
+
     # ── Helpers ─────────────────────────────────
 
     def has_group(self, group_name: str) -> bool:
@@ -154,6 +159,9 @@ class User(AbstractBaseUser, AuditModel, PermissionsMixin):
     def verify_email(self) -> None:
         self.email_verified = True
         self.save(update_fields=["email_verified", "updated_at"])
+
+    def get_absolute_url(self):
+        return reverse("security:users:detail", kwargs={"external_id": self.external_id})
 
 
 def get_default_expiration():

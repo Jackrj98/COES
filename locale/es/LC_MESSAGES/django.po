@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 15:58-0500\n"
+"POT-Creation-Date: 2026-05-23 21:30-0500\n"
 "PO-Revision-Date: 2026-05-22 16:00-0500\n"
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "Select"
 msgstr "Seleccionar"
 
-#: apps/core/forms/base.py:22 apps/security/forms/user.py:19
+#: apps/core/forms/base.py:22 apps/security/forms/user.py:26
 msgid "Search"
 msgstr "Buscar"
 
@@ -38,8 +38,8 @@ msgid "Select date"
 msgstr "Seleccionar fecha"
 
 #: apps/core/forms/base.py:46 apps/inventory/models.py:47
-#: apps/purchasing/models.py:36 apps/security/forms/user.py:11
-#: apps/security/models/users.py:112 apps/security/models/users.py:198
+#: apps/purchasing/models.py:36 apps/security/forms/user.py:12
+#: apps/security/models/users.py:113 apps/security/models/users.py:206
 msgid "Status"
 msgstr "Estado"
 
@@ -73,11 +73,11 @@ msgstr "Marcar elementos seleccionados como inactivos"
 msgid "%d records marked as inactive."
 msgstr "%d registros marcados como inactivos."
 
-#: apps/core/models.py:12 apps/security/models/users.py:82
+#: apps/core/models.py:12 apps/security/models/users.py:83
 msgid "Disabled"
 msgstr "Deshabilitado"
 
-#: apps/core/models.py:13 apps/security/models/users.py:81
+#: apps/core/models.py:13 apps/security/models/users.py:82
 msgid "Enabled"
 msgstr "Habilitado"
 
@@ -184,39 +184,43 @@ msgstr "Importar"
 msgid "Export"
 msgstr "Exportar"
 
-#: apps/core/utils/constants.py:30
+#: apps/core/utils/constants.py:23
+msgid "List"
+msgstr "Lista"
+
+#: apps/core/utils/constants.py:31
 msgid "The operation completed successfully."
 msgstr "La operación se completó exitosamente."
 
-#: apps/core/utils/constants.py:31
-#, python-brace-format
-msgid "The {model} was successfully created."
-msgstr "El/La {model} fue creado exitosamente."
-
 #: apps/core/utils/constants.py:32
 #, python-brace-format
-msgid "The {model} '{instance}' was successfully updated."
-msgstr "El/La {model} '{instance}' fue actualizado exitosamente."
+msgid "The {model} was successfully created."
+msgstr "El {model} fue creado exitosamente."
 
 #: apps/core/utils/constants.py:33
 #, python-brace-format
-msgid "The {model} '{instance}' was successfully deleted."
-msgstr "El/La {model} '{instance}' fue eliminado exitosamente."
+msgid "The {model} '{instance}' was successfully updated."
+msgstr "El {model} '{instance}' fue actualizado exitosamente."
 
-#: apps/core/utils/constants.py:36
+#: apps/core/utils/constants.py:34
+#, python-brace-format
+msgid "The {model} '{instance}' was successfully deleted."
+msgstr "El {model} '{instance}' fue eliminado exitosamente."
+
+#: apps/core/utils/constants.py:37
 msgid "An error has occurred, please try again."
 msgstr "Ha ocurrido un error, por favor intente nuevamente."
 
-#: apps/core/utils/constants.py:37
+#: apps/core/utils/constants.py:38
 msgid "An unexpected error occurred while processing your request."
 msgstr "Ocurrió un error inesperado al procesar su solicitud."
 
-#: apps/core/utils/constants.py:38
+#: apps/core/utils/constants.py:39
 #, python-brace-format
 msgid "The requested {model} '{identifier}' was not found."
-msgstr "El/La {model} '{identifier}' solicitado no fue encontrado."
+msgstr "El {model} '{identifier}' solicitado no fue encontrado."
 
-#: apps/core/utils/constants.py:39
+#: apps/core/utils/constants.py:40
 #, python-brace-format
 msgid "A {model} with the specified attributes already exists."
 msgstr "Ya existe un/una {model} con los atributos especificados."
@@ -229,7 +233,7 @@ msgstr "especialista"
 msgid "administrator"
 msgstr "administrador"
 
-#: apps/core/views.py:21 apps/security/views/users.py:272
+#: apps/core/views/views.py:21 apps/security/views/users.py:370
 msgid "You do not have permission to perform this action."
 msgstr "No tiene permiso para realizar esta acción."
 
@@ -265,7 +269,7 @@ msgstr "Insumos"
 msgid "Discarded"
 msgstr "Desechado"
 
-#: apps/inventory/models.py:34 apps/security/models/users.py:181
+#: apps/inventory/models.py:34 apps/security/models/users.py:189
 msgid "Expired"
 msgstr "Expirado"
 
@@ -437,7 +441,7 @@ msgstr "Nombre Completo"
 msgid "Username or email"
 msgstr "Usuario o correo electrónico"
 
-#: apps/security/forms/auth.py:11 apps/security/models/users.py:104
+#: apps/security/forms/auth.py:11 apps/security/models/users.py:105
 msgid "Username"
 msgstr "Nombre de usuario"
 
@@ -445,23 +449,24 @@ msgstr "Nombre de usuario"
 msgid "Password"
 msgstr "Contraseña"
 
-#: apps/security/forms/user.py:62 apps/security/forms/user.py:70
-msgid "Email"
-msgstr "Correo electrónico"
+#: apps/security/forms/user.py:18 apps/security/forms/user.py:68
+#: apps/security/forms/user.py:92
+msgid "Group"
+msgstr "Grupo"
 
-#: apps/security/forms/user.py:79
+#: apps/security/forms/user.py:121
 msgid "Current Password"
 msgstr "Contraseña Actual"
 
-#: apps/security/forms/user.py:85
+#: apps/security/forms/user.py:127
 msgid "New Password"
 msgstr "Nueva Contraseña"
 
-#: apps/security/forms/user.py:91
+#: apps/security/forms/user.py:133
 msgid "Confirm New Password"
 msgstr "Confirmar Nueva Contraseña"
 
-#: apps/security/layers/applications/user_service.py:83
+#: apps/security/layers/applications/user_service.py:107
 msgid "You are not authorized to change this password"
 msgstr "No está autorizado para cambiar esta contraseña"
 
@@ -493,146 +498,218 @@ msgstr "El superusuario debe tener is_staff=True."
 msgid "Superuser must have is_superuser=True."
 msgstr "El superusuario debe tener is_superuser=True."
 
-#: apps/security/models/users.py:26
+#: apps/security/models/users.py:27
 msgid "First name"
 msgstr "Nombres"
 
-#: apps/security/models/users.py:29
+#: apps/security/models/users.py:30
 msgid "Last name"
 msgstr "Apellidos"
 
-#: apps/security/models/users.py:34
+#: apps/security/models/users.py:35
 msgid "Document number"
 msgstr "Número de documento"
 
-#: apps/security/models/users.py:41
+#: apps/security/models/users.py:42
 msgid "Phone number"
 msgstr "Número de teléfono"
 
-#: apps/security/models/users.py:45
+#: apps/security/models/users.py:46
 msgid "Person"
 msgstr "Persona"
 
-#: apps/security/models/users.py:47
+#: apps/security/models/users.py:48
 msgid "People"
 msgstr "Personas"
 
-#: apps/security/models/users.py:83
+#: apps/security/models/users.py:84
 msgid "Locked"
 msgstr "Bloqueado"
 
-#: apps/security/models/users.py:102
+#: apps/security/models/users.py:103
 msgid "Email address"
 msgstr "Dirección de correo electrónico"
 
-#: apps/security/models/users.py:108
+#: apps/security/models/users.py:109
 msgid "Email verified"
 msgstr "Correo verificado"
 
-#: apps/security/models/users.py:109
+#: apps/security/models/users.py:110
 msgid "Force password change"
 msgstr "Forzar cambio de contraseña"
 
-#: apps/security/models/users.py:110
+#: apps/security/models/users.py:111
 msgid "Last password change"
 msgstr "Último cambio de contraseña"
 
-#: apps/security/models/users.py:113
+#: apps/security/models/users.py:114
 msgid "Failed login attempts"
 msgstr "Intentos de inicio de sesión fallidos"
 
-#: apps/security/models/users.py:114
+#: apps/security/models/users.py:115
 msgid "Locked at"
 msgstr "Bloqueado el"
 
-#: apps/security/models/users.py:128 apps/security/models/users.py:187
+#: apps/security/models/users.py:129 apps/security/models/users.py:195
 msgid "User"
 msgstr "Usuario"
 
-#: apps/security/models/users.py:129
+#: apps/security/models/users.py:130
 msgid "Users"
 msgstr "Usuarios"
 
-#: apps/security/models/users.py:143
+#: apps/security/models/users.py:144
+#: apps/security/templates/users/detail.html:62
 msgid "Verified"
 msgstr "Verificado"
 
-#: apps/security/models/users.py:143
+#: apps/security/models/users.py:144
+#: apps/security/templates/users/detail.html:64
 msgid "Not verified"
 msgstr "No verificado"
 
-#: apps/security/models/users.py:173
+#: apps/security/models/users.py:181
 msgid "Email verification"
 msgstr "Verificación de correo"
 
-#: apps/security/models/users.py:174
+#: apps/security/models/users.py:182
 msgid "Password reset"
 msgstr "Restablecer contraseña"
 
-#: apps/security/models/users.py:179
+#: apps/security/models/users.py:187
 msgid "Pending"
 msgstr "Pendiente"
 
-#: apps/security/models/users.py:180
+#: apps/security/models/users.py:188
 msgid "Used"
 msgstr "Usado"
 
-#: apps/security/models/users.py:190
+#: apps/security/models/users.py:198
 msgid "Token"
 msgstr "Token"
 
-#: apps/security/models/users.py:195
+#: apps/security/models/users.py:203
 msgid "Token type"
 msgstr "Tipo de token"
 
-#: apps/security/models/users.py:196
+#: apps/security/models/users.py:204
 msgid "Expires at"
 msgstr "Expira el"
 
-#: apps/security/models/users.py:200
+#: apps/security/models/users.py:208
 msgid "Used at"
 msgstr "Usado el"
 
-#: apps/security/models/users.py:206
+#: apps/security/models/users.py:214
 msgid "User token"
 msgstr "Token de usuario"
 
-#: apps/security/models/users.py:207
+#: apps/security/models/users.py:215
 msgid "User tokens"
 msgstr "Tokens de usuario"
 
-#: apps/security/models/users.py:241
+#: apps/security/models/users.py:249
 #, python-format
 msgid "Token is no longer valid: %(status)s"
 msgstr "El token ya no es válido: %(status)s"
 
-#: apps/security/templates/authentication/sign_in.html:38
+#: apps/security/templates/auth/sign_in.html:38
 msgid "Sign in"
 msgstr "Iniciar sesión"
 
-#: apps/security/templates/users/create_or_update.html:34
-#: apps/security/templates/users/password/password_reset_confirm.html:56
-#: templates/components/_delete.html:69 templates/components/_form.html:31
-msgid "Submit"
-msgstr "Enviar"
-
-#: apps/security/templates/users/create_or_update.html:37
-#: apps/security/templates/users/password/password_reset_confirm.html:52
+#: apps/security/templates/users/create_or_update.html:36
+#: apps/security/templates/users/password/password_reset_confirm.html:46
 #: templates/components/_delete.html:72
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: apps/security/templates/users/datatable.html:12
+#: apps/security/templates/users/create_or_update.html:39
+#: apps/security/templates/users/password/password_reset_confirm.html:50
+#: templates/components/_delete.html:69 templates/components/_form.html:31
+msgid "Submit"
+msgstr "Enviar"
+
+#: apps/security/templates/users/datatable.html:19
+#: templates/components/_datatable.html:32
+msgid "Clean filters"
+msgstr "Limpiar filtros"
+
+#: apps/security/templates/users/datatable.html:37
 msgid "New user"
 msgstr "Nuevo usuario"
 
-#: apps/security/templates/users/datatable.html:20
+#: apps/security/templates/users/datatable.html:45
 msgid "user"
 msgstr "usuario"
 
-#: apps/security/templates/users/datatable.html:23
+#: apps/security/templates/users/datatable.html:48
 msgid "group"
 msgstr "grupo"
+
+#: apps/security/templates/users/detail.html:34
+#, fuzzy
+#| msgid "Audit Information"
+msgid "Account information"
+msgstr "Información de Auditoría"
+
+#: apps/security/templates/users/detail.html:72
+msgid "Yes"
+msgstr "Si"
+
+#: apps/security/templates/users/detail.html:74
+msgid "No"
+msgstr "No"
+
+#: apps/security/templates/users/detail.html:98
+msgid "Personal information"
+msgstr "Información personal"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:10
+msgid "Dear"
+msgstr "Estimado"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:14
+#, python-format
+msgid ""
+"A request to reset your access password was generated on "
+"<strong>%(formatted_date)s</strong> at <strong>%(formatted_time)s</strong>."
+msgstr ""
+"Se ha generado una solicitud para restablecer su contrase&ntilde;a de acceso el "
+"<strong>%(formatted_date)s</strong> a las <strong>%(formatted_time)s</strong>."
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:18
+msgid "Access data:"
+msgstr "Datos de acceso:"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:19
+#, fuzzy
+#| msgid "Username"
+msgid "Username:"
+msgstr "Nombre de usuario"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:20
+msgid "Temporary password:"
+msgstr "Contraseña temporal:"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:24
+msgid "To access the system, click the following button:"
+msgstr "Para acceder al sistema, haz clic en el siguiente botón:"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:30
+msgid "Log in to"
+msgstr "Inicia sesión en"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:34
+msgid "Important:"
+msgstr "Importante"
+
+#: apps/security/templates/users/emails/reset_confirm_password.html:34
+msgid ""
+"This password is temporary. For security, you must update it immediately "
+"after logging into your account."
+msgstr ""
+"Esta contraseña es temporal. Por motivos de seguridad, debes cambiarla "
+"inmediatamente después de iniciar sesión en tu cuenta."
 
 #: apps/security/utils/constants.py:8
 msgid "The credentials are invalid, please try again."
@@ -641,7 +718,9 @@ msgstr "Las credenciales son inválidas, por favor intente nuevamente."
 #: apps/security/utils/constants.py:10
 #, python-brace-format
 msgid "The credentials are invalid, please try again. Attempts {number}"
-msgstr "Las credenciales son inválidas, por favor intente nuevamente. Intentos {number}"
+msgstr ""
+"Las credenciales son inválidas, por favor intente nuevamente. Intentos "
+"{number}"
 
 #: apps/security/utils/constants.py:12
 msgid "The user has been deactivated, please contact the administrator."
@@ -655,7 +734,9 @@ msgstr "El usuario ha sido bloqueado, por favor contacte al administrador."
 msgid ""
 "The email address is not verified. Please check your email inbox to verify "
 "the account."
-msgstr "La dirección de correo no está verificada. Por favor revise su bandeja de entrada para verificar la cuenta."
+msgstr ""
+"La dirección de correo no está verificada. Por favor revise su bandeja de "
+"entrada para verificar la cuenta."
 
 #: apps/security/utils/constants.py:19
 msgid "The password has been changed"
@@ -672,7 +753,9 @@ msgstr "La contraseña necesita ser actualizada. Para continuar navegando."
 #: apps/security/utils/constants.py:23
 msgid ""
 "A link was sent to reset your password. Please check your email to continue."
-msgstr "Se envió un enlace para restablecer su contraseña. Por favor revise su correo para continuar."
+msgstr ""
+"Se envió un enlace para restablecer su contraseña. Por favor revise su "
+"correo para continuar."
 
 #: apps/security/utils/validators.py:9
 msgid "Only upper letters, and underscores are allowed."
@@ -722,51 +805,78 @@ msgstr "Iniciar Sesión"
 msgid "Log in to your account"
 msgstr "Inicie sesión en su cuenta"
 
-#: apps/security/views/users.py:113
-msgid "Create User"
-msgstr "Crear Usuario"
+#: apps/security/views/users.py:102
 
-#: apps/security/views/users.py:169 apps/security/views/users.py:183
+msgid "User Details"
+msgstr "Detalles del usuario"
+
+#: apps/security/views/users.py:112
+#, fuzzy
+#| msgid "Update password"
+msgid "Update Password"
+msgstr "Actualizar contraseña"
+
+#: apps/security/views/users.py:115
+msgid "Reset Password"
+msgstr "Restablecer Contraseña"
+
+#: apps/security/views/users.py:217
 msgid "Update User"
 msgstr "Actualizar Usuario"
 
-#: apps/security/views/users.py:226
+#: apps/security/views/users.py:277
+msgid "Change Status"
+msgstr "Cambiar estado"
+
+#: apps/security/views/users.py:278
+msgid "Are you sure you want to change the status of this user?"
+msgstr "¿Estás seguro de que quieres cambiar el estado de este usuario?"
+
+#: apps/security/views/users.py:307 apps/security/views/users.py:326
+#: apps/security/views/users.py:328
 msgid "Update password"
 msgstr "Actualizar contraseña"
 
-#: apps/security/views/users.py:228
+#: apps/security/views/users.py:310
 msgid ""
 "To update your password, please keep the following security guidelines in "
 "mind:"
-msgstr "Para actualizar su contraseña, tenga en cuenta las siguientes pautas de seguridad:"
+msgstr ""
+"Para actualizar su contraseña, tenga en cuenta las siguientes pautas de "
+"seguridad:"
 
-#: apps/security/views/users.py:231
+#: apps/security/views/users.py:313
 msgid "Must be at least <strong>8</strong> characters long."
 msgstr "Debe tener al menos <strong>8</strong> caracteres de longitud."
 
-#: apps/security/views/users.py:232
+#: apps/security/views/users.py:314
 msgid "Cannot be entirely numeric."
 msgstr "No puede ser completamente numérica."
 
-#: apps/security/views/users.py:233
+#: apps/security/views/users.py:315
 msgid "Cannot be a commonly used password."
 msgstr "No puede ser una contraseña de uso común."
 
-#: apps/security/views/users.py:234
+#: apps/security/views/users.py:316
 msgid "Must include at least one special character (@, #, $, !)."
 msgstr "Debe incluir al menos un carácter especial (@, #, $, !)."
 
-#: apps/security/views/users.py:235
+#: apps/security/views/users.py:317
 msgid "Cannot be too similar to your other personal information."
 msgstr "No puede ser demasiado similar a su otra información personal."
 
-#: apps/security/views/users.py:242
+#: apps/security/views/users.py:336
 msgid "You do not have permission to edit other users' accounts."
 msgstr "No tiene permiso para editar cuentas de otros usuarios."
 
-#: templates/components/_datatable.html:31
-msgid "Clean filters"
-msgstr "Limpiar filtros"
+#: apps/security/views/users.py:387
+
+msgid "Password Reset Request"
+msgstr "Solicitud de restablecimiento de contraseña"
+
+#: apps/security/views/users.py:406
+msgid "Reset email sent successfully."
+msgstr "El correo electrónico de restablecimiento se ha enviado correctamente."
 
 #: templates/components/_delete.html:16
 #, python-format
@@ -782,29 +892,43 @@ msgstr ""
 "                                "
 
 #: templates/components/_delete.html:21
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                    Deleting the %(obj_name)s <b>?"
+#| "%(object)s?</b> would require\n"
+#| "                                    deleting the following protected "
+#| "objects:\n"
+#| "                                "
 msgid ""
 "\n"
 "                                    Deleting the %(obj_name)s "
-"<b>?%(object)s?</b> would require\n"
+"<b>“%(object)s”</b> would require\n"
 "                                    deleting the following protected "
 "objects:\n"
 "                                "
 msgstr ""
 "\n"
-"                                    Eliminar %(obj_name)s "
-"<b>?%(object)s?</b> requeriría\n"
+"                                    Eliminar %(obj_name)s <b>?%(object)s?</"
+"b> requeriría\n"
 "                                    eliminar los siguientes objetos "
 "protegidos:\n"
 "                                "
 
 #: templates/components/_delete.html:30
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "                                Are you sure you want to delete the "
+#| "%(obj_name)s\n"
+#| "                                ?<b>%(object)s</b>?? The following "
+#| "related items will be deleted:\n"
+#| "                            "
 msgid ""
 "\n"
 "                                Are you sure you want to delete the "
 "%(obj_name)s\n"
-"                                ?<b>%(object)s</b>?? The following related "
+"                                “<b>%(object)s</b>”? The following related "
 "items will be deleted:\n"
 "                            "
 msgstr ""
@@ -856,25 +980,43 @@ msgstr "Error del Sistema"
 msgid ""
 "The website is currently unaivailable. Try again later or contact the "
 "developer."
-msgstr "El sitio web no está disponible actualmente. Intente más tarde o contacte al desarrollador."
+msgstr ""
+"El sitio web no está disponible actualmente. Intente más tarde o contacte al "
+"desarrollador."
+
+#: templates/layouts/email.html:27
+msgid "This email was sent by the center (COES)."
+msgstr "Este correo ha sido enviado por el centro (COES)."
+
+#: templates/layouts/email.html:28
+msgid "Please do not reply to this message."
+msgstr "Por favor, no responda a este mensaje."
+
+#: templates/layouts/email.html:29
+msgid "Confidentiality Note:"
+msgstr "Nota de confidencialidad:"
+
+#: templates/layouts/email.html:29
+msgid "This message contains confidential information."
+msgstr "Este mensaje contiene información confidencial."
+
+#: templates/layouts/email.html:30
+msgid "If you are not the intended recipient, please delete it."
+msgstr "Si usted no es el destinatario, por favor elimínelo."
 
 #: templates/partials/navbar/_menu.html:35
 msgid "Logout"
 msgstr "Cerrar Sesión"
 
-#: templates/partials/navbar/_navbar.html:17
-#: templates/partials/navbar/_navbar.html:18
-msgid "Home"
-msgstr "Inicio"
-
-#: templates/partials/sidebar/_sidebar.html:25
+#: templates/partials/sidebar/_sidebar.html:27
 msgid "administration"
 msgstr "administración"
 
-#: templates/partials/sidebar/_sidebar.html:29
+#: templates/partials/sidebar/_sidebar.html:31
 msgid "users"
 msgstr "usuarios"
 
-#: templates/partials/sidebar/_sidebar.html:37
+#: templates/partials/sidebar/_sidebar.html:39
 msgid "admin site"
 msgstr "sitio de administración"
+

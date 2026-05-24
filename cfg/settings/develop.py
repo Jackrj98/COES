@@ -42,14 +42,16 @@ CELERY_TIMEZONE = TIME_ZONE
 # ------------------------------------------------------------------------------
 # EMAIL CONFIG
 # ------------------------------------------------------------------------------
+print(config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"))
+
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = config("TS_EMAIL_HOST", default="localhost")
-EMAIL_PORT = config("TS_EMAIL_PORT", default=587, cast=int)
-EMAIL_USE_TLS = config("TS_EMAIL_TLS", default=True, cast=bool)
+EMAIL_PORT = config("TS_EMAIL_PORT", default=1025, cast=int)
+EMAIL_USE_TLS = config("TS_EMAIL_TLS", default=False, cast=bool)
 EMAIL_USE_SSL = config("TS_EMAIL_SSL", default=False, cast=bool)
 EMAIL_HOST_USER = config("TS_EMAIL_USER", default="")
 EMAIL_HOST_PASSWORD = config("TS_EMAIL_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="COES Dev <no-reply@coes.com>")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="no-reply@coes.com")
 
 # ------------------------------------------------------------------------------
 # DEBUG TOOLBAR

@@ -19,7 +19,6 @@ class CustomPermissionDeniedView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         messages.error(request, _("You do not have permission to perform this action."))
-        # Retornamos explícitamente el status 403 para que los tests pasen
         return self.render_to_response(self.get_context_data(**kwargs), status=403)
 
 

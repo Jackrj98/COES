@@ -49,7 +49,12 @@ class UserBuilder:
         statuses = {
             Status.ENABLED: {"status": Status.DISABLED.value, "is_active": False},
             Status.DISABLED: {"status": Status.ENABLED.value, "is_active": True},
-            Status.LOCKED: {"status": Status.ENABLED.value, "is_active": True, "locked_at": None, "failed_login_attempts": 0},
+            Status.LOCKED: {
+                "status": Status.ENABLED.value,
+                "is_active": True,
+                "locked_at": None,
+                "failed_login_attempts": 0,
+            },
         }
 
         transition = statuses[current]
@@ -79,6 +84,14 @@ class UserBuilder:
         self.user.force_password = False
         self.user.last_password_change = timezone.now()
         self.user.save(update_fields=["password", "force_password", "last_password_change"])
+        return self
+
+    def reset_password(self, new_password):
+        self.user.force_password = True
+        self.user.set_password(new_password)
+        self.user.last_password_change = timezone.now()
+        self.user.save(update_fields=["password", "force_password", "last_password_change"])
+
         return self
 
     def build(self):

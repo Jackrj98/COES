@@ -11,7 +11,8 @@ $(document).ready(function () {
         filters: [
             {selector: "#id_date_from", field: "created_at", type: "date-range"},
             {selector: "#id_status", field: "status"},
-            {selector: "#id_search", field: "search"}
+            {selector: "#id_search", field: "search"},
+            {selector: "#id_group", field: "group"}
         ],
         order: [[6, "desc"]],
         paginationClass: "pagination-primary"
@@ -81,8 +82,8 @@ const userColumns = [
             if (!data) return '';
 
             const translations = {
-                'specialist': {label: 'Especialista', color: 'primary'},
-                'administrator': {label: 'Administrador', color: 'primary'},
+                'specialist': {label: 'Especialista', color: 'secondary'},
+                'administrator': {label: 'Administrador', color: 'secondary'},
             };
 
             const groups = data.split(', ').map(g => translations[g] || {label: g, color: 'secondary'});
@@ -211,10 +212,13 @@ document.addEventListener('click', function (e) {
                 `,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#4e73df',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Confirm',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-outline-secondary'
+                }
             }).then(result => {
                 if (!result.isConfirmed) return;
                 fetch(url, {

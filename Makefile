@@ -223,10 +223,10 @@ clean:
 # Translations
 # =============================================================================
 
-translate:
+translate-generate:
 	$(MANAGE) makemessages -l es --ignore="coes-env/*"
 
-compile-messages:
+translate-compile:
 	$(MANAGE) compilemessages
 
 
