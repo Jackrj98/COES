@@ -6,7 +6,7 @@ class BaseAppService:
     def __init__(self, model=None):
         self.model = model
 
-    def retrieve_by_external(self, external_id) -> 'model':  # noqa: F821
+    def retrieve_by_external(self, external_id) -> "model":  # noqa: F821
         """Fetches the first active object with the given external ID.
 
         Args:

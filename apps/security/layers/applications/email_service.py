@@ -1,4 +1,5 @@
 import logging
+
 from django.utils import translation
 
 from apps.security.tasks import send_email_async
