@@ -3,11 +3,13 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
@@ -27,6 +29,7 @@ from apps.security.forms import (
 )
 from apps.security.layers.applications import EmailAppService, UserAppService
 from apps.security.models import Person, User
+from apps.security.layers.security import SecurityService
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +38,7 @@ SECOND_MODEL = Person
 DEFAULT_LIST_URL = reverse_lazy("security:users:list")
 
 
+@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserListView(CustomListView):
     model = DEFAULT_MODEL
     second_model = SECOND_MODEL
@@ -90,6 +94,7 @@ class UserListView(CustomListView):
         }
 
 
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class UserDetailView(CustomDetailView):
     app_name = "users"
     model = DEFAULT_MODEL
@@ -130,7 +135,8 @@ class UserDetailView(CustomDetailView):
         )
 
         current_user = self.request.user
-        if self.object != current_user:
+        if self.object != current_user: # TODO revisar dar vuelta para usuario que va a cambiar su clave
+            print("he")
             if not current_user.groups.filter(name="administrator").exists():
                 actions_list[-1]["url"] = reverse_lazy(
                     "security:users:update",
@@ -154,6 +160,7 @@ class UserDetailView(CustomDetailView):
         return self.success_url
 
 
+@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     form_class = UserCreateForm
@@ -211,6 +218,7 @@ class UserCreateView(CustomCreateView):
         return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
 
 
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class UserUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = UserUpdateForm
@@ -308,6 +316,7 @@ class UserUpdateView(CustomUpdateView):
         return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
 
 
+@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserStatusUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     slug_field = "external_id"
@@ -356,6 +365,7 @@ class UserStatusUpdateView(CustomUpdateView):
             )
 
 
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class UserPasswordUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = PasswordUpdateForm
@@ -438,6 +448,7 @@ class UserPasswordUpdateView(CustomUpdateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
+@user_passes_test(SecurityService.is_admin)
 def send_reset_password(request, external_id):
     service = UserAppService()
     user: User = service.retrieve_by_external(external_id)
