@@ -1,6 +1,5 @@
 import unicodedata
 
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -96,10 +95,22 @@ class UserBuilder:
         self.user.locked_at = None
         self.user.force_password = True
         self.user.failed_login_attempts = 0
-        self.user.set_password(new_password)
-        self.user.last_password_change = timezone.now()
         self.user.status = self.user.Status.ENABLED.value
-        self.user.save(update_fields=["password", "force_password", "last_password_change"])
+        self.user.last_password_change = timezone.now()
+
+        self.user.set_password(new_password)
+
+        self.user.save(
+            update_fields=[
+                "password",
+                "is_active",
+                "locked_at",
+                "force_password",
+                "failed_login_attempts",
+                "status",
+                "last_password_change",
+            ]
+        )
 
         return self
 
