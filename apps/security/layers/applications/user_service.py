@@ -91,8 +91,8 @@ class UserAppService(BaseAppService):
     def update_status(self, user):
         try:
             return self.builder(user=user).change_status().build()
-        except ValidationError as e:
-            logger.warning(f"Validation error for payload: {e.json()}")
+        except (ValidationError, ValueError) as e:
+            logger.warning(f"Error updating status: {e}")
             raise
         except Exception as e:
             logger.error(f"Error update status of user: {e}", exc_info=True)

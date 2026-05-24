@@ -2,6 +2,7 @@ import unicodedata
 
 from django.contrib.auth.models import Group
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from apps.security.models import Person, User
 
@@ -56,6 +57,9 @@ class UserBuilder:
                 "failed_login_attempts": 0,
             },
         }
+
+        if current not in statuses:
+            raise ValueError(_(f"Invalid user state for the transition: {current}"))
 
         transition = statuses[current]
         self.user.status = transition["status"]
