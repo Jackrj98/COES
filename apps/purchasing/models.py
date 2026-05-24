@@ -1,7 +1,9 @@
+from django.core.validators import MinLengthValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AuditModel
+from apps.security.utils.validators import django_id_validator
 
 
 class Supplier(AuditModel):
@@ -9,7 +11,11 @@ class Supplier(AuditModel):
 
     business_name = models.CharField(_("Business name"), max_length=200)
     reason = models.CharField(_("Reason"), max_length=100)
-    tax_id = models.CharField(_("Tax id"), max_length=13)
+    tax_id = models.CharField(
+        _("Tax id"),
+        max_length=13,
+        validators=[MinLengthValidator(10), django_id_validator],
+    )
     delivery_date = models.IntegerField(_("Delivery date"), default=0)
 
     class Meta:

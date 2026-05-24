@@ -9,7 +9,7 @@ from apps.core.utils.permissions import Permissions
 @receiver(post_migrate)
 def populate_groups_permissions(sender, **kwargs):
     """Populate groups and permissions automatically after migrations."""
-    if sender.label == "core":
+    if sender.label != "core":
         return
 
     print("\n" + "=" * 60)
