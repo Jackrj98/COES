@@ -1,0 +1,56 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_filters %}
+
+{% block extra_css %}
+    <!-- summernote -->
+    <link rel="stylesheet" href="{% static 'assets/extensions/summernote/summernote-lite.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/compiled/css/form-editor-summernote.css' %}">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="{% static 'assets/extensions/flatpickr/flatpickr.min.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+    <section id="basic-vertical-layouts">
+        <div class="row match-height">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{{ title|capfirst }}</h4>
+                    {% block actions_list %} {% endblock actions_list %}
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <form class="form form-vertical" enctype="multipart/form-data" method="post">
+                            {% csrf_token %}
+                            <div class="form-body">
+                                <div class="row">
+                                    {% for field in form %}
+                                        {{ field|as_crispy_field }}
+                                    {% endfor %}
+                                    <div class="col-12 d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-primary me-2 mb-1">
+                                            {% trans 'Submit'|title %}
+                                        </button>
+                                        <button type="reset" class="btn btn-light-secondary me-1 mb-1">
+                                            {% trans 'Reset'|title %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascript %}
+    <!-- Summernote -->
+    <script src="{% static 'assets/extensions/summernote/summernote-lite.min.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/summernote.js' %}"></script>
+    <script src="{% static 'assets/extensions/summernote/lang/summernote-es-ES.js' %}"></script>
+    <!-- date-range-picker -->
+    <script src="{% static 'assets/extensions/flatpickr/flatpickr.min.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/date-picker.js' %}"></script>
+{% endblock javascript %}
+

@@ -13,12 +13,11 @@ from pathlib import Path
 
 from decouple import config
 
-from cfg.database import DATABASES_CONFIG
+from cfg.settings.database import DATABASES_CONFIG
 
 # ------------------------------------------------------------------------------
 # BASE PATHS
 # ------------------------------------------------------------------------------
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR.parent / "media"
@@ -52,9 +51,16 @@ THIRD_APPS = [
     "crispy_bootstrap5",
     "widget_tweaks",
     "django_celery_beat",
+    "rest_framework",
 ]
 
-LOCAL_APPS = []
+LOCAL_APPS = [
+    "apps.catalogs",
+    "apps.core",
+    "apps.inventory",
+    "apps.purchasing",
+    "apps.security",
+]
 
 INSTALLED_APPS = BASE_APPS + THIRD_APPS + LOCAL_APPS
 
@@ -77,7 +83,9 @@ THIRD_MIDDLEWARE = [
     "auditlog.middleware.AuditlogMiddleware",
 ]
 
-LOCAL_MIDDLEWARE = []
+LOCAL_MIDDLEWARE = [
+    "apps.security.middleware.force_password_middleware.ForcePasswordChangeMiddleware",
+]
 
 MIDDLEWARE = BASE_MIDDLEWARE + LOCAL_MIDDLEWARE + THIRD_MIDDLEWARE
 
@@ -86,7 +94,6 @@ MIDDLEWARE = BASE_MIDDLEWARE + LOCAL_MIDDLEWARE + THIRD_MIDDLEWARE
 # ------------------------------------------------------------------------------
 DB_ENGINE_SELECTED = config("DB_ENGINE", default="sqlite").lower()
 DATABASES = {"default": DATABASES_CONFIG.get(DB_ENGINE_SELECTED, DATABASES_CONFIG["sqlite"])}
-
 
 # ------------------------------------------------------------------------------
 # TEMPLATES & URLS
@@ -102,7 +109,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "django.template.context_processors.request",
             ],
             "builtins": [
                 "django.templatetags.static",
@@ -133,12 +139,19 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+# ------------------------------------------------------------------------------
+# USER & AUTH
+# ------------------------------------------------------------------------------
+AUTH_USER_MODEL = "security.User"
+LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # ------------------------------------------------------------------------------
 # SESSIONS
 # ------------------------------------------------------------------------------
 SESSION_COOKIE_NAME = "coes_session_id"
-SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_COOKIE_AGE = 1800  # 30 min
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -147,7 +160,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # ------------------------------------------------------------------------------
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Guayaquil"
 USE_I18N = True
 USE_TZ = True
 

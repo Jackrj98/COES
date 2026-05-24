@@ -22,6 +22,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", include("apps.core.urls")),
+    path("", include("apps.security.urls")),
 ]
 
 if settings.DEBUG:
@@ -30,3 +32,9 @@ if settings.DEBUG:
     urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+# 5. Handlers
+handler403 = "apps.core.views.views.handler403"
+handler404 = "apps.core.views.views.handler404"
+handler500 = "apps.core.views.views.handler500"

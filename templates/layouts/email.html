@@ -1,0 +1,40 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{{ title|capfirst }}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f6f6f6; font-family: Helvetica, Arial, sans-serif;">
+
+<table class="body-wrap" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f6f6f6">
+    <tr>
+        <td align="center">
+            <table class="container" width="600" cellpadding="20" cellspacing="0" bgcolor="#FFFFFF"
+                   style="border: 1px solid #f0f0f0; border-radius: 5px; margin-top: 20px;">
+                <tr>
+                    <td align="center">
+                        <h1 style="font-size: 20px; color: #000000; font-weight: 600; margin: 30px 0 20px;">
+                            {% block title %}{% endblock title %}
+                        </h1>
+
+                        {% block content %}{% endblock content %}
+
+                        <!-- Footer -->
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                        <p style="text-align: justify; font-size: 11px; color: #858796; line-height: 1.5;">
+                            {% trans "This email was sent by the center (COES)." %}
+                            {% trans "Please do not reply to this message." %}<br><br>
+                            <strong>{% trans "Confidentiality Note:" %}</strong> {% trans "This message contains confidential information." %}
+                            {% trans "If you are not the intended recipient, please delete it." %}
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

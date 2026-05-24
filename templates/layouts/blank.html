@@ -1,0 +1,20 @@
+{% extends 'index.html' %}
+
+{% block body %}
+    <body>
+    <div class="page page-center">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{% static 'assets/extensions/sweetalert2/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'assets/extensions/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/sweetalert2.js' %}"></script>
+    {% include 'partials/_messages.html' %}
+    {% block javascript %}{% endblock javascript %}
+    <script type="text/javascript" src="{% static 'assets/static/js/utilities.js' %}"></script>
+    </body>
+{% endblock body %}
+
+
+
+

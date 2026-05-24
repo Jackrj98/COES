@@ -72,7 +72,7 @@ make install-dev
 Copia el archivo de plantilla y configura tus credenciales (DB, Email, Redis):
 
 ```bash
-cp template.env .env
+cp .env .env
 ```
 
 ### 4. Ejecutar el proyecto

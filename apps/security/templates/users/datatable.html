@@ -1,0 +1,70 @@
+{% extends 'components/_datatable.html' %}
+{% load custom_tags crispy_forms_filters %}
+
+
+{% block filters %}
+    {% if filter_form %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form method="GET" id="filter">
+                    <div class="row align-items-end">
+                        {% for field in filter_form %}
+                            <div class="col-12 col-sm-6 col-md-3">
+                                {{ field|as_crispy_field }}
+                            </div>
+                        {% endfor %}
+                        <div class="col-12 text-end">
+                            <button type="button" id="clear-filters"
+                                    class="btn btn-outline-secondary btn-sm rounded-pill py-2 px-2">
+                                {% trans 'Clean filters' %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+{% endblock filters %}
+
+{% block actions_head %}{% endblock actions_head %}
+
+{% block card_actions %}
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-title">
+            {% trans title|capfirst %}
+        </div>
+        <a class="btn btn-primary" href="{% url 'security:users:create' %}">
+            <i class="bi bi-person-plus me-2" aria-hidden="true"></i>{% trans 'New user' %}
+        </a>
+    </div>
+{% endblock card_actions %}
+
+{% block columns %}
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">{% trans 'user'|capfirst %}</th>
+        <th scope="col">{% label person 'document_number' %}</th>
+        <th scope="col">{% label person 'phone' %}</th>
+        <th scope="col">{% trans 'group'|capfirst %}</th>
+        <th scope="col">{% label object 'status' %}</th>
+        <th scope="col">{% label person 'created_at' %}</th>
+        <th scope="col"></th>
+    </tr>
+{% endblock columns %}
+
+{% block extra_content %}
+    {% include 'users/_status_form.html' %}
+{% endblock extra_content %}
+
+{% block rows %} {% endblock rows %}
+
+{% block dt_javascript %}
+    <script>
+        const baseHref = "{% get_base_href %}"
+        const urlPaginator = "{{ list_url }}";
+        const mapStatus = {{ ui_map|safe }}
+        const tableActions = {{ table_actions|safe }}
+    </script>
+    <script src="{% static 'js/users/datatable.js' %}"></script>
+{% endblock dt_javascript %}
+
