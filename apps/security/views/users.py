@@ -3,11 +3,13 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
@@ -26,6 +28,7 @@ from apps.security.forms import (
     UserUpdateForm,
 )
 from apps.security.layers.applications import EmailAppService, UserAppService
+from apps.security.layers.security import SecurityService
 from apps.security.models import Person, User
 
 logger = logging.getLogger(__name__)
@@ -35,11 +38,12 @@ SECOND_MODEL = Person
 DEFAULT_LIST_URL = reverse_lazy("security:users:list")
 
 
+@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserListView(CustomListView):
     model = DEFAULT_MODEL
     second_model = SECOND_MODEL
     form_class = UserFilterForm
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/datatable.html"
     permission_required = ["security.view_user", "security.view_person"]
 
@@ -90,19 +94,40 @@ class UserListView(CustomListView):
         }
 
 
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class UserDetailView(CustomDetailView):
     app_name = "users"
     model = DEFAULT_MODEL
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/detail.html"
     permission_required = ["security.view_user", "security.view_person"]
 
     def get_queryset(self):
+        """Optimize a query with select_related."""
         return (
-            self.model.objects.select_related("person")
+            self.model.objects.select_related("person")  # Solo una vez
             .prefetch_related("groups")
             .filter(deleted_at__isnull=True)
         )
+
+    def get_object(self, queryset=None):
+        """Cache the object to avoid duplicate queries."""
+        if not hasattr(self, "_cached_object"):
+            self._cached_object = super().get_object(queryset)
+        return self._cached_object
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        current_user = request.user
+        target_user = self.object
+        is_admin = SecurityService.is_admin(current_user)
+
+        # Non-admin users cannot view other users
+        if target_user != current_user and not is_admin:
+            messages.warning(request, _("You do not have permission to view this user's details."))
+            return redirect(self.success_url)
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -116,23 +141,55 @@ class UserDetailView(CustomDetailView):
         model_name = self.model._meta.model_name
         update_perm = f"{app_label}.change_{model_name}"
 
-        title = _("Update Password")
-        url_name = f"{app_label}:{self.app_name}:password_change"
-        if self.object != self.request.user:
+        current_user = self.request.user
+        target_user = self.object
+        is_admin = SecurityService.is_admin(current_user)
+
+        is_viewing_self = target_user == current_user
+
+        if is_viewing_self and not is_admin:
+            # Remove the first breadcrumb item (the "List" action)
+            if ctx.get("breadcrumb") and len(ctx["breadcrumb"]) > 0:
+                ctx["breadcrumb"][-2]["title"] = _("Profile")
+                ctx["breadcrumb"][-2]["name"] = _("Profile")
+                ctx["breadcrumb"][-2]["url"] = "#"
+                ctx["breadcrumb"][-2]["active"] = True
+
+        # Determine password action type
+        if is_admin:
             title = _("Reset Password")
+            action = "reset_password"
             url_name = f"{app_label}:{self.app_name}:password_reset"
+            target = target_user
+        else:
+            title = _("Update Password")
+            action = "update_password"
+            url_name = f"{app_label}:{self.app_name}:password_change"
+            target = current_user  # Non-admin can only change their own password
 
         pwd_action = self.get_actions_map(
             title=title,
             order=1,
-            action="update_password",
+            action=action,
             icon="bi bi-key",
             url_name=url_name,
             perm=update_perm,
         )
 
         if pwd_action:
+            pwd_action["url"] = reverse_lazy(url_name, kwargs={"external_id": target.external_id})
             actions_list.append(pwd_action)
+
+            # Update edit action for non-admin viewing self
+            if not is_admin and target_user == current_user:
+                for action_item in actions_list:
+                    if action_item.get("action") == "edit":
+                        action_item["url"] = reverse_lazy(
+                            "security:users:update",
+                            kwargs={"external_id": current_user.external_id},
+                        )
+                        break
+
             actions_list.sort(key=lambda x: x["order"])
 
         return ctx
@@ -141,11 +198,12 @@ class UserDetailView(CustomDetailView):
         return self.success_url
 
 
+@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     form_class = UserCreateForm
     second_form_class = PersonBaseForm
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/create_or_update.html"
     permission_required = ["security.add_user", "security.add_person"]
 
@@ -184,7 +242,7 @@ class UserCreateView(CustomCreateView):
                 self.success_message.format(model=self.model._meta.verbose_name),
                 extra_tags="toast",
             )
-            return redirect(str(self.success_url))
+            return redirect(self.success_url)
 
         except ValidationError as e:
             self.handle_pydantic_error(e, form, person_form)
@@ -198,13 +256,32 @@ class UserCreateView(CustomCreateView):
         return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
 
 
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class UserUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = UserUpdateForm
     second_form_class = PersonBaseForm
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/create_or_update.html"
     permission_required = ["security.change_user", "security.change_person"]
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.can_edit_user(request.user, self.object):
+            messages.error(request, _("You do not have permission to edit this user."))
+            return redirect(self.success_url)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    @staticmethod
+    def can_edit_user(current_user, target_user):
+        if current_user.is_superuser:
+            return True
+
+        if current_user.groups.filter(name="administrator").exists():
+            return True
+
+        return current_user == target_user
 
     def get_queryset(self):
         return self.model.objects.select_related("person")
@@ -263,7 +340,7 @@ class UserUpdateView(CustomUpdateView):
                 ),
                 extra_tags="toast",
             )
-            return redirect(str(self.success_url))
+            return redirect(self.success_url)
 
         except ValidationError as e:
             self.handle_pydantic_error(e, form, person_form)
@@ -277,17 +354,34 @@ class UserUpdateView(CustomUpdateView):
         return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
 
 
+@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserStatusUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     slug_field = "external_id"
     slug_url_kwarg = "external_id"
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     permission_required = ["security.change_user"]
+
+    @staticmethod
+    def can_edit_user(current_user, target_user):
+        if current_user.is_superuser:
+            return True
+
+        if current_user.groups.filter(name="administrator").exists():
+            return True
+
+        return current_user == target_user
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()
+
+        if not self.can_edit_user(request.user, user):
+            messages.error(request, _("You do not have permission to edit this user."))
+            return redirect(self.success_url)
+
         return JsonResponse(
             {
+                "success": True,
                 "title": _("Change Status"),
                 "description": _("Are you sure you want to change the status of this user?"),
                 "name": user.person.full_name,
@@ -309,6 +403,7 @@ class UserStatusUpdateView(CustomUpdateView):
             )
 
 
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class UserPasswordUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = PasswordUpdateForm
@@ -375,7 +470,7 @@ class UserPasswordUpdateView(CustomUpdateView):
                 ),
                 extra_tags="toast",
             )
-            return redirect(str(self.success_url))
+            return redirect(self.success_url)
 
         except ValidationError as e:
             self.handle_pydantic_error(e, form)
@@ -391,6 +486,7 @@ class UserPasswordUpdateView(CustomUpdateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
+@user_passes_test(SecurityService.is_admin)
 def send_reset_password(request, external_id):
     service = UserAppService()
     user: User = service.retrieve_by_external(external_id)
