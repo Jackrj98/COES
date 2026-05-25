@@ -137,17 +137,6 @@ class CustomDetailView(BaseView, DetailView):
             logger.warning(f"URL reverse not found: {name}")
             return "#"
 
-    def build_breadcrumb(self, extra_breadcrumb=None):
-        verbose_name = _(self.model._meta.verbose_name)  # noqa
-        return super().build_breadcrumb(
-            extra_breadcrumb={
-                "name": LabelEnum.DETAILS.value,
-                "url": "#",
-                "active": True,
-                "title": LabelEnum.DETAILS.value,
-            }
-        )
-
 
 class BaseActionView(BaseView):
     """Intermediate class for sharing form logic."""

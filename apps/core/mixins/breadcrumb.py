@@ -32,7 +32,7 @@ class BreadcrumbMixin:
                 {
                     "name": display_name,
                     "url": instance.get_absolute_url(),
-                    "active": False,
+                    "active": True,
                     "title": display_name,
                 }
             )

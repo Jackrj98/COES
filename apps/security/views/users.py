@@ -28,8 +28,8 @@ from apps.security.forms import (
     UserUpdateForm,
 )
 from apps.security.layers.applications import EmailAppService, UserAppService
-from apps.security.models import Person, User
 from apps.security.layers.security import SecurityService
+from apps.security.models import Person, User
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class UserListView(CustomListView):
     model = DEFAULT_MODEL
     second_model = SECOND_MODEL
     form_class = UserFilterForm
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/datatable.html"
     permission_required = ["security.view_user", "security.view_person"]
 
@@ -98,16 +98,36 @@ class UserListView(CustomListView):
 class UserDetailView(CustomDetailView):
     app_name = "users"
     model = DEFAULT_MODEL
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/detail.html"
     permission_required = ["security.view_user", "security.view_person"]
 
     def get_queryset(self):
+        """Optimize a query with select_related."""
         return (
-            self.model.objects.select_related("person")
+            self.model.objects.select_related("person")  # Solo una vez
             .prefetch_related("groups")
             .filter(deleted_at__isnull=True)
         )
+
+    def get_object(self, queryset=None):
+        """Cache the object to avoid duplicate queries."""
+        if not hasattr(self, "_cached_object"):
+            self._cached_object = super().get_object(queryset)
+        return self._cached_object
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        current_user = request.user
+        target_user = self.object
+        is_admin = SecurityService.is_admin(current_user)
+
+        # Non-admin users cannot view other users
+        if target_user != current_user and not is_admin:
+            messages.warning(request, _("You do not have permission to view this user's details."))
+            return redirect(self.success_url)
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -121,9 +141,31 @@ class UserDetailView(CustomDetailView):
         model_name = self.model._meta.model_name
         update_perm = f"{app_label}.change_{model_name}"
 
-        title = _("Reset Password")
-        action = "reset_password"
-        url_name = f"{app_label}:{self.app_name}:password_reset"
+        current_user = self.request.user
+        target_user = self.object
+        is_admin = SecurityService.is_admin(current_user)
+
+        is_viewing_self = target_user == current_user
+
+        if is_viewing_self and not is_admin:
+            # Remove the first breadcrumb item (the "List" action)
+            if ctx.get("breadcrumb") and len(ctx["breadcrumb"]) > 0:
+                ctx["breadcrumb"][-2]["title"] = _("Profile")
+                ctx["breadcrumb"][-2]["name"] = _("Profile")
+                ctx["breadcrumb"][-2]["url"] = "#"
+                ctx["breadcrumb"][-2]["active"] = True
+
+        # Determine password action type
+        if is_admin:
+            title = _("Reset Password")
+            action = "reset_password"
+            url_name = f"{app_label}:{self.app_name}:password_reset"
+            target = target_user
+        else:
+            title = _("Update Password")
+            action = "update_password"
+            url_name = f"{app_label}:{self.app_name}:password_change"
+            target = current_user  # Non-admin can only change their own password
 
         pwd_action = self.get_actions_map(
             title=title,
@@ -134,24 +176,20 @@ class UserDetailView(CustomDetailView):
             perm=update_perm,
         )
 
-        current_user = self.request.user
-        if self.object != current_user: # TODO revisar dar vuelta para usuario que va a cambiar su clave
-            print("he")
-            if not current_user.groups.filter(name="administrator").exists():
-                actions_list[-1]["url"] = reverse_lazy(
-                    "security:users:update",
-                    kwargs={"external_id": current_user.external_id},
-                )
-
-                title = _("Update Password")
-                action = "update_password"
-                url_name = f"{app_label}:{self.app_name}:password_change"
-                pwd_action["url"] = reverse_lazy(
-                    url_name, kwargs={"external_id": current_user.external_id}
-                )
-
         if pwd_action:
+            pwd_action["url"] = reverse_lazy(url_name, kwargs={"external_id": target.external_id})
             actions_list.append(pwd_action)
+
+            # Update edit action for non-admin viewing self
+            if not is_admin and target_user == current_user:
+                for action_item in actions_list:
+                    if action_item.get("action") == "edit":
+                        action_item["url"] = reverse_lazy(
+                            "security:users:update",
+                            kwargs={"external_id": current_user.external_id},
+                        )
+                        break
+
             actions_list.sort(key=lambda x: x["order"])
 
         return ctx
@@ -165,7 +203,7 @@ class UserCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     form_class = UserCreateForm
     second_form_class = PersonBaseForm
-    success_url = DEFAULT_LIST_URL
+    success_url: str = DEFAULT_LIST_URL
     template_name = "users/create_or_update.html"
     permission_required = ["security.add_user", "security.add_person"]
 
@@ -204,7 +242,7 @@ class UserCreateView(CustomCreateView):
                 self.success_message.format(model=self.model._meta.verbose_name),
                 extra_tags="toast",
             )
-            return redirect(str(self.success_url))
+            return redirect(self.success_url)
 
         except ValidationError as e:
             self.handle_pydantic_error(e, form, person_form)
@@ -302,7 +340,7 @@ class UserUpdateView(CustomUpdateView):
                 ),
                 extra_tags="toast",
             )
-            return redirect(str(self.success_url))
+            return redirect(self.success_url)
 
         except ValidationError as e:
             self.handle_pydantic_error(e, form, person_form)
@@ -432,7 +470,7 @@ class UserPasswordUpdateView(CustomUpdateView):
                 ),
                 extra_tags="toast",
             )
-            return redirect(str(self.success_url))
+            return redirect(self.success_url)
 
         except ValidationError as e:
             self.handle_pydantic_error(e, form)
