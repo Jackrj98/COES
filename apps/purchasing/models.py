@@ -1,5 +1,8 @@
+import re
+
 from django.core.validators import MinLengthValidator
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AuditModel
@@ -16,16 +19,43 @@ class Supplier(AuditModel):
         max_length=13,
         validators=[MinLengthValidator(10), django_id_validator],
     )
-    delivery_date = models.IntegerField(_("Delivery date"), default=0)
+    delivery_days = models.IntegerField(_("Delivery days"), default=0)
+
+    # Contact information
+    email = models.EmailField(_("Email address"), unique=True, max_length=255)
+    phone = models.CharField(_("Phone number"), max_length=15, validators=[MinLengthValidator(10)])
 
     class Meta:
         db_table = "supplier"
         verbose_name = _("Supplier")
         verbose_name_plural = _("Suppliers")
-        ordering = ("-pk",)
+        ordering = ("-created_at",)
 
     def __str__(self):
         return self.reason
+
+    @property
+    def initials(self):
+        if not self.business_name or not self.business_name.strip():
+            return "?"
+
+        # Split by spaces, hyphens, and underscores
+        words = re.split(r"[\s\-_]+", self.business_name.strip())
+        words = [w for w in words if w]  # Filter empty strings
+
+        if not words:
+            return "?"
+
+        if len(words) == 1:
+            word = words[0]
+            initials = word[:2] if len(word) >= 2 else word[0] * 2
+        else:
+            initials = words[0][0] + words[-1][0]
+
+        return initials.upper()
+
+    def get_absolute_url(self):
+        return reverse("purchasing:suppliers:detail", kwargs={"external_id": self.external_id})
 
 
 class PurchaseOrder(AuditModel):

@@ -2,6 +2,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import NoReverseMatch, reverse
 from django.utils.text import capfirst
@@ -21,8 +22,8 @@ class BaseView(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin, Breadc
     model = None
     success_url = None
     template_name = None
-    success_message = MessageEnum.SUCCESS
-    failure_message = MessageEnum.FAILURE
+    success_message: str = MessageEnum.SUCCESS.value
+    failure_message: str = MessageEnum.FAILURE.value
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -61,8 +62,12 @@ class CustomListView(BaseView, DatatableMixin, ListView):
         ctx["current_page"] = True
         ctx["actions"] = self.get_actions()
         ctx["filter_form"] = self.form_class()
-        ctx["status_choices"] = self.model.IsActiveChoices.choices
-        ctx["status_color_choices"] = self.model.IsActiveColorChoices.choices
+        if self.model.IsActiveChoices:
+            ctx["status_choices"] = self.model.IsActiveChoices.choices
+
+        if self.model.IsActiveColorChoices:
+            ctx["status_color_choices"] = self.model.IsActiveColorChoices.choices
+
         return ctx
 
     def get_actions(self):
@@ -216,6 +221,12 @@ class CustomUpdateView(BaseActionView, UpdateView):
                 "title": LabelEnum.EDIT.value,
             }
         )
+
+
+class CustomStatusUpdateView(BaseActionView, UpdateView):
+    slug_field = "external_id"
+    slug_url_kwarg = "external_id"
+    success_message = MessageEnum.SUCCESS.value
 
 
 class BaseDeleteView(BaseView, DeleteView):

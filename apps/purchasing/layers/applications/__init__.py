@@ -1,4 +1,3 @@
-from .email_service import EmailAppService
-from .user_service import UserAppService
+from .supplier_service import SupplierAppService
 
-__all__ = [UserAppService, EmailAppService]
+__all__ = [SupplierAppService]

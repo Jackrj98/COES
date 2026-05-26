@@ -7,11 +7,34 @@
     <link rel="stylesheet" href="{% static 'assets/compiled/css/table-datatable-jquery.css' %}">
     <!-- daterange picker -->
     <link rel="stylesheet" href="{% static 'assets/extensions/flatpickr/flatpickr.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/extensions/choices.js/public/assets/styles/choices.css' %}">
+
     {% block head_list %}{% endblock head_list %}
 {% endblock extra_css %}
 
+{% block actions %}
+    <div class="dropdown m-2">
+        <button class="btn btn-primary dropdown-toggle no-arrow d-flex align-items-center gap-2 py-2"
+                type="button"
+                id="dropdownMenuButton"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+            <span class="d-none d-sm-inline font-weight-bold">{{ actions.title|default:'Acciones' }}</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end"
+             aria-labelledby="dropdownMenuButton">
+            {% block dropdown_actions %}
+                <a class="dropdown-item" href="#">Action 1</a>
+                <a class="dropdown-item" href="#">Action 2</a>
+                <a class="dropdown-item" href="#">Action 3</a>
+            {% endblock dropdown_actions %}
+        </div>
+    </div>
+{% endblock actions %}
 
 {% block content %}
+    {% block metrics %}{% endblock metrics %}
     <section class="section">
         <div class="row d-flex justify-content-center g-0">
             <div class="col-xl-12 col-md-12 mb-4">
@@ -74,6 +97,12 @@
             const statusChoices = {{ status_choices|safe }};
         </script>
     {% endif %}
+    {% if status_color_choices %}
+        <script type="application/javascript">
+            const statusColorChoices = {{ status_color_choices|safe }};
+        </script>
+    {% endif %}
+
     <script src="{% static 'assets/extensions/datatables.net/js/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js' %}"></script>
     <!-- datatables-responsive -->
@@ -84,6 +113,8 @@
     <script src="{% static 'assets/extensions/flatpickr/flatpickr.min.js' %}"></script>
     <script src="{% static 'assets/extensions/flatpickr/l10n/es.js' %}"></script>
     <script src="{% static 'assets/static/js/pages/date-picker.js' %}"></script>
+    <script src="{% static 'assets/extensions/choices.js/public/assets/scripts/choices.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/form-element-select.js' %}"></script>
 
     <script src="{% static 'assets/static/js/cookie.js' %}"></script>
 

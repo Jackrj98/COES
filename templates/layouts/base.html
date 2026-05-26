@@ -17,34 +17,15 @@
             <div id="main-content" class="flex-grow-1">
                 <div class="page-heading">
                     <div class="page-title">
-                        <div class="row">
+                        <div class="row align-items-center">
                             <div class="col-12 col-md-6 order-md-1 order-last">
                                 <h3>{{ title|capfirst }}</h3>
                                 <p class="text-subtitle text-muted">{{ description|capfirst }}</p>
                             </div>
                             <div class="col-12 col-md-6 order-md-2 order-first">
-                                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item">
-                                            <a href="{% url 'core:home' %}">Dashboard</a>
-                                        </li>
-                                        {% block breadcrumb %}
-                                            {% for bread in breadcrumb %}
-                                                {% if bread.active %}
-                                                    <li class="breadcrumb-item active" aria-current="page">
-                                                        {% trans bread.name|capfirst %}
-                                                    </li>
-                                                {% else %}
-                                                    <li class="breadcrumb-item">
-                                                        <a href="{{ bread.url }}">
-                                                            {% trans bread.name|capfirst %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% endblock breadcrumb %}
-                                    </ol>
-                                </nav>
+                                <div class="float-start float-lg-end d-flex gap-2">
+                                    {% block actions %}{% endblock actions %}
+                                </div>
                             </div>
                         </div>
                     </div>

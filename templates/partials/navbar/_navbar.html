@@ -1,21 +1,51 @@
 <header>
     <nav class="navbar navbar-expand navbar-light navbar-top">
         <div class="container-fluid">
-            <a href="#" class="burger-btn d-block">
-                <i class="bi bi-justify fs-3"></i>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <div class="d-flex align-items-center w-100">
+                <a href="#" class="burger-btn d-xl-none d-block me-3">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+
+                <div class="d-none d-md-flex align-items-center">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'core:home' %}" class="text-decoration-none">
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            {% block breadcrumb %}
+                                {% for bread in breadcrumb %}
+                                    {% if bread.active %}
+                                        <li class="breadcrumb-item active fw-semibold" aria-current="page">
+                                            {% trans bread.name|capfirst %}
+                                        </li>
+                                    {% else %}
+                                        <li class="breadcrumb-item">
+                                            <a href="{{ bread.url }}" class="text-decoration-none">
+                                                {% trans bread.name|capfirst %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endblock breadcrumb %}
+                        </ol>
+                    </nav>
+                </div>
+
+                <div class="ms-auto">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+            </div>
+
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                {# ACTIONS #}
-                 <ul class="navbar-nav ms-auto mb-lg-0">
-                    {#  NOTIFICATIONS #}
+                <ul class="navbar-nav ms-auto mb-lg-0">
                     {% include 'partials/navbar/_notifications.html' %}
                 </ul>
-                {# MENU #}
                 {% include 'partials/navbar/_menu.html' %}
             </div>
         </div>

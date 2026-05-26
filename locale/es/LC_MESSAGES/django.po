@@ -362,8 +362,8 @@ msgid "Tax id"
 msgstr "RUC"
 
 #: apps/purchasing/models.py:13
-msgid "Delivery date"
-msgstr "Fecha de entrega"
+msgid "Delivery days"
+msgstr "Días de entrega"
 
 #: apps/purchasing/models.py:17
 msgid "Supplier"
@@ -512,7 +512,7 @@ msgstr "Número de documento"
 
 #: apps/security/models/users.py:42
 msgid "Phone number"
-msgstr "Número de teléfono"
+msgstr "Teléfono"
 
 #: apps/security/models/users.py:46
 msgid "Person"
