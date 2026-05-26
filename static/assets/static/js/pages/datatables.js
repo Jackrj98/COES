@@ -10,7 +10,7 @@ class DataTableFactory {
                     selector,
                     ajaxUrl,
                     columns,
-                    order = [[0, "asc"]],
+                    order = [],
                     filters = [],
                     paginationClass = "pagination-primary",
                     rowClickAction = null,

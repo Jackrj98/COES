@@ -23,6 +23,12 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
+                <li class="sidebar-item  {% active 'purchasing:suppliers:list' %}">
+                    <a href="{% url 'purchasing:suppliers:list' %}" class='sidebar-link'>
+                        <i class="bi bi-people-fill"></i>
+                        <span>{% trans 'suppliers'|capfirst %}</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-title">{% trans 'administration'|capfirst %}</li>
                 <li class="sidebar-item  {% active 'security:users:list' %}">
@@ -31,6 +37,7 @@
                         <span>{% trans 'users'|capfirst %}</span>
                     </a>
                 </li>
+
 
                 {% if request.user.is_superuser %}
                     <li class="sidebar-item">

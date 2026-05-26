@@ -105,7 +105,7 @@ class UserDetailView(CustomDetailView):
     def get_queryset(self):
         """Optimize a query with select_related."""
         return (
-            self.model.objects.select_related("person")  # Solo una vez
+            self.model.objects.select_related("person")
             .prefetch_related("groups")
             .filter(deleted_at__isnull=True)
         )
