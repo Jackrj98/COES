@@ -1,9 +1,9 @@
 from django.urls import path
 
 from apps.purchasing.views.suppliers import (
+    SupplierCreateView,
     SupplierDetailView,
     SupplierListView,
-    SupplierCreateView,
     SupplierStatusUpdateView,
     SupplierUpdateView,
 )

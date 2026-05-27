@@ -25,7 +25,7 @@ const userColumns = [
     {
         orderable: false,
         data: "external_id",
-        width: "4%",
+        width: "3%",
         className: DataTableFactory.classes.center,
         render: (data, type, row, meta) => {
             return meta.settings._iDisplayStart + meta.row + 1;
@@ -43,7 +43,7 @@ const userColumns = [
             const iconColor = emailVerified ? "text-primary" : "text-secondary";
 
             return `
-                <div class="d-flex flex-column" style="max-width: 22vw; min-width: 0;">
+                <div class="d-flex flex-column" style="max-width: 22vw; min-width: 10vw;">
                     <h6 class="fw-semibold mb-0 text-truncate">${capitalize(fullName)}</h6>
                     <a class="text-muted text-truncate text-sm d-block" 
                        href="mailto:${data}" 
@@ -59,7 +59,7 @@ const userColumns = [
         orderable: false,
         data: "person__document_number",
         width: "12%",
-        className: DataTableFactory.classes.center,
+        className: DataTableFactory.classes.justify,
         render: (data, type, row) => {
             return data ? data : "-";
         }
@@ -68,7 +68,7 @@ const userColumns = [
         orderable: false,
         data: "person__phone",
         width: "12%",
-        className: DataTableFactory.classes.center,
+        className: DataTableFactory.classes.justify,
         render: (data, type, row) => {
             return data ? data : "-";
         }
@@ -76,50 +76,40 @@ const userColumns = [
     {
         orderable: false,
         data: "group_name",
-        width: "16%",
-        className: DataTableFactory.classes.center,
+        width: "14%",
         render: function (data, type, row) {
             if (!data) return '';
-
             const translations = {
                 'specialist': {label: 'Especialista', color: 'secondary'},
                 'administrator': {label: 'Administrador', color: 'secondary'},
             };
-
             const groups = data.split(', ').map(g => translations[g] || {label: g, color: 'secondary'});
             return groups.map(g => `
-                <span class="badge bg-${g.color}-subtle text-${g.color}-emphasis border border-${g.color}-subtle text-truncate py-2 px-2 rounded-3"
-                      style="max-width: 16vw; min-width: 0; width: 120px;"
-                      data-bs-toggle="tooltip" 
-                      title="${g.label}">
-                    ${g.label}
-                </span>
+                <button type="button" class="btn btn-icon icon-left bg-${g.color} bg-opacity-25 rounded-pill px-2 py-1"
+                        style="width: 120px; cursor: default;">
+                    <span class="fw-semibold text-${g.color} text-truncate">${g.label}</span>
+                </button>
             `).join('');
         }
     },
     {
         orderable: false,
         data: "status",
-        width: "12%",
-        className: DataTableFactory.classes.center,
+        width: "13%",
         render: (data, type, row) => {
             const {label, color} = mapStatus[data];
             return `
-                <span class="badge bg-transparent border border-${color} border-1 text-${color} 
-                    text-truncate py-2 px-2 rounded-3" 
-                      style="width: 120px;"
-                      data-bs-toggle="tooltip" 
-                      data-bs-placement="top" 
-                      title="${label}">
-                    ${label}
-                </span>
+                <button type="button" class="btn btn-icon icon-left bg-${color} bg-opacity-25 rounded-pill px-2 py-1"
+                        style="width: 120px; cursor: default;">
+                    <span class="fw-semibold text-${color} text-truncate">${label}</span>
+                </button>
             `;
         }
     },
     {
         orderable: true,
         data: "created_at",
-        width: "18%",
+        width: "14%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
             const {full} = parseDateTime(data);
@@ -132,59 +122,34 @@ const userColumns = [
     },
     {
         data: "external_id",
-        width: "4%",
+        width: "10%",
         orderable: false,
         className: DataTableFactory.classes.center,
-        render: (data, type, row) => {
-            const statusMeta = {
-                true: {icon: "bi bi-toggle-on"},
-                false: {icon: "bi bi-toggle-off"},
-            };
-
-            const actions = Object.entries(tableActions);
-            const menuItems = actions.map(([key, action]) => {
-                const dangerClass = action.danger ? 'text-danger' : '';
-                const isStatusAction = key === 'status';
-                const icon = isStatusAction ? statusMeta[row.is_active].icon : action.icon;
-
-                let actionUrl = action.url;
-                const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-                if (uuidPattern.test(actionUrl)) {
-                    actionUrl = actionUrl.replace(uuidPattern, data);
-                }
-                if (isStatusAction) {
-                    const status = row.is_active ? 0 : 1;
-                    return `
-                        <li>
-                            <a class="dropdown-item status-toggle-btn ${dangerClass}" 
-                               href="javascript:void(0)" 
-                               data-id="${data}"
-                               data-url="${actionUrl}">
-                                <i class="${icon} me-2"></i>${action.label}
-                            </a>
-                        </li>
-                    `;
-                }
-
-                return `
-                    <li>
-                        <a class="dropdown-item ${key}-btn ${dangerClass}" 
-                           href="${actionUrl}" 
-                           data-id="${data}">
-                            <i class="${icon} me-2"></i>${action.label}
-                        </a>
-                    </li>
-                `;
-            }).join('');
-
+         render: (data, type, row) => {
+            const detailUrl = `${urlPaginator}${data}/`;
+            const editUrl = `${urlPaginator}${data}/update`;
+            const statusUrl = `${urlPaginator}${data}/update-status/`;
             return `
-                <div class="dropdown">
-                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots-vertical"></i>
+                <div class="d-flex justify-content-center gap-1 flex-nowrap">
+                    <button type="button" class="btn btn-icon btn-outline-secondary bg-opacity-25 rounded-circle border-0"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover"
+                            title="Ver detalles"
+                            onclick="window.location.href='${detailUrl}'">
+                        <i class="bi bi-eye fs-6"></i>
                     </button>
-                    <ul class="dropdown-menu">
-                        ${menuItems}
-                    </ul>
+                    <button type="button" class="btn btn-icon btn-outline-secondary bg-opacity-25 rounded-circle border-0"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover"
+                            title="Editar detalles"
+                            onclick="window.location.href='${editUrl}'">
+                        <i class="bi bi-pencil-square fs-6"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-icon btn-outline-secondary bg-opacity-25 rounded-circle border-0 status-toggle-btn"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover"
+                            title="${row.is_active ? 'Desactivar' : 'Activar'}"
+                            data-url="${statusUrl}">
+                        <i class="bi ${row.is_active ? 'bi-toggle-on' : 'bi-toggle-off'} fs-6"></i>
+                    </button>
                 </div>
             `;
         }

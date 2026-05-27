@@ -113,14 +113,34 @@ class DataTableFactory {
     clearFilters() {
         this.filters.forEach(f => {
             const $element = $(f.selector);
+            const element = $element[0]; // Referencia al DOM nativo
+            // 1. Handle Flatpickr
             if ($element.hasClass('flatpickr-input')) {
                 const flatpickrInstance = $element[0]._flatpickr;
-                if (flatpickrInstance) {
-                    flatpickrInstance.clear();
-                } else {
-                    $element.val('');
-                }
-            } else {
+                flatpickrInstance ? flatpickrInstance.clear() : $element.val('');
+            }
+
+            // 2. Handle Choices.js
+            else if (element && element.choices) {
+                const instance = element.choices;
+
+                // 1. Quitar todos los ítems seleccionados de forma limpia
+                instance.removeActiveItems();
+
+                // 2. Si definiste un placeholder en tu HTML (option value=""), esto lo selecciona
+                instance.setChoiceByValue('');
+
+                // 3. NO USES clearStore(). En su lugar, simplemente dispara el evento change
+                // para que el select original (el oculto) sepa que volvió al estado inicial
+                $(element).val('').trigger('change');
+            }
+            // 3. Handle Regular Selects
+            else if ($element.is('select')) {
+                $element.prop('selectedIndex', 0).trigger('change');
+            }
+
+            // 4. Handle Text/Inputs
+            else {
                 $element.val('');
             }
         });

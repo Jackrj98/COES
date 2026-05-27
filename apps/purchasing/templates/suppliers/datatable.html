@@ -10,8 +10,6 @@
     {% endwith %}
 {% endblock actions %}
 
-{% block card_actions %}{% endblock card_actions %}
-
 {% block metrics %}
     <div class="row g-3 mb-3">
         <!-- Total Suppliers -->
@@ -84,26 +82,29 @@
                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                     {{ filter_form.search|as_crispy_field }}
                 </div>
-                <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                <div class="col-6 col-sm-6 col-md-4 col-lg-4">
                     {{ filter_form.reason|as_crispy_field }}
                 </div>
                 <div class="col-6 col-sm-6 col-md-3 col-lg-2">
                     {{ filter_form.delivery_days|as_crispy_field }}
                 </div>
-                <div class="col-6 col-sm-6 col-md-2 col-lg-2">
-                    {{ filter_form.status|as_crispy_field }}
-                </div>
 
-                <div class="col-6 col-sm-6 col-md-1 col-lg-1 d-flex align-items-end justify-content-end">
-                    <div class="mb-3 ml-auto">
-                        <button type="button" id="clear-filters"
-                                class="btn btn-outline-secondary"
-                                style="width: 38px; height: 38px; padding: 0;"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                title="{% trans 'Clean filters' %}">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
+                <div class="col-6 col-sm-6 col-md-2 col-lg-2">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="flex-grow-1">
+                            {{ filter_form.status|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" id="clear-filters"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 38px; height: 38px; padding: 0;"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    data-bs-trigger="hover"
+                                    title="{% trans 'Clean filters' %}">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,19 +113,13 @@
 {% endblock filters %}
 
 {% block columns %}
-    <tr>
-        <th scope="col">{% trans 'supplier'|upper %}</th>
-        {% label object 'business_name' as business_name %}
-        <th scope="col">{{ business_name|upper }}</th>
-        {% label object 'tax_id' as tax_id %}
-        <th scope="col">{{ tax_id|upper }}</th>
-        <th scope="col">{% trans 'delivery'|upper %}</th>
-        <th scope="col">EMAIL</th>
-        {% label object 'phone' as phone %}
-        <th scope="col">{{ phone|upper }}</th>
-        <th scope="col">{% trans 'status'|upper %}</th>
-        <th scope="col">{% trans 'actions'|upper %}</th>
-    </tr>
+    <th scope="col" class="text-uppercase">{% trans 'supplier' %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'tax_id' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'delivery' %}</th>
+    <th scope="col" class="text-uppercase">EMAIL</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'phone' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'status' %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'actions' %}</th>
 {% endblock columns %}
 
 {% block rows %} {% endblock rows %}

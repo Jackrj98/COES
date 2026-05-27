@@ -1,55 +1,60 @@
 {% extends 'components/_datatable.html' %}
 {% load custom_tags crispy_forms_filters %}
 
+{% block actions %}
+    {% with menu_a=actions.menu_actions %}
+        <a class="btn btn-icon btn-primary" href="{{ menu_a.add.url }}">
+            <i class="bi bi-plus fs-5"></i>
+            <span class="d-none d-md-inline fw-semibold">{% trans menu_a.add.title %}</span>
+        </a>
+    {% endwith %}
+{% endblock actions %}
 
 {% block filters %}
     {% if filter_form %}
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <form method="GET" id="filter">
-                    <div class="row align-items-end">
-                        {% for field in filter_form %}
-                            <div class="col-12 col-sm-6 col-md-3">
-                                {{ field|as_crispy_field }}
-                            </div>
-                        {% endfor %}
-                        <div class="col-12 text-end">
+        <form method="GET" id="filter" class="mb-4">
+            <div class="row align-items-end g-3">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-5">
+                    {{ filter_form.search|as_crispy_field }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                    {{ filter_form.date_from|as_crispy_field }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-3 col-lg-2">
+                    {{ filter_form.group|as_crispy_field }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-2 col-lg-2">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="flex-grow-1">
+                            {{ filter_form.status|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
                             <button type="button" id="clear-filters"
-                                    class="btn btn-outline-secondary btn-sm rounded-pill py-2 px-2">
-                                {% trans 'Clean filters' %}
+                                    class="btn btn-outline-secondary"
+                                    style="width: 38px; height: 38px; padding: 0;"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    data-bs-trigger="hover"
+                                    title="{% trans 'Clean filters' %}">
+                                <i class="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+        </form>
     {% endif %}
 {% endblock filters %}
 
-{% block actions_head %}{% endblock actions_head %}
-
-{% block card_actions %}
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <div class="card-title">
-            {% trans title|capfirst %}
-        </div>
-        <a class="btn btn-primary" href="{% url 'security:users:create' %}">
-            <i class="bi bi-person-plus me-2" aria-hidden="true"></i>{% trans 'New user' %}
-        </a>
-    </div>
-{% endblock card_actions %}
-
 {% block columns %}
-    <tr>
-        <th scope="col">#</th>
-        <th scope="col">{% trans 'user'|capfirst %}</th>
-        <th scope="col">{% label person 'document_number' %}</th>
-        <th scope="col">{% label person 'phone' %}</th>
-        <th scope="col">{% trans 'group'|capfirst %}</th>
-        <th scope="col">{% label object 'status' %}</th>
-        <th scope="col">{% label person 'created_at' %}</th>
-        <th scope="col"></th>
-    </tr>
+    <th scope="col" class="text-uppercase">#</th>
+    <th scope="col" class="text-uppercase">{{ object|object_verbose_name }}</th>
+    <th scope="col" class="text-uppercase">{{ person|field_label:'document_number' }}</th>
+    <th scope="col" class="text-uppercase">{{ person|field_label:'phone' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'group' %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'status' }}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'created_at' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'actions'|upper %}</th>
 {% endblock columns %}
 
 {% block extra_content %}

@@ -25,9 +25,10 @@ def object_verbose_name_plural(obj) -> str:
     return obj._meta.verbose_name_plural
 
 
-@register.filter
-def field_label(obj, field_name):
-    return obj._meta.get_field(field_name).verbose_name
+@register.simple_tag
+def get_verbose_name(instance, field_name):
+    """Obtener verbose_name de un campo del modelo."""
+    return instance._meta.get_field(field_name).verbose_name
 
 
 @register.simple_tag
@@ -35,6 +36,11 @@ def label(obj, field_name):
     """Uso: {% label notification 'type' %}."""
     field = obj._meta.get_field(field_name)
     return capfirst(field.verbose_name)
+
+
+@register.filter
+def field_label(obj, field_name):
+    return obj._meta.get_field(field_name).verbose_name
 
 
 @register.filter

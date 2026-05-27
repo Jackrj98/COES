@@ -11,7 +11,6 @@ class SupplierFilterForm(BaseFilterForm, BaseFormHelperMixin):
     status = forms.ChoiceField(
         label=_("Status"),
         required=False,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(Supplier.IsActiveChoices.choices),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     reason = forms.ChoiceField(
@@ -43,8 +42,10 @@ class SupplierFilterForm(BaseFilterForm, BaseFormHelperMixin):
             label_class="form-label text-sm text-muted", form_class="needs-validation"
         )
 
-        choices = [("", _("All reasons"))] + SupplierAppService().retrieve_reasons()
-        self.fields["reason"].choices = choices
+        reason_choices = [("", _("All reasons"))] + SupplierAppService().retrieve_reasons()
+        status_choices = BaseFilterForm.DEFAULT_CHOICE + list(Supplier.IsActiveChoices.choices)  # type: ignore
+        self.fields["reason"].choices = reason_choices
+        self.fields["status"].choices = status_choices
 
 
 class SupplierBaseForm(forms.ModelForm):

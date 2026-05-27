@@ -11,13 +11,11 @@ class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
     status = forms.ChoiceField(
         label=_("Status"),
         required=False,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     group = forms.ChoiceField(
         label=_("Group"),
         required=False,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups()),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
 
@@ -27,12 +25,17 @@ class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
         if "search" in self.fields:
             self.fields["search"].label = search_text
             self.fields["search"].widget.attrs.update(
-                {"placeholder": search_text, "class": "form-control"}
+                {"placeholder": _("Search by names, username, email"), "class": "form-control"}
             )
 
         self.setup_form_helper(
             label_class="form-label text-sm text-muted", form_class="needs-validation"
         )
+
+        status_choices = BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices)  # type: ignore
+        groups_choices = BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups())
+        self.fields["status"].choices = status_choices
+        self.fields["group"].choices = groups_choices
 
 
 class PersonBaseForm(forms.ModelForm):

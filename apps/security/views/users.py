@@ -50,12 +50,14 @@ class UserListView(CustomListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         user = self.request.user
+        ctx["description"] = _("Management of registered users")
 
         ctx["object"] = self.model
         ctx["person"] = self.second_model
         ctx["ui_map"] = self.model.Status.get_ui_map()
         ctx["table_actions"] = self.get_table_actions(user)
         ctx["status_choices"] = self.model.StatusChoices.choices
+        ctx["actions"]["menu_actions"]["add"]["url"] = reverse_lazy("security:users:create")
         return ctx
 
     def retrieve_data(self, params):
@@ -113,7 +115,7 @@ class UserDetailView(CustomDetailView):
     def get_object(self, queryset=None):
         """Cache the object to avoid duplicate queries."""
         if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)
+            self._cached_object = super().get_object(queryset)  # noqa
         return self._cached_object
 
     def dispatch(self, request, *args, **kwargs):
@@ -141,8 +143,8 @@ class UserDetailView(CustomDetailView):
         model_name = self.model._meta.model_name
         update_perm = f"{app_label}.change_{model_name}"
 
-        current_user = self.request.user
         target_user = self.object
+        current_user = self.request.user
         is_admin = SecurityService.is_admin(current_user)
 
         is_viewing_self = target_user == current_user
@@ -165,7 +167,7 @@ class UserDetailView(CustomDetailView):
             title = _("Update Password")
             action = "update_password"
             url_name = f"{app_label}:{self.app_name}:password_change"
-            target = current_user  # Non-admin can only change their own password
+            target = current_user
 
         pwd_action = self.get_actions_map(
             title=title,
@@ -252,7 +254,7 @@ class UserCreateView(CustomCreateView):
 
     def form_invalid(self, form, **kwargs):
         person_form = kwargs.get("person_form")
-        messages.warning(self.request, self.failure_message.value)
+        messages.warning(self.request, self.failure_message)
         return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
 
 
@@ -288,7 +290,7 @@ class UserUpdateView(CustomUpdateView):
 
     def get_object(self, queryset=None):
         if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)
+            self._cached_object = super().get_object(queryset)  # noqa
         return self._cached_object
 
     def get_form(self, form_class=None):
@@ -350,7 +352,7 @@ class UserUpdateView(CustomUpdateView):
 
     def form_invalid(self, form, **kwargs):
         person_form = kwargs.get("person_form")
-        messages.warning(self.request, self.failure_message.value)
+        messages.warning(self.request, self.failure_message)
         return self.render_to_response(self.get_context_data(form=form, person_form=person_form))
 
 
@@ -407,7 +409,7 @@ class UserStatusUpdateView(CustomUpdateView):
 class UserPasswordUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = PasswordUpdateForm
-    success_url = reverse_lazy("security:login")
+    success_url: str = reverse_lazy("security:login")
     permission_required = "security.change_user"
     template_name = "users/password/password_reset_confirm.html"
 
@@ -482,11 +484,10 @@ class UserPasswordUpdateView(CustomUpdateView):
             self.handle_error(str(e), e)
 
     def form_invalid(self, form):
-        messages.warning(self.request, self.failure_message.value)
+        messages.warning(self.request, self.failure_message)
         return self.render_to_response(self.get_context_data(form=form))
 
 
-@user_passes_test(SecurityService.is_admin)
 def send_reset_password(request, external_id):
     service = UserAppService()
     user: User = service.retrieve_by_external(external_id)

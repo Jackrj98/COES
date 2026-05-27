@@ -63,21 +63,11 @@
                 {% endblock filters %}
 
                 <div class="card shadow">
-                    {% block card_actions %}
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <div class="card-title">
-                                {% trans title|capfirst %}
-                            </div>
-                            <button class="btn btn-primary">
-                                <i class="ti ti-user-plus" aria-hidden="true"></i> New user
-                            </button>
-                        </div>
-                    {% endblock card_actions %}
-                    <div class="card-body">
+                    <div class="card-body mt-0 pt-0">
                         <div class="table-responsive w-100 mt-3">
                             <table id="datatable-list" class="table w-100">
                                 <thead>
-                                <tr>{% block columns %}{% endblock %}</tr>
+                                <tr class="text-uppercase">{% block columns %}{% endblock %}</tr>
                                 </thead>
                                 <tbody>{% block rows %}{% endblock %}</tbody>
                                 <caption>{% block caption %}{% endblock %}</caption>
