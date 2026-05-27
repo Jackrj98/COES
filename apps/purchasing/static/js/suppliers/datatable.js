@@ -35,23 +35,16 @@ const columns = [
 
             return `
                 <div class="d-flex align-items-center gap-3">
-                    <button type="button" class="btn btn-icon icon-left bg-primary bg-opacity-25 flex-shrink-0" 
-                        style="width: 50px">
-                        ${initials(data)}
-                    </button>
+                       <div class="bg-${randomColor} bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width: 40px; height: 40px;">
+                            <span class="fw-bold fs-6 text-${randomColor}">${initials(data)}</span>
+                        </div>
                     <div class="text-start">
                         <a href="${detailUrl}" class="text-decoration-none text-reset fw-semibold">${data}</a>
                     </div>
                 </div>
             `;
         }
-    },
-    {
-        orderable: false,
-        data: "reason",
-        width: "20%",
-        className: DataTableFactory.classes.justify,
-        render: (data) => `<span class="text-muted">${data || '—'}</span>`
     },
     {
         orderable: false,
@@ -63,13 +56,13 @@ const columns = [
     {
         orderable: false,
         data: "delivery_days",
-        width: "12%",
+        width: "10%",
         className: DataTableFactory.classes.center,
         render: (data) => {
             let color = data <= 5 ? 'success' : (data <= 14 ? 'warning' : 'danger');
             return `
                 <button type="button" class="btn btn-icon icon-left bg-${color} bg-opacity-25 rounded-pill px-3 py-1"
-                        style="min-width: 70px; cursor: default;">
+                        style="min-width: 65px; cursor: default;">
                     <span class="fw-semibold">${data} d</span>
                 </button>
             `;
@@ -80,11 +73,15 @@ const columns = [
         data: "email",
         width: "16%",
         className: DataTableFactory.classes.justify,
-        render: (data) => `
-            <div class="d-flex align-items-center justify-content-center gap-2">
-                ${data || '—'}
-            </div>
-        `
+        render: (data) => {
+            return `
+                    <div class="d-flex flex-column"  style="max-width: 10vw; min-width: 0;">
+                        <span class="fw-semibold mb-0 text-truncate d-block" data-bs-toggle="tooltip" title="${data || '-'}">
+                            ${data || '?'}
+                        </span>
+                    </div>
+                `;
+        }
     },
     {
         orderable: false,
@@ -100,7 +97,7 @@ const columns = [
     {
         orderable: false,
         data: "is_active",
-        width: "16%",
+        width: "14%",
         className: DataTableFactory.classes.center,
         render: (data) => {
             const status = data ? 1 : 0;

@@ -2,7 +2,6 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import NoReverseMatch, reverse
 from django.utils.text import capfirst

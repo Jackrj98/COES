@@ -13,8 +13,8 @@ from apps.core.views.base import (
     CustomCreateView,
     CustomDetailView,
     CustomListView,
-    CustomUpdateView,
     CustomStatusUpdateView,
+    CustomUpdateView,
 )
 from apps.purchasing.forms import SupplierBaseForm, SupplierFilterForm
 from apps.purchasing.layers.applications import SupplierAppService
@@ -222,13 +222,15 @@ class SupplierStatusUpdateView(CustomStatusUpdateView):
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
         print(instance)
-        model_name = self.model._meta.verbose_name.lower() # noqa
+        model_name = self.model._meta.verbose_name.lower()  # noqa
 
         return JsonResponse(
             {
                 "success": True,
                 "title": _("Change Status"),
-                "description": _(f"Are you sure you want to change the status of this {model_name}?"),
+                "description": _(
+                    f"Are you sure you want to change the status of this {model_name}?"
+                ),
                 "name": instance.business_name,
                 "email": instance.email,
                 "is_active": instance.is_active,
