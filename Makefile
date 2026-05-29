@@ -1,6 +1,7 @@
 # =============================================================================
 # Global Variables
 # =============================================================================
+NUMBER 		   ?= 10
 ROOT_DIR       := $(shell pwd)
 SETTINGS       := cfg.settings
 PORT           ?= 8000
@@ -191,8 +192,6 @@ test:
 	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest
 
 
-NUMBER ?= 10
-
 seed:
 	@printf "${YELLOW}Select seed to run:${NC}\n"
 	@printf "  1) users\n"
@@ -212,6 +211,12 @@ seed:
 		3) $(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV);; \
 		4) $(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		5) $(MANAGE) seed_inventory_movement --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		0) \
+			$(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV); \
+			$(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV); \
+			$(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV); \
+			$(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV); \
+			$(MANAGE) seed_inventory_movement --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		*) printf "${RED}Invalid option${NC}\n";; \
 	esac
 

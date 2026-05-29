@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
             for i in range(random.randint(1, 10)):
                 Batch.objects.create(
-                    suppy=supply,
+                    supply=supply,
                     number=fake.unique.bothify(text="LOTE-####"),
                     expiration_date=fake.future_date(end_date="+1y"),
                     stock=random.randint(10, 100),

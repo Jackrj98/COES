@@ -55,7 +55,7 @@ class Batch(AuditModel):
         EXPIRED = 2, _("Expired")
 
     supply = models.ForeignKey(
-        Supply, verbose_name=_("Supply"), on_delete=models.PROTECT, related_name="batches"
+        Supply, verbose_name=_("Supply"), on_delete=models.PROTECT, related_name="batches", null=True, blank=True
     )
     number = models.CharField(_("Number"), max_length=100)
     expiration_date = models.DateField(_("Expiration date"))
