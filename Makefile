@@ -196,7 +196,8 @@ NUMBER ?= 10
 seed:
 	@printf "${YELLOW}Select seed to run:${NC}\n"
 	@printf "  1) users\n"
-	@printf "  2) seed_suppliers\n"
+	@printf "  2) suppliers\n"
+	@printf "  3) catalogs\n"
 	@printf "  0) all\n"
 	@printf "${GREEN}Enter option: ${NC}"; \
 	read option; \
@@ -206,6 +207,7 @@ seed:
 	case $$option in \
 		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		2) $(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		3) $(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV);; \
 		*) printf "${RED}Invalid option${NC}\n";; \
 	esac
 

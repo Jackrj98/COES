@@ -5,7 +5,7 @@ import string
 from django.contrib.auth.models import Group
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
@@ -69,6 +69,7 @@ class UserAppService(BaseAppService):
         return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
     @staticmethod
+    @transaction.atomic
     def register_user(payload):
         """Register a new user."""
         builder = UserBuilder()

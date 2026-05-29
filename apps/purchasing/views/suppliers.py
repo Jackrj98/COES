@@ -221,7 +221,6 @@ class SupplierStatusUpdateView(CustomStatusUpdateView):
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        print(instance)
         model_name = self.model._meta.verbose_name.lower()  # noqa
 
         return JsonResponse(

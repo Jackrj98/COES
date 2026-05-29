@@ -5,6 +5,16 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
+# ─────────────────────────────────────────
+# Managers
+# ─────────────────────────────────────────
+class ActiveManager(models.Manager):
+    """Returns only active objects."""
+
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
 class AuditModel(models.Model):
     """Abstract base model for all models."""
 
@@ -23,7 +33,11 @@ class AuditModel(models.Model):
     external_id = models.UUIDField(
         _("External ID"), default=uuid.uuid4, unique=True, editable=False
     )
-    is_active = models.BooleanField(_("Is active"), default=True)
+    is_active = models.BooleanField(
+        _("Is active"),
+        default=True,
+        help_text=_("Check this box to enable the feature in the system."),
+    )
 
     # audit data
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
@@ -33,6 +47,7 @@ class AuditModel(models.Model):
     updated_by = models.CharField(_("Updated by"), max_length=255, null=True, blank=True)
 
     # Managers
+    active = ActiveManager()
     objects = models.Manager()
 
     class Meta:
@@ -58,3 +73,9 @@ class AuditModel(models.Model):
             self.updated_by = user_identifier
 
         super().save(*args, **kwargs)
+
+    def get_is_active_display(self):
+        return self.IsActiveChoices(self.is_active).label
+
+    def get_is_active_color_display(self):
+        return self.IsActiveColorChoices(self.is_active).label

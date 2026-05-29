@@ -17,13 +17,14 @@
                             {% block breadcrumb %}
                                 {% for bread in breadcrumb %}
                                     {% if bread.active %}
-                                        <li class="breadcrumb-item active fw-semibold" aria-current="page">
-                                            {% trans bread.name|capfirst %}
+                                        <li class="breadcrumb-item active fw-semibold text-truncate-custom"
+                                            aria-current="page" title="{{ bread.name }}">
+                                            {% trans bread.name|truncatechars:15|capfirst %}
                                         </li>
                                     {% else %}
-                                        <li class="breadcrumb-item">
+                                        <li class="breadcrumb-item text-truncate-custom" title="{{ bread.name }}">
                                             <a href="{{ bread.url }}" class="text-decoration-none">
-                                                {% trans bread.name|capfirst %}
+                                                {% trans bread.name|truncatechars:15|capfirst %}
                                             </a>
                                         </li>
                                     {% endif %}

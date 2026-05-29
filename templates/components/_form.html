@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{% static 'assets/compiled/css/form-editor-summernote.css' %}">
     <!-- daterange picker -->
     <link rel="stylesheet" href="{% static 'assets/extensions/flatpickr/flatpickr.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/extensions/choices.js/public/assets/styles/choices.css' %}">
+
 {% endblock extra_css %}
 
 {% block content %}
@@ -52,5 +54,7 @@
     <!-- date-range-picker -->
     <script src="{% static 'assets/extensions/flatpickr/flatpickr.min.js' %}"></script>
     <script src="{% static 'assets/static/js/pages/date-picker.js' %}"></script>
+    <script src="{% static 'assets/extensions/choices.js/public/assets/scripts/choices.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/form-element-select.js' %}"></script>
 {% endblock javascript %}
 
