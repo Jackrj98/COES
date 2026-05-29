@@ -145,7 +145,6 @@ class TestUpdateCatalog:
 
     @pytest.mark.django_db
     def test_raises_error_on_duplicate_code(self, service, valid_payload):
-        catalog1 = service.register_catalog(valid_payload)
         catalog2 = service.register_catalog({**valid_payload, "code": "TEST002", "name": "Other"})
 
         update_data = {**valid_payload, "code": "TEST001"}  # Trying to change to existing code

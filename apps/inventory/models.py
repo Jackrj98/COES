@@ -3,6 +3,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.catalogs.models import Catalog
 from apps.core.models import AuditModel
 
 
@@ -12,8 +13,28 @@ class Supply(AuditModel):
     name = models.CharField(_("Name"), max_length=255)
     code = models.CharField(_("Code"), max_length=50)
     description = models.CharField(_("Description"), max_length=255)
-    image_url = models.ImageField(_("Image url"), upload_to="imagen/")
+    image_url = models.ImageField(_("Image URL"), upload_to="supplies/")
     stock_min = models.PositiveIntegerField(_("Stock min"), default=10)
+
+    category = models.ForeignKey(
+        "catalogs.CatalogItem",
+        on_delete=models.PROTECT,
+        related_name="supplies_by_category",
+        verbose_name=_("Category"),
+        limit_choices_to={"catalog__code": Catalog.CatalogCodes.SUPPLY_CATEGORY},
+        null=True,
+        blank=True,
+    )
+
+    unit_of_measure = models.ForeignKey(
+        "catalogs.CatalogItem",
+        on_delete=models.PROTECT,
+        related_name="supplies_by_unit",
+        verbose_name=_("Unit of Measure"),
+        limit_choices_to={"catalog__code": Catalog.CatalogCodes.UNIT_OF_MEASURE},
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = "supply"
@@ -33,7 +54,7 @@ class Batch(AuditModel):
         ACTIVE = 1, _("Active")
         EXPIRED = 2, _("Expired")
 
-    suppy = models.ForeignKey(
+    supply = models.ForeignKey(
         Supply, verbose_name=_("Supply"), on_delete=models.PROTECT, related_name="batches"
     )
     number = models.CharField(_("Number"), max_length=100)
@@ -61,10 +82,10 @@ class Batch(AuditModel):
             "number",
             "-expiration_date",
         )
-        unique_together = (("suppy", "number"),)
+        unique_together = (("supply", "number"),)
 
     def __str__(self):
-        return f"{self.suppy.name} - {self.number}"
+        return f"{self.supply.name} - {self.number}"
 
     @property
     def is_expired(self):
@@ -88,8 +109,8 @@ class InventoryMovement(AuditModel):
     concept = models.CharField(_("Concept"), max_length=255)
     quantity = models.PositiveIntegerField(_("Quantity"), validators=[MinValueValidator(0)])
     observation = models.CharField(_("Observation"), max_length=255)
-    previus_stock = models.PositiveIntegerField(
-        _("Previus stock"), validators=[MinValueValidator(0)]
+    previous_stock = models.PositiveIntegerField(
+        _("Previous stock"), validators=[MinValueValidator(0)], default=0
     )
     after_stock = models.PositiveIntegerField(_("After stock"), validators=[MinValueValidator(0)])
     is_increment = models.BooleanField(_("Increment"), blank=True, null=True)
@@ -101,17 +122,17 @@ class InventoryMovement(AuditModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.movement_type
+        return self.get_movement_type_display()
 
     @transaction.atomic
     def save(self, *args, **kwargs):
         if not self.pk:
             self.previous_stock = self.batch.stock
-            if self.movement_type == self.movement_type.INBOUND:
+            if self.movement_type == self.Type.INBOUND:
                 self.batch.stock += self.quantity
-            elif self.movement_type == self.movement_type.OUTBOUND:
+            elif self.movement_type == self.Type.OUTBOUND:
                 self.batch.stock -= self.quantity
-            elif self.movement_type == self.movement_type.ADJUSTMENT:
+            elif self.movement_type == self.Type.ADJUSTMENT:
                 if getattr(self, "is_increment", False):
                     self.batch.stock += self.quantity
                 else:

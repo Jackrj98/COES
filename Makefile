@@ -198,6 +198,8 @@ seed:
 	@printf "  1) users\n"
 	@printf "  2) suppliers\n"
 	@printf "  3) catalogs\n"
+	@printf "  4) inventory\n"
+	@printf "  5) inventory movement\n"
 	@printf "  0) all\n"
 	@printf "${GREEN}Enter option: ${NC}"; \
 	read option; \
@@ -208,6 +210,8 @@ seed:
 		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		2) $(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		3) $(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV);; \
+		4) $(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		5) $(MANAGE) seed_inventory_movement --number=$$count --settings=$(SETTINGS).$(ENV);; \
 		*) printf "${RED}Invalid option${NC}\n";; \
 	esac
 
