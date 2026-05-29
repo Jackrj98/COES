@@ -17,6 +17,13 @@ class Permissions:
                         "view_person",
                     ]
                 },
+                "purchasing": {
+                    "details": [
+                        "add_supplier",
+                        "change_supplier",
+                        "view_supplier",
+                    ]
+                },
             },
         },
         # ──────────────────────────────────────────────
@@ -107,6 +114,13 @@ class Permissions:
                         "change_person",
                         "delete_person",
                         "view_person",
+                    ]
+                },
+                "purchasing": {
+                    "details": [
+                        "add_supplier",
+                        "change_supplier",
+                        "view_supplier",
                     ]
                 },
             },

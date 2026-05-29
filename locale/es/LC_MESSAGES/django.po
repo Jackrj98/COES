@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-23 21:30-0500\n"
-"PO-Revision-Date: 2026-05-22 16:00-0500\n"
+"POT-Creation-Date: 2026-05-27 19:39-0500\n"
+"PO-Revision-Date: 2026-05-27 19:45-0500\n"
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -17,11 +17,304 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
+#: apps/catalogs/admin.py:12
+msgid "Code prefix"
+msgstr "Prefijo del código"
+
+#: apps/catalogs/admin.py:17
+msgid "Catalog (cat_*)"
+msgstr "Catálogo (cat_*)"
+
+#: apps/catalogs/admin.py:18
+msgid "Unit of measure (uni_*)"
+msgstr "Unidad de medida (uni_*)"
+
+#: apps/catalogs/admin.py:19
+msgid "Other codes"
+msgstr "Otros códigos"
+
+#: apps/catalogs/admin.py:51 apps/catalogs/admin.py:130
+msgid "Basic Information"
+msgstr "Información Básica"
+
+#: apps/catalogs/admin.py:53 apps/catalogs/admin.py:138
+#: apps/core/forms/base.py:46 apps/inventory/models.py:47
+#: apps/purchasing/admin.py:13 apps/purchasing/admin.py:79
+#: apps/purchasing/forms.py:12 apps/purchasing/models.py:72
+#: apps/security/forms/user.py:12 apps/security/models/users.py:113
+#: apps/security/models/users.py:206
+msgid "Status"
+msgstr "Estado"
+
+#: apps/catalogs/admin.py:59 apps/catalogs/admin.py:144
+#: apps/core/mixins/admin.py:26 apps/security/admin.py:64
+msgid "Audit Information"
+msgstr "Información de Auditoría"
+
+#: apps/catalogs/admin.py:89
+msgid "Items"
+msgstr "Elementos"
+
+#: apps/catalogs/admin.py:96 apps/catalogs/admin.py:132
+#: apps/catalogs/admin.py:174 apps/catalogs/models.py:94
+msgid "Catalog"
+msgstr "Catálogo"
+
+#: apps/catalogs/forms.py:13
+msgid "Search by name or code"
+msgstr "Buscar por nombre o código"
+
+#: apps/catalogs/layers/applications/catalog_item_service.py:25
+msgid "Code and catalog code are required."
+msgstr "El código y el código de catálogo son obligatorios."
+
+#: apps/catalogs/layers/applications/catalog_item_service.py:44
+msgid "Catalog code is required."
+msgstr "El código de catálogo es obligatorio."
+
+#: apps/catalogs/layers/applications/catalog_item_service.py:72
+msgid "Catalog reference is not allowed."
+msgstr "No se permite referencia circular al catálogo."
+
+#: apps/catalogs/layers/applications/catalog_item_service.py:101
+#: apps/catalogs/layers/applications/catalog_service.py:68
+msgid "Catalog item with this code already exists in this catalog."
+msgstr "Ya existe un elemento con este código en el catálogo."
+
+#: apps/catalogs/layers/applications/catalog_item_service.py:147
+#: apps/catalogs/layers/applications/catalog_item_service.py:154
+msgid "Catalog item instance is required."
+msgstr "La instancia del elemento de catálogo es obligatoria."
+
+#: apps/catalogs/layers/applications/catalog_service.py:112
+msgid "Catalog instance is required."
+msgstr "La instancia del catálogo es obligatoria."
+
+#: apps/catalogs/layers/dto/catalog_dto.py:14
+msgid "Unique identifier code, numbers and underscores"
+msgstr "Código identificador único, números y guiones bajos"
+
+#: apps/catalogs/layers/dto/catalog_dto.py:25
+msgid "Code can only contain letters, numbers and underscores"
+msgstr "El código solo puede contener letras, números y guiones bajos"
+
+#: apps/catalogs/layers/dto/catalog_dto.py:33
+#: apps/catalogs/layers/dto/catalog_dto.py:82
+msgid "Name cannot be empty or only whitespace"
+msgstr "El nombre no puede estar vacío ni contener solo espacios"
+
+#: apps/catalogs/layers/dto/catalog_dto.py:41
+msgid "Priority must be between 1 and 100000"
+msgstr "La prioridad debe estar entre 1 y 100000"
+
+#: apps/catalogs/layers/dto/catalog_dto.py:59
+msgid "Unique identifier code, only upper case, numbers and underscores"
+msgstr "Código identificador único, solo mayúsculas, números y guiones bajos"
+
+#: apps/catalogs/layers/dto/catalog_dto.py:72
+msgid "Code must be in uppercase"
+msgstr "El código debe estar en mayúsculas"
+
+#: apps/catalogs/layers/dto/catalog_dto.py:74
+msgid "Code can only contain uppercase letters, numbers and underscores"
+msgstr "El código solo puede contener letras mayúsculas, números y guiones bajos"
+
+#: apps/catalogs/layers/dto/catalog_dto.py:90
+msgid "Priority must be between 1 and 10000"
+msgstr "La prioridad debe estar entre 1 y 10000"
+
+#: apps/catalogs/models.py:20 apps/catalogs/models.py:58
+#: apps/inventory/models.py:12
+msgid "Name"
+msgstr "Nombre"
+
+#: apps/catalogs/models.py:26 apps/catalogs/models.py:63
+#: apps/inventory/models.py:13
+msgid "Code"
+msgstr "Código"
+
+#: apps/catalogs/models.py:30 apps/catalogs/models.py:66
+msgid "Unique identifier code, only lower case, numbers and underscores"
+msgstr "Código identificador único, solo minúsculas, números y guiones bajos"
+
+#: apps/catalogs/models.py:33 apps/catalogs/models.py:69
+#: apps/inventory/models.py:14
+msgid "Description"
+msgstr "Descripción"
+
+#: apps/catalogs/models.py:36 apps/catalogs/models.py:76
+msgid "Priority"
+msgstr "Prioridad"
+
+#: apps/catalogs/models.py:38
+msgid "Priority level"
+msgstr "Nivel de prioridad"
+
+#: apps/catalogs/models.py:44
+msgid "catalog"
+msgstr "catálogo"
+
+#: apps/catalogs/models.py:45 templates/partials/sidebar/_sidebar.html:35
+msgid "catalogs"
+msgstr "catálogos"
+
+#: apps/catalogs/models.py:81
+msgid "Extra value"
+msgstr "Valor adicional"
+
+#: apps/catalogs/models.py:85
+msgid "Auxiliary value, e.g. abbreviation 'ml' for 'Milliliter'"
+msgstr "Valor auxiliar, ej. abreviatura 'ml' para 'Mililitro'"
+
+#: apps/catalogs/models.py:99
+msgid "catalog item"
+msgstr "elemento de catálogo"
+
+#: apps/catalogs/models.py:100
+msgid "catalog items"
+msgstr "elementos de catálogo"
+
+#: apps/catalogs/templates/catalogs/create_or_update.html:50
+#: apps/purchasing/templates/suppliers/create_or_update.html:35
+#: apps/security/templates/users/create_or_update.html:36
+#: apps/security/templates/users/password/password_reset_confirm.html:99
+#: templates/components/_delete.html:72
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: apps/catalogs/templates/catalogs/create_or_update.html:53
+#: apps/purchasing/templates/suppliers/create_or_update.html:38
+#: apps/security/templates/users/create_or_update.html:39
+#: apps/security/templates/users/password/password_reset_confirm.html:103
+#: templates/components/_delete.html:69 templates/components/_form.html:33
+msgid "Submit"
+msgstr "Guardar"
+
+#: apps/catalogs/templates/catalogs/datatable.html:32
+#: apps/purchasing/templates/suppliers/datatable.html:104
+#: apps/security/templates/users/datatable.html:38
+#: templates/components/_datatable.html:55
+msgid "Clean filters"
+msgstr "Limpiar filtros"
+
+#: apps/catalogs/templates/catalogs/datatable.html:49
+#: apps/purchasing/templates/suppliers/datatable.html:121
+msgid "status"
+msgstr "estado"
+
+#: apps/catalogs/templates/catalogs/datatable.html:50
+msgid "created"
+msgstr "creado"
+
+#: apps/catalogs/templates/catalogs/datatable.html:51
+#: apps/purchasing/templates/suppliers/datatable.html:122
+#: apps/security/templates/users/datatable.html:57
+msgid "actions"
+msgstr "acciones"
+
+#: apps/catalogs/templates/catalogs/detail.html:27
+#: apps/purchasing/templates/suppliers/detail.html:27
+msgid "Identification"
+msgstr "Identificación"
+
+#: apps/catalogs/templates/catalogs/detail.html:30 apps/purchasing/models.py:15
+#: apps/purchasing/templates/suppliers/detail.html:30
+msgid "Business name"
+msgstr "Razón social"
+
+#: apps/catalogs/templates/catalogs/detail.html:32 apps/purchasing/models.py:16
+#: apps/purchasing/templates/suppliers/detail.html:32
+msgid "Reason"
+msgstr "Motivo"
+
+#: apps/catalogs/templates/catalogs/detail.html:34
+#: apps/purchasing/templates/suppliers/detail.html:34
+msgid "Tax ID"
+msgstr "RUC"
+
+#: apps/catalogs/templates/catalogs/detail.html:45
+#: apps/purchasing/templates/suppliers/detail.html:45
+msgid "Contact"
+msgstr "Contacto"
+
+#: apps/catalogs/templates/catalogs/detail.html:50
+#: apps/purchasing/templates/suppliers/detail.html:50
+msgid "Email"
+msgstr "Correo electrónico"
+
+#: apps/catalogs/templates/catalogs/detail.html:56
+#: apps/purchasing/templates/suppliers/detail.html:56
+msgid "Phone"
+msgstr "Teléfono"
+
+#: apps/catalogs/templates/catalogs/detail.html:69
+#: apps/purchasing/templates/suppliers/detail.html:69
+msgid "Delivery deadline"
+msgstr "Plazo de entrega"
+
+#: apps/catalogs/templates/catalogs/detail.html:76
+#: apps/purchasing/templates/suppliers/detail.html:76
+msgid "Delivery time"
+msgstr "Tiempo de entrega"
+
+#: apps/catalogs/templates/catalogs/detail.html:77
+#: apps/purchasing/templates/suppliers/detail.html:77
+msgid "days"
+msgstr "días"
+
+#: apps/catalogs/templates/catalogs/detail.html:96
+#: apps/purchasing/templates/suppliers/detail.html:96
+msgid "Fast"
+msgstr "Rápido"
+
+#: apps/catalogs/templates/catalogs/detail.html:100
+#: apps/purchasing/templates/suppliers/detail.html:100
+msgid "Medium"
+msgstr "Medio"
+
+#: apps/catalogs/templates/catalogs/detail.html:104
+#: apps/purchasing/templates/suppliers/detail.html:104
+msgid "Slow"
+msgstr "Lento"
+
+#: apps/catalogs/templates/catalogs/detail.html:117
+#: apps/purchasing/templates/suppliers/detail.html:117
+msgid "Audit information"
+msgstr "Información de auditoría"
+
+#: apps/catalogs/views/catalog_items.py:41
+#: apps/purchasing/views/suppliers.py:41
+msgid "Management of registered suppliers"
+msgstr "Gestión de proveedores registrados"
+
+#: apps/catalogs/views/catalog_items.py:93
+#: apps/purchasing/views/suppliers.py:93
+msgid "Supplier Details"
+msgstr "Detalles del Proveedor"
+
+#: apps/catalogs/views/catalog_items.py:165
+#: apps/purchasing/views/suppliers.py:165
+msgid "Update Supplier"
+msgstr "Actualizar Proveedor"
+
+#: apps/catalogs/views/catalog_items.py:230
+#: apps/purchasing/views/suppliers.py:230 apps/security/views/users.py:387
+msgid "Change Status"
+msgstr "Cambiar Estado"
+
+#: apps/catalogs/views/catalogs.py:41
+msgid "Management of registered catalogs"
+msgstr "Gestión de catálogos registrados"
+
+#: apps/catalogs/views/catalogs.py:70
+msgid "Catalog Details"
+msgstr "Detalles del Catálogo"
+
 #: apps/core/forms/base.py:19 apps/core/forms/base.py:48
 msgid "Select"
 msgstr "Seleccionar"
 
-#: apps/core/forms/base.py:22 apps/security/forms/user.py:26
+#: apps/core/forms/base.py:22 apps/security/forms/user.py:24
 msgid "Search"
 msgstr "Buscar"
 
@@ -37,23 +330,15 @@ msgstr "Fecha"
 msgid "Select date"
 msgstr "Seleccionar fecha"
 
-#: apps/core/forms/base.py:46 apps/inventory/models.py:47
-#: apps/purchasing/models.py:36 apps/security/forms/user.py:12
-#: apps/security/models/users.py:113 apps/security/models/users.py:206
-msgid "Status"
-msgstr "Estado"
+#: apps/core/forms/base.py:48 apps/core/models.py:23
+#: apps/security/models/users.py:82
+msgid "Enabled"
+msgstr "Habilitado"
 
-#: apps/core/forms/base.py:48 apps/inventory/models.py:33
-msgid "Active"
-msgstr "Activo"
-
-#: apps/core/forms/base.py:48
-msgid "Inactive"
-msgstr "Inactivo"
-
-#: apps/core/mixins/admin.py:26 apps/security/admin.py:64
-msgid "Audit Information"
-msgstr "Información de Auditoría"
+#: apps/core/forms/base.py:48 apps/core/models.py:22
+#: apps/security/models/users.py:83
+msgid "Disabled"
+msgstr "Deshabilitado"
 
 #: apps/core/mixins/admin.py:45
 msgid "Mark selected items as active"
@@ -73,47 +358,43 @@ msgstr "Marcar elementos seleccionados como inactivos"
 msgid "%d records marked as inactive."
 msgstr "%d registros marcados como inactivos."
 
-#: apps/core/models.py:12 apps/security/models/users.py:83
-msgid "Disabled"
-msgstr "Deshabilitado"
-
-#: apps/core/models.py:13 apps/security/models/users.py:82
-msgid "Enabled"
-msgstr "Habilitado"
-
-#: apps/core/models.py:20
+#: apps/core/models.py:30
 msgid "Disable"
 msgstr "Deshabilitar"
 
-#: apps/core/models.py:21
+#: apps/core/models.py:31
 msgid "Enable"
 msgstr "Habilitar"
 
-#: apps/core/models.py:24
+#: apps/core/models.py:34
 msgid "External ID"
 msgstr "ID Externo"
 
-#: apps/core/models.py:26
+#: apps/core/models.py:37
 msgid "Is active"
 msgstr "Está activo"
 
-#: apps/core/models.py:29
+#: apps/core/models.py:39
+msgid "Check this box to enable the feature in the system."
+msgstr "Marque esta casilla para habilitar la función en el sistema."
+
+#: apps/core/models.py:43
 msgid "Created at"
 msgstr "Creado el"
 
-#: apps/core/models.py:30
+#: apps/core/models.py:44
 msgid "Updated at"
 msgstr "Actualizado el"
 
-#: apps/core/models.py:31
+#: apps/core/models.py:45
 msgid "Deleted at"
 msgstr "Eliminado el"
 
-#: apps/core/models.py:32
+#: apps/core/models.py:46
 msgid "Created by"
 msgstr "Creado por"
 
-#: apps/core/models.py:33
+#: apps/core/models.py:47
 msgid "Updated by"
 msgstr "Actualizado por"
 
@@ -229,25 +510,13 @@ msgstr "Ya existe un/una {model} con los atributos especificados."
 msgid "specialist"
 msgstr "especialista"
 
-#: apps/core/utils/permissions.py:26
+#: apps/core/utils/permissions.py:33
 msgid "administrator"
 msgstr "administrador"
 
-#: apps/core/views/views.py:21 apps/security/views/users.py:370
+#: apps/core/views/views.py:28 apps/security/views/users.py:481
 msgid "You do not have permission to perform this action."
 msgstr "No tiene permiso para realizar esta acción."
-
-#: apps/inventory/models.py:12
-msgid "Name"
-msgstr "Nombre"
-
-#: apps/inventory/models.py:13
-msgid "Code"
-msgstr "Código"
-
-#: apps/inventory/models.py:14
-msgid "Description"
-msgstr "Descripción"
 
 #: apps/inventory/models.py:15
 msgid "Image url"
@@ -258,6 +527,7 @@ msgid "Stock min"
 msgstr "Stock mínimo"
 
 #: apps/inventory/models.py:20 apps/inventory/models.py:37
+#: apps/purchasing/admin.py:115
 msgid "Supply"
 msgstr "Insumo"
 
@@ -268,6 +538,10 @@ msgstr "Insumos"
 #: apps/inventory/models.py:32
 msgid "Discarded"
 msgstr "Desechado"
+
+#: apps/inventory/models.py:33
+msgid "Active"
+msgstr "Activo"
 
 #: apps/inventory/models.py:34 apps/security/models/users.py:189
 msgid "Expired"
@@ -349,77 +623,142 @@ msgstr "Movimiento de Inventario"
 msgid "Inventory Movements"
 msgstr "Movimientos de Inventario"
 
-#: apps/purchasing/models.py:10
-msgid "Business name"
-msgstr "Razón social"
-
-#: apps/purchasing/models.py:11
-msgid "Reason"
-msgstr "Motivo"
-
-#: apps/purchasing/models.py:12
-msgid "Tax id"
-msgstr "RUC"
-
-#: apps/purchasing/models.py:13
-msgid "Delivery days"
-msgstr "Días de entrega"
-
-#: apps/purchasing/models.py:17
+#: apps/purchasing/admin.py:64 apps/purchasing/models.py:30
 msgid "Supplier"
 msgstr "Proveedor"
 
+#: apps/purchasing/admin.py:85
+msgid "Total Items"
+msgstr "Total de ítems"
+
+#: apps/purchasing/admin.py:109
+msgid "Order Number"
+msgstr "Número de Orden"
+
+#: apps/purchasing/forms.py:17
+msgid "Reasons"
+msgstr "Motivos"
+
+#: apps/purchasing/forms.py:22 apps/purchasing/models.py:22
+msgid "Delivery days"
+msgstr "Días de entrega"
+
+#: apps/purchasing/forms.py:25
+msgid "All deadlines"
+msgstr "Todos los plazos"
+
+#: apps/purchasing/forms.py:26
+msgid "Fast (? 5 days)"
+msgstr "Rápido (? 5 días)"
+
+#: apps/purchasing/forms.py:27
+msgid "Medium (6?14 days)"
+msgstr "Medio (6-14 días)"
+
+#: apps/purchasing/forms.py:28
+msgid "Slow (> 14 days)"
+msgstr "Lento (> 14 días)"
+
+#: apps/purchasing/forms.py:35
+msgid "Search by name or ruc"
+msgstr "Buscar por nombre o RUC"
+
+#: apps/purchasing/forms.py:45
+msgid "All reasons"
+msgstr "Todos los motivos"
+
 #: apps/purchasing/models.py:18
+msgid "Tax id"
+msgstr "RUC"
+
+#: apps/purchasing/models.py:25 apps/security/models/users.py:103
+msgid "Email address"
+msgstr "Correo electrónico"
+
+#: apps/purchasing/models.py:26 apps/security/models/users.py:42
+msgid "Phone number"
+msgstr "Teléfono"
+
+#: apps/purchasing/models.py:31
 msgid "Suppliers"
 msgstr "Proveedores"
 
-#: apps/purchasing/models.py:29
+#: apps/purchasing/models.py:65
 msgid "Draft"
 msgstr "Borrador"
 
-#: apps/purchasing/models.py:30
+#: apps/purchasing/models.py:66
 msgid "Sent"
 msgstr "Enviado"
 
-#: apps/purchasing/models.py:31
+#: apps/purchasing/models.py:67
 msgid "Completed"
 msgstr "Completado"
 
-#: apps/purchasing/models.py:32
+#: apps/purchasing/models.py:68
 msgid "Cancelled"
 msgstr "Cancelado"
 
-#: apps/purchasing/models.py:34
+#: apps/purchasing/models.py:70
 msgid "Order number"
 msgstr "Número de orden"
 
-#: apps/purchasing/models.py:40
+#: apps/purchasing/models.py:76
 msgid "Purchase Order"
 msgstr "Orden de Compra"
 
-#: apps/purchasing/models.py:41
+#: apps/purchasing/models.py:77
 msgid "Purchase Orders"
 msgstr "Órdenes de Compra"
 
-#: apps/purchasing/models.py:53
+#: apps/purchasing/models.py:89
 msgid "Quantity requested"
 msgstr "Cantidad solicitada"
 
-#: apps/purchasing/models.py:54
+#: apps/purchasing/models.py:90
 msgid "Quantity received"
 msgstr "Cantidad recibida"
 
-#: apps/purchasing/models.py:55
+#: apps/purchasing/models.py:91
 msgid "Unit cost"
 msgstr "Costo unitario"
 
-#: apps/purchasing/models.py:60
+#: apps/purchasing/models.py:96
 msgid "Order detail"
 msgstr "Detalle de orden"
 
-#: apps/purchasing/models.py:61
+#: apps/purchasing/models.py:97
 msgid "Order details"
 msgstr "Detalles de orden"
+
+#: apps/purchasing/templates/suppliers/datatable.html:23
+msgid "Number of records"
+msgstr "Número de registros"
+
+#: apps/purchasing/templates/suppliers/datatable.html:25
+#: templates/partials/sidebar/_sidebar.html:29
+msgid "suppliers"
+msgstr "proveedores"
+
+#: apps/purchasing/templates/suppliers/datatable.html:38
+msgid "Fast Delivery"
+msgstr "Entrega Rápida"
+
+#: apps/purchasing/templates/suppliers/datatable.html:53
+msgid "Medium Delivery"
+msgstr "Entrega Media"
+
+#: apps/purchasing/templates/suppliers/datatable.html:68
+msgid "Slow Delivery"
+msgstr "Entrega Lenta"
+
+#: apps/purchasing/templates/suppliers/datatable.html:116
+msgid "supplier"
+msgstr "proveedor"
+
+#: apps/purchasing/templates/suppliers/datatable.html:118
+msgid "delivery"
+msgstr "entrega"
 
 #: apps/security/admin.py:26
 msgid "Credentials"
@@ -449,24 +788,28 @@ msgstr "Nombre de usuario"
 msgid "Password"
 msgstr "Contraseña"
 
-#: apps/security/forms/user.py:18 apps/security/forms/user.py:68
-#: apps/security/forms/user.py:92
+#: apps/security/forms/user.py:17 apps/security/forms/user.py:71
+#: apps/security/forms/user.py:95
 msgid "Group"
 msgstr "Grupo"
 
-#: apps/security/forms/user.py:121
+#: apps/security/forms/user.py:28
+msgid "Search by names, username, email"
+msgstr "Buscar por nombres, usuario o correo"
+
+#: apps/security/forms/user.py:124
 msgid "Current Password"
 msgstr "Contraseña Actual"
 
-#: apps/security/forms/user.py:127
+#: apps/security/forms/user.py:130
 msgid "New Password"
 msgstr "Nueva Contraseña"
 
-#: apps/security/forms/user.py:133
+#: apps/security/forms/user.py:136
 msgid "Confirm New Password"
 msgstr "Confirmar Nueva Contraseña"
 
-#: apps/security/layers/applications/user_service.py:107
+#: apps/security/layers/applications/user_service.py:143
 msgid "You are not authorized to change this password"
 msgstr "No está autorizado para cambiar esta contraseña"
 
@@ -476,7 +819,7 @@ msgstr "Las contraseñas no coinciden."
 
 #: apps/security/layers/dto/user_dto.py:45
 msgid "The new password cannot be the same as the current password."
-msgstr "La nueva contraseña no puede ser igual a la contraseña actual."
+msgstr "La nueva contraseña no puede ser igual a la actual."
 
 #: apps/security/layers/dto/user_dto.py:53
 msgid "The current password is incorrect."
@@ -510,10 +853,6 @@ msgstr "Apellidos"
 msgid "Document number"
 msgstr "Número de documento"
 
-#: apps/security/models/users.py:42
-msgid "Phone number"
-msgstr "Teléfono"
-
 #: apps/security/models/users.py:46
 msgid "Person"
 msgstr "Persona"
@@ -525,10 +864,6 @@ msgstr "Personas"
 #: apps/security/models/users.py:84
 msgid "Locked"
 msgstr "Bloqueado"
-
-#: apps/security/models/users.py:103
-msgid "Email address"
-msgstr "Dirección de correo electrónico"
 
 #: apps/security/models/users.py:109
 msgid "Email verified"
@@ -559,12 +894,12 @@ msgid "Users"
 msgstr "Usuarios"
 
 #: apps/security/models/users.py:144
-#: apps/security/templates/users/detail.html:62
+#: apps/security/templates/users/detail.html:70
 msgid "Verified"
 msgstr "Verificado"
 
 #: apps/security/models/users.py:144
-#: apps/security/templates/users/detail.html:64
+#: apps/security/templates/users/detail.html:72
 msgid "Not verified"
 msgstr "No verificado"
 
@@ -617,56 +952,29 @@ msgstr "El token ya no es válido: %(status)s"
 msgid "Sign in"
 msgstr "Iniciar sesión"
 
-#: apps/security/templates/users/create_or_update.html:36
-#: apps/security/templates/users/password/password_reset_confirm.html:46
-#: templates/components/_delete.html:72
-msgid "Cancel"
-msgstr "Cancelar"
-
-#: apps/security/templates/users/create_or_update.html:39
-#: apps/security/templates/users/password/password_reset_confirm.html:50
-#: templates/components/_delete.html:69 templates/components/_form.html:31
-msgid "Submit"
-msgstr "Enviar"
-
-#: apps/security/templates/users/datatable.html:19
-#: templates/components/_datatable.html:32
-msgid "Clean filters"
-msgstr "Limpiar filtros"
-
-#: apps/security/templates/users/datatable.html:37
-msgid "New user"
-msgstr "Nuevo usuario"
-
-#: apps/security/templates/users/datatable.html:45
-msgid "user"
-msgstr "usuario"
-
-#: apps/security/templates/users/datatable.html:48
+#: apps/security/templates/users/datatable.html:54
 msgid "group"
 msgstr "grupo"
 
 #: apps/security/templates/users/detail.html:34
-#, fuzzy
-#| msgid "Audit Information"
 msgid "Account information"
-msgstr "Información de Auditoría"
+msgstr "Información de cuenta"
 
-#: apps/security/templates/users/detail.html:72
+#: apps/security/templates/users/detail.html:80
 msgid "Yes"
-msgstr "Si"
+msgstr "Sí"
 
-#: apps/security/templates/users/detail.html:74
+#: apps/security/templates/users/detail.html:82
 msgid "No"
 msgstr "No"
 
-#: apps/security/templates/users/detail.html:98
+#: apps/security/templates/users/detail.html:111
 msgid "Personal information"
 msgstr "Información personal"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:10
 msgid "Dear"
-msgstr "Estimado"
+msgstr "Estimado/a"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:14
 #, python-format
@@ -674,7 +982,7 @@ msgid ""
 "A request to reset your access password was generated on "
 "<strong>%(formatted_date)s</strong> at <strong>%(formatted_time)s</strong>."
 msgstr ""
-"Se ha generado una solicitud para restablecer su contrase&ntilde;a de acceso el "
+"Se ha generado una solicitud para restablecer su contraseña de acceso el "
 "<strong>%(formatted_date)s</strong> a las <strong>%(formatted_time)s</strong>."
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:18
@@ -682,10 +990,8 @@ msgid "Access data:"
 msgstr "Datos de acceso:"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:19
-#, fuzzy
-#| msgid "Username"
 msgid "Username:"
-msgstr "Nombre de usuario"
+msgstr "Nombre de usuario:"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:20
 msgid "Temporary password:"
@@ -693,23 +999,23 @@ msgstr "Contraseña temporal:"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:24
 msgid "To access the system, click the following button:"
-msgstr "Para acceder al sistema, haz clic en el siguiente botón:"
+msgstr "Para acceder al sistema, haga clic en el siguiente botón:"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:30
 msgid "Log in to"
-msgstr "Inicia sesión en"
+msgstr "Iniciar sesión en"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:34
 msgid "Important:"
-msgstr "Importante"
+msgstr "Importante:"
 
 #: apps/security/templates/users/emails/reset_confirm_password.html:34
 msgid ""
 "This password is temporary. For security, you must update it immediately "
 "after logging into your account."
 msgstr ""
-"Esta contraseña es temporal. Por motivos de seguridad, debes cambiarla "
-"inmediatamente después de iniciar sesión en tu cuenta."
+"Esta contraseña es temporal. Por seguridad, debe actualizarla inmediatamente "
+"después de iniciar sesión."
 
 #: apps/security/utils/constants.py:8
 msgid "The credentials are invalid, please try again."
@@ -718,9 +1024,7 @@ msgstr "Las credenciales son inválidas, por favor intente nuevamente."
 #: apps/security/utils/constants.py:10
 #, python-brace-format
 msgid "The credentials are invalid, please try again. Attempts {number}"
-msgstr ""
-"Las credenciales son inválidas, por favor intente nuevamente. Intentos "
-"{number}"
+msgstr "Las credenciales son inválidas, por favor intente nuevamente. Intentos {number}"
 
 #: apps/security/utils/constants.py:12
 msgid "The user has been deactivated, please contact the administrator."
@@ -748,14 +1052,13 @@ msgstr "La contraseña actual es incorrecta"
 
 #: apps/security/utils/constants.py:21
 msgid "The password needs to be updated. To continue browsing."
-msgstr "La contraseña necesita ser actualizada. Para continuar navegando."
+msgstr "La contraseña necesita ser actualizada para continuar navegando."
 
 #: apps/security/utils/constants.py:23
 msgid ""
 "A link was sent to reset your password. Please check your email to continue."
 msgstr ""
-"Se envió un enlace para restablecer su contraseña. Por favor revise su "
-"correo para continuar."
+"Se envió un enlace para restablecer su contraseña. Por favor revise su correo."
 
 #: apps/security/utils/validators.py:9
 msgid "Only upper letters, and underscores are allowed."
@@ -805,39 +1108,48 @@ msgstr "Iniciar Sesión"
 msgid "Log in to your account"
 msgstr "Inicie sesión en su cuenta"
 
-#: apps/security/views/users.py:102
+#: apps/security/views/users.py:53
+msgid "Management of registered users"
+msgstr "Gestión de usuarios registrados"
 
+#: apps/security/views/users.py:129
+msgid "You do not have permission to view this user's details."
+msgstr "No tiene permiso para ver los detalles de este usuario."
+
+#: apps/security/views/users.py:136
 msgid "User Details"
-msgstr "Detalles del usuario"
+msgstr "Detalles del Usuario"
 
-#: apps/security/views/users.py:112
-#, fuzzy
-#| msgid "Update password"
-msgid "Update Password"
-msgstr "Actualizar contraseña"
+#: apps/security/views/users.py:155 apps/security/views/users.py:156
+msgid "Profile"
+msgstr "Perfil"
 
-#: apps/security/views/users.py:115
+#: apps/security/views/users.py:162
 msgid "Reset Password"
 msgstr "Restablecer Contraseña"
 
-#: apps/security/views/users.py:217
+#: apps/security/views/users.py:167
+msgid "Update Password"
+msgstr "Actualizar Contraseña"
+
+#: apps/security/views/users.py:273 apps/security/views/users.py:381
+msgid "You do not have permission to edit this user."
+msgstr "No tiene permiso para editar este usuario."
+
+#: apps/security/views/users.py:303
 msgid "Update User"
 msgstr "Actualizar Usuario"
 
-#: apps/security/views/users.py:277
-msgid "Change Status"
-msgstr "Cambiar estado"
-
-#: apps/security/views/users.py:278
+#: apps/security/views/users.py:388
 msgid "Are you sure you want to change the status of this user?"
-msgstr "¿Estás seguro de que quieres cambiar el estado de este usuario?"
+msgstr "¿Está seguro de que quiere cambiar el estado de este usuario?"
 
-#: apps/security/views/users.py:307 apps/security/views/users.py:326
-#: apps/security/views/users.py:328
+#: apps/security/views/users.py:418 apps/security/views/users.py:437
+#: apps/security/views/users.py:439
 msgid "Update password"
 msgstr "Actualizar contraseña"
 
-#: apps/security/views/users.py:310
+#: apps/security/views/users.py:421
 msgid ""
 "To update your password, please keep the following security guidelines in "
 "mind:"
@@ -845,38 +1157,37 @@ msgstr ""
 "Para actualizar su contraseña, tenga en cuenta las siguientes pautas de "
 "seguridad:"
 
-#: apps/security/views/users.py:313
+#: apps/security/views/users.py:424
 msgid "Must be at least <strong>8</strong> characters long."
-msgstr "Debe tener al menos <strong>8</strong> caracteres de longitud."
+msgstr "Debe tener al menos <strong>8</strong> caracteres."
 
-#: apps/security/views/users.py:314
+#: apps/security/views/users.py:425
 msgid "Cannot be entirely numeric."
 msgstr "No puede ser completamente numérica."
 
-#: apps/security/views/users.py:315
+#: apps/security/views/users.py:426
 msgid "Cannot be a commonly used password."
 msgstr "No puede ser una contraseña de uso común."
 
-#: apps/security/views/users.py:316
+#: apps/security/views/users.py:427
 msgid "Must include at least one special character (@, #, $, !)."
 msgstr "Debe incluir al menos un carácter especial (@, #, $, !)."
 
-#: apps/security/views/users.py:317
+#: apps/security/views/users.py:428
 msgid "Cannot be too similar to your other personal information."
 msgstr "No puede ser demasiado similar a su otra información personal."
 
-#: apps/security/views/users.py:336
+#: apps/security/views/users.py:447
 msgid "You do not have permission to edit other users' accounts."
 msgstr "No tiene permiso para editar cuentas de otros usuarios."
 
-#: apps/security/views/users.py:387
-
+#: apps/security/views/users.py:498
 msgid "Password Reset Request"
-msgstr "Solicitud de restablecimiento de contraseña"
+msgstr "Solicitud de Restablecimiento de Contraseña"
 
-#: apps/security/views/users.py:406
+#: apps/security/views/users.py:518
 msgid "Reset email sent successfully."
-msgstr "El correo electrónico de restablecimiento se ha enviado correctamente."
+msgstr "Correo de restablecimiento enviado correctamente."
 
 #: templates/components/_delete.html:16
 #, python-format
@@ -892,18 +1203,11 @@ msgstr ""
 "                                "
 
 #: templates/components/_delete.html:21
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                                    Deleting the %(obj_name)s <b>?"
-#| "%(object)s?</b> would require\n"
-#| "                                    deleting the following protected "
-#| "objects:\n"
-#| "                                "
+#, python-format
 msgid ""
 "\n"
 "                                    Deleting the %(obj_name)s "
-"<b>“%(object)s”</b> would require\n"
+"<b>?%(object)s?</b> would require\n"
 "                                    deleting the following protected "
 "objects:\n"
 "                                "
@@ -916,27 +1220,20 @@ msgstr ""
 "                                "
 
 #: templates/components/_delete.html:30
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "                                Are you sure you want to delete the "
-#| "%(obj_name)s\n"
-#| "                                ?<b>%(object)s</b>?? The following "
-#| "related items will be deleted:\n"
-#| "                            "
+#, python-format
 msgid ""
 "\n"
 "                                Are you sure you want to delete the "
 "%(obj_name)s\n"
-"                                “<b>%(object)s</b>”? The following related "
+"                                ?<b>%(object)s</b>?? The following related "
 "items will be deleted:\n"
 "                            "
 msgstr ""
 "\n"
-"                                ¿Está seguro que desea eliminar "
+"                                ¿Está seguro de que desea eliminar "
 "%(obj_name)s\n"
-"                                ?<b>%(object)s</b>?? Los siguientes "
-"elementos relacionados serán eliminados:\n"
+"                                ?<b>%(object)s</b>?? Los siguientes elementos "
+"relacionados serán eliminados:\n"
 "                            "
 
 #: templates/components/_delete.html:39
@@ -945,9 +1242,9 @@ msgstr "Resumen"
 
 #: templates/components/_delete.html:53
 msgid "Detail Objects"
-msgstr "Objetos Detalle"
+msgstr "Objetos de Detalle"
 
-#: templates/components/_form.html:34
+#: templates/components/_form.html:36
 msgid "Reset"
 msgstr "Restablecer"
 
@@ -1004,19 +1301,31 @@ msgstr "Este mensaje contiene información confidencial."
 msgid "If you are not the intended recipient, please delete it."
 msgstr "Si usted no es el destinatario, por favor elimínelo."
 
-#: templates/partials/navbar/_menu.html:35
+#: templates/partials/navbar/_menu.html:22
+msgid "My Profile"
+msgstr "Mi Perfil"
+
+#: templates/partials/navbar/_menu.html:32
 msgid "Logout"
 msgstr "Cerrar Sesión"
 
-#: templates/partials/sidebar/_sidebar.html:27
+#: templates/partials/sidebar/_sidebar.html:39
 msgid "administration"
 msgstr "administración"
 
-#: templates/partials/sidebar/_sidebar.html:31
+#: templates/partials/sidebar/_sidebar.html:43
 msgid "users"
 msgstr "usuarios"
 
-#: templates/partials/sidebar/_sidebar.html:39
+#: templates/partials/sidebar/_sidebar.html:52
 msgid "admin site"
 msgstr "sitio de administración"
 
+#~ msgid "Inactive"
+#~ msgstr "Inactivo"
+
+#~ msgid "New user"
+#~ msgstr "Nuevo usuario"
+
+#~ msgid "user"
+#~ msgstr "usuario"

@@ -45,7 +45,7 @@ class BaseFilterForm(forms.Form, BaseFormHelperMixin):
     status = forms.ChoiceField(
         label=_("Status"),
         required=False,
-        choices=[("", _("Select")), (1, _("Active")), (0, _("Inactive"))],
+        choices=[("", _("Select")), (1, _("Enabled")), (0, _("Disabled"))],
         widget=forms.Select(),
     )
 

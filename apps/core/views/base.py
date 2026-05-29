@@ -90,14 +90,12 @@ class CustomDetailView(BaseView, DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
         ctx["status_choices"] = self.model.IsActiveChoices.choices
         ctx["status_color_choices"] = self.model.IsActiveColorChoices.choices
 
         app_label = self.model._meta.app_label  # noqa
         model_name = self.model._meta.model_name  # noqa
         update_perm = f"{app_label}.change_{model_name}"
-
         actions_list = []
         edit_action = self.get_actions_map(
             title=LabelEnum.ACTIONS.EDIT.value.format(model=model_name),
@@ -180,11 +178,11 @@ class CustomCreateView(BaseActionView, FormView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["title"] = self.get_action_title(LabelEnum.ADD_MODEL.value)
+
         return ctx
 
     def build_breadcrumb(self, extra_breadcrumb=None):
         verbose_name = _(self.model._meta.verbose_name)  # noqa
-
         return super().build_breadcrumb(
             extra_breadcrumb={
                 "name": LabelEnum.ADD_MODEL.format(model=verbose_name),
@@ -205,6 +203,7 @@ class CustomUpdateView(BaseActionView, UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx["cancel_url"] = self.get_success_url()
         ctx["title"] = self.get_action_title(LabelEnum.EDIT_MODEL.value)
         ctx["detail_url"] = (getattr(self.object, "get_absolute_url", lambda: "#")(),)
 
@@ -220,6 +219,13 @@ class CustomUpdateView(BaseActionView, UpdateView):
                 "title": LabelEnum.EDIT.value,
             }
         )
+
+    def get_success_url(self):
+        referer = self.request.META.get("HTTP_REFERER", "")
+        if str(self.object.external_id) in referer:
+            return self.object.get_absolute_url()
+
+        return self.success_url
 
 
 class CustomStatusUpdateView(BaseActionView, UpdateView):

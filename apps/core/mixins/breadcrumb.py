@@ -12,14 +12,14 @@ class BreadcrumbMixin:
         return str(instance)
 
     def build_breadcrumb(self, extra_breadcrumb=None):
-        if not self.model:  # noqa
+        if not self.model:
             return []
 
-        verbose_name_plural = _(self.model._meta.verbose_name_plural).title()  # noqa
+        verbose_name_plural = _(self.model._meta.verbose_name_plural).title()
         breadcrumb = [
             {
                 "name": verbose_name_plural,
-                "url": self.get_success_url(),  # noqa
+                "url": self.get_success_url(),
                 "active": False,
                 "title": LabelEnum.LIST.format(model=verbose_name_plural),
             }
@@ -32,13 +32,20 @@ class BreadcrumbMixin:
                 {
                     "name": display_name,
                     "url": instance.get_absolute_url(),
-                    "active": True,
+                    "active": False,
                     "title": display_name,
                 }
             )
-            if extra_breadcrumb:
-                breadcrumb.append(extra_breadcrumb)
+            breadcrumb[-1]["active"] = False
         else:
             breadcrumb[-1]["active"] = True
+
+        if extra_breadcrumb:
+            if len(breadcrumb) > 1:
+                breadcrumb[-2]["active"] = False
+            else:
+                breadcrumb[0]["active"] = False
+
+            breadcrumb.append(extra_breadcrumb)
 
         return breadcrumb

@@ -29,6 +29,12 @@
                         <span>{% trans 'suppliers'|capfirst %}</span>
                     </a>
                 </li>
+                <li class="sidebar-item  {% active 'catalogs:catalogs:list' %}">
+                    <a href="{% url 'catalogs:catalogs:list' %}" class='sidebar-link'>
+                        <i class="bi bi-box2-fill"></i>
+                        <span>{% trans 'catalogs'|capfirst %}</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-title">{% trans 'administration'|capfirst %}</li>
                 <li class="sidebar-item  {% active 'security:users:list' %}">
