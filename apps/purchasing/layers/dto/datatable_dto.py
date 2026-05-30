@@ -25,6 +25,7 @@ class DatatableSearch(DatatableSearchBase):
         search = params.request.GET.get("search")
 
         if search:
+            search = search.strip()
             search_fields = [
                 "business_name",
                 "email",

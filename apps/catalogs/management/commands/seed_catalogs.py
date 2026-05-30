@@ -32,16 +32,34 @@ class Command(BaseCommand):
             )
 
             items = []
-            if catalog.code == Catalog.CatalogCodes.SUPPLY_CATEGORY:
-                data = [("Instrumental", "INST"), ("Materiales", "MAT"), ("Equipos", "EQU")]
-            else:
-                data = [("Unidad", "UN"), ("Caja", "BOX"), ("Set", "SET"), ("Piezas", "PCS")]
 
-            for name, code in data:
+            if catalog.code == Catalog.CatalogCodes.SUPPLY_CATEGORY:
+                data = [
+                    ("Instrumental", "INST", ""),
+                    ("Materiales", "MAT", ""),
+                    ("Equipos", "EQU", ""),
+                    ("Medicamentos", "MED", ""),
+                    ("Desechables", "DES", ""),
+                ]
+            else:  # UNIT_OF_MEASURE
+                data = [
+                    ("Unidad", "UN", "und"),
+                    ("Caja", "BOX", "caja"),
+                    ("Paquete", "PKG", "paq"),
+                    ("Set", "SET", "set"),
+                    ("Piezas", "PCS", "pza"),
+                    ("Mililitro", "ML", "ml"),
+                    ("Gramo", "GR", "g"),
+                    ("Kilogramo", "KG", "kg"),
+                    ("Litro", "L", "l"),
+                ]
+
+            for name, code, extra in data:
                 items.append(
                     CatalogItem(
                         name=name,
                         code=f"{catalog.code}_{code}".upper(),
+                        extra=extra,
                         catalog=catalog,
                         is_active=True,
                         created_by="system",
@@ -49,4 +67,10 @@ class Command(BaseCommand):
                 )
 
             CatalogItem.objects.bulk_create(items, ignore_conflicts=True)
+
+            status = "Created" if created else "Already existed"
+            self.stdout.write(
+                self.style.SUCCESS(f"{status} catalowg '{catalog.name}' with {len(items)} items.")
+            )
+
             self.stdout.write(self.style.SUCCESS(f"Created catalog '{catalog.name}' and items."))

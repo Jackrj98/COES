@@ -11,10 +11,18 @@ class Supply(AuditModel):
     """Represents a supply item in the system."""
 
     name = models.CharField(_("Name"), max_length=255)
-    code = models.CharField(_("Code"), max_length=50)
+    code = models.CharField(
+        _("Code"),
+        max_length=50,
+        unique=True,
+        db_index=True,
+        help_text=_("Unique identifier code, numbers and underscores"),
+    )
     description = models.CharField(_("Description"), max_length=255)
-    image_url = models.ImageField(_("Image URL"), upload_to="supplies/")
-    stock_min = models.PositiveIntegerField(_("Stock min"), default=10)
+    image_url = models.ImageField(_("Image URL"), upload_to="supplies/", blank=True, null=True)
+    stock_min = models.PositiveIntegerField(
+        _("Stock min"), default=10, help_text=_("Notify me when stock reaches this level")
+    )
 
     category = models.ForeignKey(
         "catalogs.CatalogItem",
@@ -55,7 +63,12 @@ class Batch(AuditModel):
         EXPIRED = 2, _("Expired")
 
     supply = models.ForeignKey(
-        Supply, verbose_name=_("Supply"), on_delete=models.PROTECT, related_name="batches", null=True, blank=True
+        Supply,
+        verbose_name=_("Supply"),
+        on_delete=models.PROTECT,
+        related_name="batches",
+        null=True,
+        blank=True,
     )
     number = models.CharField(_("Number"), max_length=100)
     expiration_date = models.DateField(_("Expiration date"))

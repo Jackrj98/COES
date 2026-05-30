@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.mixins import BaseAdminMixin
@@ -82,9 +82,7 @@ class BatchAdmin(BaseAdminMixin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        return queryset.annotate(
-            movement_count=Count("movements", distinct=True)
-        )
+        return queryset.annotate(movement_count=Count("movements", distinct=True))
 
     @admin.display(description=_("Movement count"), ordering="movement_count")
     def movement_count(self, obj):
