@@ -20,6 +20,7 @@ class SupplyBaseForm(forms.ModelForm):
             "stock_min",
             "category",
             "unit_of_measure",
+            "is_active",
         ]
         widgets = {
             "name": forms.TextInput(
@@ -27,10 +28,11 @@ class SupplyBaseForm(forms.ModelForm):
             ),
             "code": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: INS-001"}),
             "description": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
-            "image_url": forms.ClearableFileInput(attrs={"class": "form-control"}),
+            "image_url": forms.ClearableFileInput(attrs={"class": "form-control image-preview-filepond"}),
             "stock_min": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
             "category": forms.Select(attrs={"class": "form-select choices"}),
             "unit_of_measure": forms.Select(attrs={"class": "form-select choices"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input", "role": "switch"}),
         }
         validators = {
             "stock_min": [MinValueValidator(0)],
@@ -138,3 +140,35 @@ class SupplyFilterForm(BaseFilterForm, BaseFormHelperMixin):
         choices.extend([(item.code, item.name) for item in queryset])
 
         return choices
+
+
+class BatchFilterForm(BaseFilterForm, BaseFormHelperMixin):
+    status = forms.ChoiceField(
+        label=_("Status"),
+        required=False,
+        choices=[("", _("All"))] + list(Batch.StatusChoices.choices),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    expiration = forms.ChoiceField(
+        label=_("Expiration"),
+        choices=[
+            ("", _("All")),
+            ("current", _("Current")),
+            ("expiring", _("Expiring")),
+            ("expired", _("Expired")),
+        ],
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        search_text = _("Search by batch number")
+        if "search" in self.fields:
+            self.fields["search"].widget.attrs.update(
+                {"placeholder": search_text, "class": "form-control"}
+            )
+
+        self.setup_form_helper(
+            label_class="form-label text-sm text-muted", form_class="needs-validation"
+        )

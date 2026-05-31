@@ -107,12 +107,12 @@ class SupplyAppService(BaseAppService):
             logger.error(f"Error saving file: {e}", exc_info=True)
             return None
 
-    def register_supply(self, payload):
+    def register_supply(self, payload, file=None):
         """Register a new supply item."""
-        return self.save_supply(payload, instance=None)
+        return self.save_supply(payload, file=file, instance=None)
 
-    def update_supply(self, instance, payload):
+    def update_supply(self, instance, payload, file=None):
         """Update an existing supply item."""
         if not instance:
             raise ValueError(_("Supply instance is required."))
-        return self.save_supply(payload, instance=instance)
+        return self.save_supply(payload, instance=instance, file=file)

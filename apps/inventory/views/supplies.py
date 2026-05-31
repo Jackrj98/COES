@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import F, Q, Sum, Count
+from django.db.models import Count, F, Q, Sum
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -17,7 +17,7 @@ from apps.core.views.base import (
     CustomListView,
     CustomUpdateView,
 )
-from apps.inventory.forms import SupplyFilterForm
+from apps.inventory.forms import BatchFilterForm, SupplyBaseForm, SupplyFilterForm
 from apps.inventory.layers.applications import SupplyAppService
 from apps.inventory.models import Batch, Supply
 from apps.security.layers.security import SecurityService
@@ -25,6 +25,7 @@ from apps.security.layers.security import SecurityService
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = Supply
+SECOND_MODEL = Batch
 DEFAULT_LIST_URL = reverse_lazy("inventory:supplies:list")
 
 
@@ -40,7 +41,7 @@ class SupplyListView(CustomListView):
         ctx = super().get_context_data(**kwargs)
         ctx["object"] = self.model
         ctx["description"] = _("Management of registered supplies")
-        ctx["actions"]["menu_actions"]["add"]["url"] = reverse_lazy("catalogs:catalogs:create")
+        ctx["actions"]["menu_actions"]["add"]["url"] = reverse_lazy("inventory:supplies:create")
 
         thirty_days_from_now = timezone.now() + timedelta(days=30)
         supplies = self.object_list
@@ -57,11 +58,7 @@ class SupplyListView(CustomListView):
         expiring_batches = Batch.objects.filter(
             status=Batch.Status.ACTIVE, expiration_date__lte=thirty_days_from_now
         ).count()
-        print(
-            Batch.objects.filter(
-                status=Batch.Status.ACTIVE, expiration_date__lte=thirty_days_from_now
-            ).count()
-        )
+
         ctx["metrics_list"] = [
             {
                 "title": _("Total Supplies"),
@@ -107,12 +104,14 @@ class SupplyDetailView(CustomDetailView):
 
     app_name = "inventory"
     model = DEFAULT_MODEL
+    second_model = SECOND_MODEL
     success_url = DEFAULT_LIST_URL
     template_name = "supplies/detail.html"
     permission_required = ["inventory.view_supply", "inventory.view_batch"]
 
     def get_queryset(self):
         """Optimize a query with select_related and annotated stock data."""
+        batch_status = self.second_model.Status.ACTIVE
         return (
             super()
             .get_queryset()
@@ -120,11 +119,11 @@ class SupplyDetailView(CustomDetailView):
             .annotate(
                 total_stock=Sum(
                     "batches__stock",
-                    filter=Q(batches__status=Batch.Status.ACTIVE, batches__deleted_at__isnull=True),
+                    filter=Q(batches__status=batch_status, batches__deleted_at__isnull=True),
                 ),
                 active_batches_count=Count(
                     "batches",
-                    filter=Q(batches__status=Batch.Status.ACTIVE, batches__deleted_at__isnull=True),
+                    filter=Q(batches__status=batch_status, batches__deleted_at__isnull=True),
                 ),
             )
         )
@@ -132,7 +131,7 @@ class SupplyDetailView(CustomDetailView):
     def get_object(self, queryset=None):
         """Cache the object to avoid duplicate queries."""
         if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset) # noqa
+            self._cached_object = super().get_object(queryset)  # noqa
         return self._cached_object
 
     def get_context_data(self, **kwargs):
@@ -141,8 +140,8 @@ class SupplyDetailView(CustomDetailView):
         # Calculate stock percentage (capped at 100%)
         ctx["stock_percentage"] = self._calculate_stock_percentage(supply)
         # Additional context
-        ctx["filter_form"] = "CatalogFilterForm"
-        ctx["is_admin"] = SecurityService.is_admin(self.request.user)
+        ctx["batch"] = self.second_model
+        ctx["filter_form"] = BatchFilterForm
 
         return ctx
 
@@ -162,14 +161,13 @@ class SupplyDetailView(CustomDetailView):
         return 0
 
 
-
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
-class CatalogCreateView(CustomCreateView):
+class SupplyCreateView(CustomCreateView):
     model = DEFAULT_MODEL
-    form_class = "CatalogBaseForm"
+    form_class = SupplyBaseForm
     success_url: str = DEFAULT_LIST_URL
-    permission_required = "catalogs.add_catalog"
-    template_name = "catalogs/create_or_update.html"
+    permission_required = "inventory.add_supply"
+    template_name = "supplies/create_or_update.html"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -187,10 +185,10 @@ class CatalogCreateView(CustomCreateView):
 
     def form_valid(self, form, **kwargs):
         service = SupplyAppService()
-
+        file = self.request.FILES.get("file")
         try:
             data = form.cleaned_data
-            service.register_catalog(payload={**data})
+            service.register_supply(payload={**data}, file=file)
             messages.success(
                 self.request,
                 self.success_message.format(model=self.model._meta.verbose_name),

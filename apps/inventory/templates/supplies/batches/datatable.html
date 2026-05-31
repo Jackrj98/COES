@@ -1,0 +1,83 @@
+{% load custom_tags crispy_forms_filters %}
+
+<section class="section">
+    <div class="row d-flex justify-content-center g-0">
+        <div class="col-xl-12 col-md-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h4 class="card-title mb-0">
+                        {% trans 'Breakdown by batch'|capfirst %}
+                    </h4>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="bi bi-record-fill text-success" style="line-height:1;"></i>
+                            <small class="text-muted">{% trans 'Current' %} (+30 d)</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="bi bi-record-fill text-warning" style="line-height:1;"></i>
+                            <small class="text-muted">{% trans 'Expiring' %} (≤30 d)</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="bi bi-record-fill text-danger" style="line-height:1;"></i>
+                            <small class="text-muted">{% trans 'Expired'|capfirst %}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body mt-0 pt-0">
+
+                    {% block filters %}
+                        {% if filter_form %}
+                            <form method="GET" id="filter" class="mb-4">
+                                <div class="row align-items-end g-3">
+                                    <div class="col-12 col-sm-6 col-md-8 col-lg-6">
+                                        {{ filter_form.search|as_crispy_field }}
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-md-8 col-lg-3">
+                                        {{ filter_form.status|as_crispy_field }}
+                                    </div>
+                                    <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                                        <div class="d-flex align-items-end gap-2">
+                                            <div class="flex-grow-1">
+                                                {{ filter_form.expiration|as_crispy_field }}
+                                            </div>
+                                            <div class="mb-3">
+                                                <button type="button"
+                                                        id="clear-filters"
+                                                        class="btn btn-outline-secondary"
+                                                        style="width: 38px; height: 38px; padding: 0;">
+                                                    <i class="bi bi-arrow-clockwise"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        {% endif %}
+                    {% endblock filters %}
+                    <div class="table-responsive w-100 mt-3">
+                        <table id="datatable-list" class="table w-100">
+                            <thead>
+                            <tr class="text-uppercase">
+                                {% block columns %}
+                                    <th scope="col" class="text-uppercase"></th>
+                                    <th scope="col" class="text-uppercase">{{ batch|field_label:'number'|upper }}</th>
+                                    <th scope="col"
+                                        class="text-uppercase">{{ batch|field_label:'expiration_date'|upper }}</th>
+                                    <th scope="col" class="text-uppercase">{{ batch|field_label:'stock'|upper }}</th>
+                                    <th scope="col" class="text-uppercase">{{ batch|field_label:'stock'|upper }}</th>
+                                    <th scope="col"
+                                        class="text-uppercase">{{ batch|field_label:'purchase_unit_cost'|upper }}</th>
+                                    <th scope="col" class="text-uppercase">{{ batch|field_label:'status'|upper }}</th>
+                                    <th scope="col" class="text-uppercase">{% trans 'actions'|upper %}</th>
+                                {% endblock columns %}
+                            </tr>
+                            </thead>
+                            <tbody>{% block rows %}{% endblock %}</tbody>
+                            <caption>{% block caption %}{% endblock %}</caption>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

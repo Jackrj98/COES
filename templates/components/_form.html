@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="{% static 'assets/extensions/flatpickr/flatpickr.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/extensions/choices.js/public/assets/styles/choices.css' %}">
 
+    <link rel="stylesheet" href="{% static 'assets/extensions/filepond/filepond.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'assets/extensions/filepond-plugin-image-preview/filepond-plugin-image-preview.css' %}">
 {% endblock extra_css %}
 
 {% block content %}
@@ -56,5 +59,10 @@
     <script src="{% static 'assets/static/js/pages/date-picker.js' %}"></script>
     <script src="{% static 'assets/extensions/choices.js/public/assets/scripts/choices.js' %}"></script>
     <script src="{% static 'assets/static/js/pages/form-element-select.js' %}"></script>
+    <script src="{% static 'assets/extensions/filepond/filepond.js' %}"></script>
+
+    <script src="{% static 'assets/extensions/filepond-plugin-image-preview/filepond-plugin-image-preview.min.js' %}"></script>
+    <script src="{% static 'assets/static/js/pages/filepond.js' %}"></script>
+
 {% endblock javascript %}
 
