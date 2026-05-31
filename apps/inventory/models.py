@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -52,6 +53,45 @@ class Supply(AuditModel):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("inventory:supplies:detail", kwargs={"external_id": self.external_id})
+
+    @property
+    def stock_available(self):
+        return self.batches.aggregate(models.Sum("stock"))["stock__sum"] or 0
+
+    @property
+    def stock_min_reached(self):
+        return self.stock_available <= self.stock_min
+
+    @property
+    def initials(self):
+        name_parts = self.name.split()
+        initials = "".join(part[0] for part in name_parts[:2])
+        return initials.upper()
+
+    @property
+    def active_batches(self):
+        return self.batches.filter(status=Batch.Status.ACTIVE).count()
+
+    @property
+    def stock_percentage(self):
+        if self.stock_min <= 0:
+            return 0
+
+        pct = (self.stock_available / self.stock_min) * 100
+        return min(round(pct), 100)
+
+    @property
+    def color(self):
+        current_stock = getattr(self, "total_stock", self.stock_available) or 0
+        if current_stock >= self.stock_min:
+            return "success"
+        elif current_stock > self.stock_min * 0.2:
+            return "warning"
+        else:
+            return "danger"
 
 
 class Batch(AuditModel):

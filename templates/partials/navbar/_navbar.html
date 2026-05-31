@@ -19,12 +19,12 @@
                                     {% if bread.active %}
                                         <li class="breadcrumb-item active fw-semibold text-truncate-custom"
                                             aria-current="page" title="{{ bread.name }}">
-                                            {% trans bread.name|truncatechars:15|capfirst %}
+                                            {% trans bread.name|capfirst|truncatechars:15 %}
                                         </li>
                                     {% else %}
                                         <li class="breadcrumb-item text-truncate-custom" title="{{ bread.name }}">
                                             <a href="{{ bread.url }}" class="text-decoration-none">
-                                                {% trans bread.name|truncatechars:15|capfirst %}
+                                                {% trans bread.name|capfirst|truncatechars:15 %}
                                             </a>
                                         </li>
                                     {% endif %}

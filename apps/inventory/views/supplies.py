@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import F, Q, Sum
+from django.db.models import F, Q, Sum, Count
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -102,53 +102,65 @@ class SupplyListView(CustomListView):
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
-class CatalogDetailView(CustomDetailView):
-    app_name = "catalogs"
+class SupplyDetailView(CustomDetailView):
+    """View for displaying supply details with stock information."""
+
+    app_name = "inventory"
     model = DEFAULT_MODEL
-    success_url: str = DEFAULT_LIST_URL
-    template_name = "catalogs/detail.html"
-    permission_required = ["catalogs.view_catalog", "catalogs.view_catalogitem"]
+    success_url = DEFAULT_LIST_URL
+    template_name = "supplies/detail.html"
+    permission_required = ["inventory.view_supply", "inventory.view_batch"]
+
+    def get_queryset(self):
+        """Optimize a query with select_related and annotated stock data."""
+        return (
+            super()
+            .get_queryset()
+            .select_related("category", "unit_of_measure")
+            .annotate(
+                total_stock=Sum(
+                    "batches__stock",
+                    filter=Q(batches__status=Batch.Status.ACTIVE, batches__deleted_at__isnull=True),
+                ),
+                active_batches_count=Count(
+                    "batches",
+                    filter=Q(batches__status=Batch.Status.ACTIVE, batches__deleted_at__isnull=True),
+                ),
+            )
+        )
 
     def get_object(self, queryset=None):
         """Cache the object to avoid duplicate queries."""
         if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)  # noqa
+            self._cached_object = super().get_object(queryset) # noqa
         return self._cached_object
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["is_admin"] = SecurityService.is_admin(self.request.user)
-
-        catalog = self.get_object()
-        ctx["total_items"] = catalog.items.count()
-        ctx["active_items"] = catalog.items.filter(is_active=True).count()
+        supply = self.get_object()
+        # Calculate stock percentage (capped at 100%)
+        ctx["stock_percentage"] = self._calculate_stock_percentage(supply)
+        # Additional context
         ctx["filter_form"] = "CatalogFilterForm"
-        ctx["items_url"] = reverse_lazy(
-            "catalogs:items:list", kwargs={"catalog_reference": catalog.external_id}
-        )
-        #   {'title': 'Accionable', 'actions': [{'icon': 'bi bi-pencil-square', 'order': 0, 'title': 'Editar', 'action': 'update', 'description': '', 'url': '/catalogs/be7e4974-2d35-4333-a226-d6801cf0854a/update/'}]}
-
-        actions = ctx["actions"]
-        actions["actions"].insert(
-            0,
-            {
-                "icon": "bi bi-plus-lg",
-                "order": 1,
-                "title": _("Add item"),
-                "action": "add_item",
-                "description": "",
-                "url": reverse_lazy(
-                    "catalogs:items:create", kwargs={"catalog_reference": catalog.external_id}
-                ),
-            },
-        )
-        ctx["actions"] = actions
-        print(actions)
+        ctx["is_admin"] = SecurityService.is_admin(self.request.user)
 
         return ctx
 
     def get_success_url(self):
+        """Return the success URL after form submission."""
         return self.success_url
+
+    @staticmethod
+    def _calculate_stock_percentage(supply):
+        """Calculate stock percentage based on total_stock and stock_min."""
+        stock_val = getattr(supply, "total_stock", 0) or 0
+        min_val = supply.stock_min
+
+        if min_val > 0 and stock_val > 0:
+            percentage = (stock_val / min_val) * 100
+            return min(round(percentage), 100)
+        return 0
+
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
