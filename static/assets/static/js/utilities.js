@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+    $('.select2').each(function() {
+        $(this).select2({
+            theme: "bootstrap-5",
+            width: '100%',
+            dropdownParent: $(this).parent(),
+        });
+    });
     document.addEventListener("submit", (e) => {
         const form = e.target;
         if (form.tagName !== "FORM" || form.hasAttribute("data-no-loader")) return;

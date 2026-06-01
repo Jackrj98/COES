@@ -51,14 +51,19 @@ class SupplyAppService(BaseAppService):
             logger.exception(f"Failed to fetch supplies: {e}")
             return params.result([]) if hasattr(params, "result") else []
 
+    @staticmethod
+    def _generate_unique_code():
+        import uuid
+
+        return f"INS-{uuid.uuid4().hex[:8].upper()}"
+
     @transaction.atomic
     def save_supply(self, payload, file=None, instance=None):
-
         builder = SupplyBuilder(supply=instance) if instance else SupplyBuilder()
-        action = "updating" if instance else "creating"
 
         try:
             dto = SupplyDTO(**payload)
+
             supply = (
                 builder.set_name(dto.name)
                 .set_code(dto.code)
@@ -68,47 +73,49 @@ class SupplyAppService(BaseAppService):
                 .set_category(dto.category_id)
                 .set_unit_of_measure(dto.unit_of_measure_id)
                 .save()
-            )
+            ).build()
 
             if file:
-                self._save_uploaded_file(file, instance=supply)
+                self._save_uploaded_file(file=file, instance=supply)
 
-            return supply.build()
+            return supply
+
         except ValidationError as e:
-            logger.warning(f"Validation error {action} supply: {e.json()}")
+            logger.warning(f"Validation error: {e.json()}")
             raise
         except Exception as e:
-            logger.error(f"Error {action} supply: {e}", exc_info=True)
+            logger.error(f"Error saving supply: {e}", exc_info=True)
             raise
 
     @staticmethod
-    def _delete_old_image(instance, field_name="image_url"):
-        """Delete an old image file from storage."""
-        try:
-            old_file = getattr(instance, field_name, None)
-            if old_file and old_file.name:
-                old_file.delete(save=False)
-        except Exception as e:
-            logger.warning(f"Error deleting old image: {e}")
-
-    def _save_uploaded_file(self, file, instance=None, field_name="image_url"):
-        """Save the uploaded file to an instance or return URL."""
-        try:
-            if instance:
-                self._delete_old_image(instance, field_name)
-                setattr(instance, field_name, file)
-                instance.save(update_fields=[field_name])
-                return getattr(instance, field_name).url if getattr(instance, field_name) else None
-
-            file_path = default_storage.save(f"supplies/{file.name}", file)
-            return default_storage.url(file_path)
-
-        except Exception as e:
-            logger.error(f"Error saving file: {e}", exc_info=True)
+    def _save_uploaded_file(file, instance=None, field_name="image_url"):
+        """Save uploaded file and delete old one if exists."""
+        if not file or not instance:
             return None
+
+        # Get the old file field value
+        old_file_field = getattr(instance, field_name)
+
+        # Delete old file if exists
+        if old_file_field and old_file_field.name:
+            try:
+                if default_storage.exists(old_file_field.name):
+                    default_storage.delete(old_file_field.name)
+                    print(f"DEBUG: Old file {old_file_field.name} deleted successfully.")
+            except Exception as e:
+                print(f"WARNING: Could not delete old file: {e}")
+
+        # Assign and save new file
+        setattr(instance, field_name, file)
+        instance.save()
+
+        # Return the URL of the new file
+        new_file_field = getattr(instance, field_name)
+        return new_file_field.url if new_file_field else None
 
     def register_supply(self, payload, file=None):
         """Register a new supply item."""
+        payload["code"] = self._generate_unique_code()
         return self.save_supply(payload, file=file, instance=None)
 
     def update_supply(self, instance, payload, file=None):

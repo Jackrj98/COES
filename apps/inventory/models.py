@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.urls import reverse
@@ -6,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.catalogs.models import Catalog
 from apps.core.models import AuditModel
+from apps.core.utils.helpers import generate_upload_path
 
 
 class Supply(AuditModel):
@@ -20,7 +22,9 @@ class Supply(AuditModel):
         help_text=_("Unique identifier code, numbers and underscores"),
     )
     description = models.CharField(_("Description"), max_length=255)
-    image_url = models.ImageField(_("Image URL"), upload_to="supplies/", blank=True, null=True)
+    image_url = models.ImageField(
+        _("Image URL"), upload_to=generate_upload_path, blank=True, null=True
+    )
     stock_min = models.PositiveIntegerField(
         _("Stock min"), default=10, help_text=_("Notify me when stock reaches this level")
     )
@@ -49,7 +53,7 @@ class Supply(AuditModel):
         db_table = "supply"
         verbose_name = _("Supply")
         verbose_name_plural = _("Supplies")
-        ordering = ("name", "-created_at")
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.name
@@ -92,6 +96,12 @@ class Supply(AuditModel):
             return "warning"
         else:
             return "danger"
+
+    def get_image(self):
+        """Get the URL of the user's image."""
+        if self.image_url:
+            return f"{settings.MEDIA_URL}{self.image_url}"
+        return f"{settings.STATIC_URL}assets/img/undraw_profile.svg"
 
 
 class Batch(AuditModel):

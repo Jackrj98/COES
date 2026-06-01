@@ -3,12 +3,29 @@ from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from apps.catalogs.layers.applications import CatalogItemAppService
+from apps.catalogs.models import CatalogItem
 from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
 from apps.inventory.models import Batch, InventoryMovement, Supply
 
 
 class SupplyBaseForm(forms.ModelForm):
     """Form base for Supply."""
+
+    category = forms.ModelChoiceField(
+        label=_("Category"),
+        queryset=CatalogItem.objects.none(),
+        widget=forms.Select(attrs={"class": "form-select select2"}),
+        empty_label=_("Select category"),
+        required=True,
+    )
+
+    unit_of_measure = forms.ModelChoiceField(
+        label=_("Unit of Measure"),
+        queryset=CatalogItem.objects.none(),
+        widget=forms.Select(attrs={"class": "form-select select2"}),
+        empty_label=_("Select unit of measure"),
+        required=True,
+    )
 
     class Meta:
         model = Supply
@@ -27,16 +44,47 @@ class SupplyBaseForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Ej: Amoxicilina 500mg"}
             ),
             "code": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: INS-001"}),
-            "description": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
-            "image_url": forms.ClearableFileInput(attrs={"class": "form-control image-preview-filepond"}),
+            "description": forms.Textarea(
+                attrs={
+                    "rows": 3,
+                    "class": "form-control",
+                    "required": False,
+                    "placeholder": "Ej: Amoxicilina 500mg",
+                }
+            ),
+            "image_url": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control image-preview-filepond",
+                    "name": "image_url",
+                    "accept": "image/*",
+                }
+            ),
             "stock_min": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
-            "category": forms.Select(attrs={"class": "form-select choices"}),
-            "unit_of_measure": forms.Select(attrs={"class": "form-select choices"}),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input", "role": "switch"}),
         }
         validators = {
             "stock_min": [MinValueValidator(0)],
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        service = CatalogItemAppService()
+        self.fields["category"].queryset = (  # noqa
+            service.retrieve_catalog_items(catalog_code="cat_supply")
+            .only("id", "name")
+            .order_by("name")
+        )
+        self.fields["category"].label_from_instance = lambda obj: obj.name  # noqa
+
+        self.fields["unit_of_measure"].queryset = (  # noqa
+            service.retrieve_catalog_items(catalog_code="uni_measure")
+            .only("id", "name", "extra")
+            .order_by("name")
+        )
+        self.fields["unit_of_measure"].label_from_instance = lambda obj: (  # noqa
+            f"{obj.name} ({obj.extra})" if obj.extra else obj.name
+        )
 
 
 class BatchBaseForm(forms.ModelForm):
@@ -105,7 +153,7 @@ class SupplyFilterForm(BaseFilterForm, BaseFormHelperMixin):
     category = forms.ChoiceField(
         label=_("Category"),
         required=False,
-        widget=forms.Select(attrs={"class": "form-select choices"}),
+        widget=forms.Select(attrs={"class": "form-select select2"}),
     )
     stock = forms.ChoiceField(
         label=_("Stock"),

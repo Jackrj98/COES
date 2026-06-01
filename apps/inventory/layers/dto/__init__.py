@@ -1,4 +1,4 @@
 from .datatable_dto import DatatableSearch
-from .supply import SupplyDTO
+from .supply_dto import SupplyDTO
 
 __all__ = [DatatableSearch, SupplyDTO]

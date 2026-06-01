@@ -13,8 +13,8 @@ from apps.core.models import AuditModel
 
 class Catalog(AuditModel):
     class CatalogCodes:
-        SUPPLY_CATEGORY = "cat_supply"
-        UNIT_OF_MEASURE = "uni_measure"
+        SUPPLY_CATEGORY = "CAT_SUPPLY"
+        UNIT_OF_MEASURE = "UNI_MEASURE"
 
     name = models.CharField(
         _("Name"),

@@ -102,7 +102,7 @@ class SupplyListView(CustomListView):
 class SupplyDetailView(CustomDetailView):
     """View for displaying supply details with stock information."""
 
-    app_name = "inventory"
+    app_name = "supplies"
     model = DEFAULT_MODEL
     second_model = SECOND_MODEL
     success_url = DEFAULT_LIST_URL
@@ -184,11 +184,18 @@ class SupplyCreateView(CustomCreateView):
         return self.form_invalid(form)
 
     def form_valid(self, form, **kwargs):
+        data = form.cleaned_data
         service = SupplyAppService()
-        file = self.request.FILES.get("file")
+        uploaded_file = self.request.FILES.get("image_url")
+
         try:
-            data = form.cleaned_data
-            service.register_supply(payload={**data}, file=file)
+            data.pop("image_url")
+            category = data.pop("category")
+            unit_of_measure = data.pop("unit_of_measure")
+            data["category_id"] = category.id
+            data["unit_of_measure_id"] = unit_of_measure.id
+
+            service.register_supply(payload={**data}, file=uploaded_file)
             messages.success(
                 self.request,
                 self.success_message.format(model=self.model._meta.verbose_name),
@@ -208,12 +215,12 @@ class SupplyCreateView(CustomCreateView):
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
-class CatalogUpdateView(CustomUpdateView):
+class SupplyUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
-    form_class = "CatalogBaseForm"
+    form_class = SupplyBaseForm
     success_url: str = DEFAULT_LIST_URL
-    permission_required = "catalogs.change_catalog"
-    template_name = "catalogs/create_or_update.html"
+    permission_required = "inventory.change_supply"
+    template_name = "supplies/create_or_update.html"
 
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
@@ -240,21 +247,23 @@ class CatalogUpdateView(CustomUpdateView):
         return self.form_invalid(form)
 
     def form_valid(self, form):
+        """Handle valid form submission with category and unit conversion."""
+        cleaned_data = form.cleaned_data
         service = SupplyAppService()
-        data = form.cleaned_data
+        uploaded_file = self.request.FILES.get("image_url")
+
         try:
-            instance = service.update_catalog(
-                instance=self.get_object(),
-                payload={**data},
+            # Prepare data for service layer
+            supply_data = self._prepare_supply_data(cleaned_data)
+
+            # Update supply instance
+            instance = service.update_supply(
+                instance=self.get_object(), payload=supply_data, file=uploaded_file
             )
 
-            reference = instance.code[:10]
-            model_name = self.model._meta.verbose_name
-            messages.success(
-                self.request,
-                self.success_message.format(model=model_name, instance=reference),
-                extra_tags="toast",
-            )
+            # Show success message
+            self._show_success_message(instance)
+
             return redirect(self.get_success_url())
 
         except ValidationError as e:
@@ -262,6 +271,39 @@ class CatalogUpdateView(CustomUpdateView):
             return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
+
+    @staticmethod
+    def _prepare_supply_data(cleaned_data):
+        """Transform form data for the service layer.
+        Converts category and unit_of_measure objects to their IDs.
+        """
+        data = cleaned_data.copy()  # Avoid mutating original
+
+        # Remove file field (handled separately)
+        data.pop("image_url", None)
+
+        # Extract and convert foreign keys to IDs
+        category = data.pop("category", None)
+        unit_of_measure = data.pop("unit_of_measure", None)
+
+        if category:
+            data["category_id"] = category.id
+
+        if unit_of_measure:
+            data["unit_of_measure_id"] = unit_of_measure.id
+
+        return data
+
+    def _show_success_message(self, instance):
+        """Display a success message after a successful update."""
+        reference = instance.name[:10]
+        model_name = self.model._meta.verbose_name
+
+        messages.success(
+            self.request,
+            self.success_message.format(model=model_name, instance=reference),
+            extra_tags="toast",
+        )
 
     def form_invalid(self, form):
         messages.warning(self.request, self.failure_message)

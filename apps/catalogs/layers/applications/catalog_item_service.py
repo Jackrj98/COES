@@ -52,9 +52,8 @@ class CatalogItemAppService(BaseAppService):
             raise ValueError(_("Catalog code is required."))
 
         norm_ctg_code = self.normalize_data(catalog_code, remove_spaces=True, to_lowercase=False)
-
         queryset = self.model.active.filter(catalog__code=norm_ctg_code, is_active=True)
-        return queryset.select_related("catalog").order_by("-priority")
+        return queryset.order_by("-priority")
 
     def retrieve_by_priority(self, catalog_code, priority):
         norm_ctg_code = self.normalize_data(catalog_code, remove_spaces=True, to_lowercase=False)
@@ -163,7 +162,6 @@ class CatalogItemAppService(BaseAppService):
         catalog = self.retrieve_catalog_by_external(catalog_reference)
 
         payload["catalog_id"] = catalog.id
-        print(payload)
         return self.save_item(payload, instance=None)
 
     def update_item(self, instance, payload, catalog_reference):

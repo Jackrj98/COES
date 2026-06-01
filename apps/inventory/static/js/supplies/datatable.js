@@ -8,7 +8,7 @@ $(document).ready(function () {
         selector: "#datatable-list",
         ajaxUrl: urlPaginator,
         columns: columns,
-        order: [[0, "asc"]],
+        order: [],
         filters: [
             {selector: "#id_status", field: "status"},
             {selector: "#id_search", field: "search"},
@@ -102,15 +102,16 @@ const columns = [
             width: "10%",
             className: DataTableFactory.classes.justify,
             render: (data, type, row) => {
+                const stock = data || 0;
                 const stockColor = (s, min) => s >= min ? '#22c55e' : (s >= min * 0.2 ? '#f59e0b' : '#ef4444');
-                const col = stockColor(data, row.stock_min);
-                const pct = Math.min(Math.round((data / (row.stock_min * 2 || 1)) * 100), 100);
+                const col = stockColor(stock, row.stock_min);
+                const pct = Math.min(Math.round((stock / (row.stock_min * 2 || 1)) * 100), 100);
 
                 return `
                     <td class="py-4">
                         <div class="d-flex flex-column" style="width: 60px;">
                             <span class="fw-bold mb-1" style="color: ${col}; font-size: 0.9rem;">
-                                ${data}
+                                ${stock}
                             </span>
                             <div class="progress" style="height: 4px; background-color: #2b3035;">
                                 <div class="progress-bar" 

@@ -15,7 +15,9 @@ class SupplyBuilder:
     def set_code(self, code: str) -> "SupplyBuilder":
         if code:
             clean_code = "".join(
-                c for c in code.strip().upper().replace(" ", "_") if c.isalnum() or c == "_"
+                c
+                for c in code.strip().upper().replace(" ", "_")
+                if c.isalnum() or c == "_" or c == "-"
             )
             self.supply.code = clean_code
         return self
@@ -37,12 +39,12 @@ class SupplyBuilder:
 
     def set_category(self, category: int) -> "SupplyBuilder":
         """Set a supply category."""
-        self.supply.category = category
+        self.supply.category_id = category
         return self
 
     def set_unit_of_measure(self, unit_of_measure: int) -> "SupplyBuilder":
         """Set a supply unit_of_measure."""
-        self.supply.unit_of_measure = unit_of_measure
+        self.supply.unit_of_measure_id = unit_of_measure
         return self
 
     def set_active(self, is_active: bool = True) -> "SupplyBuilder":

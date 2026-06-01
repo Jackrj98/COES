@@ -22,7 +22,7 @@ class BaseAppService:
         if not isinstance(data, str):
             return data
 
-        normalized = data.strip().strip("'")
+        normalized = data.strip().strip("'").upper()
         if to_lowercase:
             normalized = normalized.lower()
         if remove_spaces:
