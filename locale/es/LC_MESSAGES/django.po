@@ -9,6 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-31 22:48-0500\n"
 "PO-Revision-Date: 2026-05-31 22:49-0500\n"
+
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -45,6 +46,8 @@ msgstr "Información Básica"
 #: apps/purchasing/forms.py:12 apps/purchasing/models.py:72
 #: apps/security/forms/user.py:12 apps/security/models/users.py:113
 #: apps/security/models/users.py:206
+ apps/security/models/users.py:206
+
 msgid "Status"
 msgstr "Estado"
 
