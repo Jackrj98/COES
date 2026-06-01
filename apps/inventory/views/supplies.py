@@ -187,7 +187,6 @@ class SupplyCreateView(CustomCreateView):
         try:
             # Prepare data for service layer
             supply_data = form.get_service_payload()
-            print(supply_data)
             uploaded_file = self.request.FILES.get("image_url")
 
             # Register supply

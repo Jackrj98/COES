@@ -55,7 +55,9 @@ class SupplyAppService(BaseAppService):
     def _generate_unique_code(code):
         import uuid
 
-        return f"{code[:3]}-{uuid.uuid4().hex[:6].upper()}"
+        if code:
+            return f"{code}-{uuid.uuid4().hex[:6].upper()}"
+        return f"{uuid.uuid4().hex[:6].upper()}"
 
     @transaction.atomic
     def save_supply(self, payload, file=None, instance=None):
@@ -101,10 +103,9 @@ class SupplyAppService(BaseAppService):
             try:
                 if default_storage.exists(old_file_field.name):
                     default_storage.delete(old_file_field.name)
-                    print(f"DEBUG: Old file {old_file_field.name} deleted successfully.")
+                    logger.info(f"Deleted old file: {old_file_field.name}")
             except Exception as e:
-                print(f"WARNING: Could not delete old file: {e}")
-
+                logger.error(f"Error deleting old file: {e}")
         # Assign and save new file
         setattr(instance, field_name, file)
         instance.save()
@@ -115,8 +116,8 @@ class SupplyAppService(BaseAppService):
 
     def register_supply(self, payload, file=None):
         """Register a new supply item."""
-        category_code = payload.get("category_code")
-        payload.pop("category_code")
+        category_code = payload.get("category_code", None)
+        payload.pop("category_code", None)
         payload["code"] = self._generate_unique_code(category_code)
 
         return self.save_supply(payload, file=file, instance=None)
@@ -126,6 +127,6 @@ class SupplyAppService(BaseAppService):
         if not instance:
             raise ValueError(_("Supply instance is required."))
 
-        payload.pop("category_code")
+        payload.pop("category_code", None)
         payload["code"] = instance.code
         return self.save_supply(payload, instance=instance, file=file)

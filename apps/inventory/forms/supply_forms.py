@@ -76,7 +76,7 @@ class SupplyBaseForm(forms.ModelForm):
         service = CatalogItemAppService()
         self.fields["category"].queryset = (  # noqa
             service.retrieve_catalog_items(catalog_code="cat_supply")
-            .only("id", "name", "code")
+            .only("id", "name", "code", "extra")
             .order_by("name")
         )
         self.fields["category"].label_from_instance = lambda obj: obj.name  # noqa
@@ -100,7 +100,7 @@ class SupplyBaseForm(forms.ModelForm):
 
         if category:
             data["category_id"] = category.id
-            data["category_code"] = category.code
+            data["category_code"] = category.extra
 
         if unit_of_measure:
             data["unit_of_measure_id"] = unit_of_measure.id
