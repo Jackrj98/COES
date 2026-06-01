@@ -145,9 +145,15 @@ class TestUpdateCatalog:
 
     @pytest.mark.django_db
     def test_raises_error_on_duplicate_code(self, service, valid_payload):
-        catalog2 = service.register_catalog({**valid_payload, "code": "TEST002", "name": "Other"})
+        service.register_catalog(
+            {**valid_payload, "code": "EXISTENTE", "name": "Primero", "is_active": True}
+        )
 
-        update_data = {**valid_payload, "code": "TEST001"}  # Trying to change to existing code
+        catalog2 = service.register_catalog(
+            {**valid_payload, "code": "TEST002", "name": "Segundo", "is_active": True}
+        )
+
+        update_data = {**valid_payload, "code": "EXISTENTE", "name": "Nombre"}
 
         with pytest.raises(ValueError, match="already exists"):
             service.update_catalog(catalog2, update_data)

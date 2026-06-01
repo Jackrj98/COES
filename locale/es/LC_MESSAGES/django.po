@@ -7,8 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-31 20:34-0500\n"
-"PO-Revision-Date: 2026-05-31 20:35-0500\n"
+"POT-Creation-Date: 2026-05-31 22:48-0500\n"
+"PO-Revision-Date: 2026-05-31 22:49-0500\n"
+
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -39,11 +40,14 @@ msgid "Basic Information"
 msgstr "Información Básica"
 
 #: apps/catalogs/admin.py:53 apps/catalogs/admin.py:138
-#: apps/core/forms/base.py:46 apps/inventory/forms/supply_forms.py:195
-#: apps/inventory/models.py:131 apps/purchasing/admin.py:13
-#: apps/purchasing/admin.py:79 apps/purchasing/forms.py:12
-#: apps/purchasing/models.py:72 apps/security/forms/user.py:12
-#: apps/security/models/users.py:113 apps/security/models/users.py:206
+#: apps/core/forms/base.py:46 apps/inventory/forms/supply_forms.py:193
+#: apps/inventory/models.py:148 apps/inventory/models.py:194
+#: apps/purchasing/admin.py:13 apps/purchasing/admin.py:79
+#: apps/purchasing/forms.py:12 apps/purchasing/models.py:72
+#: apps/security/forms/user.py:12 apps/security/models/users.py:113
+#: apps/security/models/users.py:206
+ apps/security/models/users.py:206
+
 msgid "Status"
 msgstr "Estado"
 
@@ -61,7 +65,7 @@ msgstr "Elementos"
 msgid "Catalog"
 msgstr "Catálogo"
 
-#: apps/catalogs/forms.py:13 apps/inventory/forms/supply_forms.py:172
+#: apps/catalogs/forms.py:13 apps/inventory/forms/supply_forms.py:170
 msgid "Search by name or code"
 msgstr "Buscar por nombre o código"
 
@@ -217,7 +221,7 @@ msgstr "creado"
 
 #: apps/catalogs/templates/catalogs/datatable.html:51
 #: apps/catalogs/templates/catalogs/items/datatable.html:55
-#: apps/inventory/templates/supplies/batches/datatable.html:71
+#: apps/inventory/templates/supplies/batches/datatable.html:72
 #: apps/inventory/templates/supplies/datatable.html:77
 #: apps/purchasing/templates/suppliers/datatable.html:122
 #: apps/security/templates/users/datatable.html:57
@@ -498,76 +502,87 @@ msgid "Movement Details"
 msgstr "Detalles del movimiento"
 
 #: apps/inventory/forms/supply_forms.py:15
-#: apps/inventory/forms/supply_forms.py:154 apps/inventory/models.py:36
+#: apps/inventory/forms/supply_forms.py:152 apps/inventory/models.py:36
 msgid "Category"
 msgstr "Categoría"
 
 #: apps/inventory/forms/supply_forms.py:18
+#, fuzzy
+#| msgid "Select date"
 msgid "Select category"
-msgstr "Selecciona una categoría"
+msgstr "Seleccionar fecha"
 
 #: apps/inventory/forms/supply_forms.py:23 apps/inventory/models.py:46
 msgid "Unit of Measure"
 msgstr "Unidad de medida"
 
 #: apps/inventory/forms/supply_forms.py:26
+#, fuzzy
+#| msgid "Unit of Measure"
 msgid "Select unit of measure"
-msgstr "Selecciona la unidad de medida"
+msgstr "Unidad de medida"
 
-#: apps/inventory/forms/supply_forms.py:159 apps/inventory/models.py:126
+#: apps/inventory/forms/supply_forms.py:157 apps/inventory/models.py:143
 msgid "Stock"
 msgstr "Stock"
 
-#: apps/inventory/forms/supply_forms.py:161
+#: apps/inventory/forms/supply_forms.py:159
 msgid "All stocks"
 msgstr "Todas las existencias"
 
-#: apps/inventory/forms/supply_forms.py:162
+#: apps/inventory/forms/supply_forms.py:160
 msgid "Low stock"
 msgstr "Stock bajo"
 
-#: apps/inventory/forms/supply_forms.py:163
+#: apps/inventory/forms/supply_forms.py:161
 #: apps/inventory/templates/supplies/detail.html:63
 msgid "Normal stock"
 msgstr "Stock habitual"
 
-#: apps/inventory/forms/supply_forms.py:164
+#: apps/inventory/forms/supply_forms.py:162
 #: apps/inventory/templates/supplies/detail.html:59
 msgid "Critical stock"
 msgstr "Stock crítico"
 
-#: apps/inventory/forms/supply_forms.py:187
+#: apps/inventory/forms/supply_forms.py:185
 msgid "All categories"
 msgstr "Todas las categorías"
 
-#: apps/inventory/forms/supply_forms.py:197
-#: apps/inventory/forms/supply_forms.py:203
+#: apps/inventory/forms/supply_forms.py:195
+#: apps/inventory/forms/supply_forms.py:201
 msgid "All"
 msgstr "Todos"
 
-#: apps/inventory/forms/supply_forms.py:201
+#: apps/inventory/forms/supply_forms.py:199
+#: apps/inventory/templates/supplies/batches/datatable.html:64
 msgid "Expiration"
 msgstr "Caducidad"
 
-#: apps/inventory/forms/supply_forms.py:204
+#: apps/inventory/forms/supply_forms.py:202
 #: apps/inventory/templates/supplies/batches/datatable.html:14
 msgid "Current"
 msgstr "Vigente"
 
-#: apps/inventory/forms/supply_forms.py:205
+#: apps/inventory/forms/supply_forms.py:203
 #: apps/inventory/templates/supplies/batches/datatable.html:18
 msgid "Expiring"
 msgstr "Por vencer"
 
-#: apps/inventory/forms/supply_forms.py:206 apps/inventory/models.py:113
+#: apps/inventory/forms/supply_forms.py:204 apps/inventory/models.py:113
 #: apps/inventory/templates/supplies/batches/datatable.html:22
 #: apps/security/models/users.py:189
 msgid "Expired"
 msgstr "Vencido"
 
-#: apps/inventory/forms/supply_forms.py:214
+#: apps/inventory/forms/supply_forms.py:212
 msgid "Search by batch number"
 msgstr "Buscar por número de lote"
+
+#: apps/inventory/layers/applications/batch_service.py:105
+#, fuzzy
+#| msgid "Catalog instance is required."
+msgid "Batch instance is required."
+msgstr "La instancia del catálogo es obligatoria."
 
 #: apps/inventory/layers/applications/supply_service.py:124
 msgid "Supply instance is required."
@@ -585,12 +600,12 @@ msgstr "Stock mínimo"
 msgid "Notify me when stock reaches this level"
 msgstr "Informarme cuando las existencias alcancen este nivel"
 
-#: apps/inventory/models.py:54 apps/inventory/models.py:117
+#: apps/inventory/models.py:54 apps/inventory/models.py:134
 #: apps/purchasing/admin.py:115
 msgid "Supply"
 msgstr "Insumo"
 
-#: apps/inventory/models.py:55 templates/partials/sidebar/_sidebar.html:30
+#: apps/inventory/models.py:55
 msgid "Supplies"
 msgstr "Insumos"
 
@@ -602,81 +617,104 @@ msgstr "Desechado"
 msgid "Active"
 msgstr "Activo"
 
-#: apps/inventory/models.py:123
+#: apps/inventory/models.py:140
 msgid "Number"
 msgstr "Número"
 
-#: apps/inventory/models.py:124
-msgid "Expiration date"
-msgstr "Fecha de expiración"
+#: apps/inventory/models.py:141
+msgid "Due date"
+msgstr "Fecha de vencimiento"
 
-#: apps/inventory/models.py:129
+#: apps/inventory/models.py:146
 msgid "Purchase unit cost"
 msgstr "Costo unitario de compra"
 
-#: apps/inventory/models.py:134
+#: apps/inventory/models.py:151
 msgid "Purchase order"
 msgstr "Orden de compra"
 
-#: apps/inventory/models.py:142 apps/inventory/models.py:169
+#: apps/inventory/models.py:159 apps/inventory/models.py:191
 msgid "Batch"
 msgstr "Lote"
 
-#: apps/inventory/models.py:143
+#: apps/inventory/models.py:160
 msgid "Batches"
 msgstr "Lotes"
 
-#: apps/inventory/models.py:164
+#: apps/inventory/models.py:181
 msgid "Inbound"
 msgstr "Entrada"
 
-#: apps/inventory/models.py:165
+#: apps/inventory/models.py:182
 msgid "Outbound"
 msgstr "Salida"
 
-#: apps/inventory/models.py:166
+#: apps/inventory/models.py:183
 msgid "Adjustment"
 msgstr "Ajuste"
 
-#: apps/inventory/models.py:171
+#: apps/inventory/models.py:186 apps/security/models/users.py:187
+msgid "Pending"
+msgstr "Pendiente"
+
+#: apps/inventory/models.py:187 apps/purchasing/models.py:67
+msgid "Completed"
+msgstr "Completado"
+
+#: apps/inventory/models.py:188 apps/purchasing/models.py:68
+msgid "Cancelled"
+msgstr "Cancelado"
+
+#: apps/inventory/models.py:193
 msgid "Type"
 msgstr "Tipo"
 
-#: apps/inventory/models.py:172
+#: apps/inventory/models.py:196
 msgid "Concept"
 msgstr "Concepto"
 
-#: apps/inventory/models.py:173
+#: apps/inventory/models.py:197
 msgid "Quantity"
 msgstr "Cantidad"
 
-#: apps/inventory/models.py:174
+#: apps/inventory/models.py:198
 msgid "Observation"
 msgstr "Observación"
 
-#: apps/inventory/models.py:176
+#: apps/inventory/models.py:201
 msgid "Previous stock"
 msgstr "Stock previo"
 
-#: apps/inventory/models.py:178
+#: apps/inventory/models.py:202
 msgid "After stock"
 msgstr "Stock posterior"
 
-#: apps/inventory/models.py:179
+#: apps/inventory/models.py:203
 msgid "Increment"
 msgstr "Incremento"
 
-#: apps/inventory/models.py:183
+#: apps/inventory/models.py:205
+#, fuzzy
+#| msgid "Unit cost"
+msgid "Unit cost at movement"
+msgstr "Costo unitario"
+
+#: apps/inventory/models.py:210
 msgid "Inventory Movement"
 msgstr "Movimiento de Inventario"
 
-#: apps/inventory/models.py:184
+#: apps/inventory/models.py:211
 msgid "Inventory Movements"
 msgstr "Movimientos de Inventario"
 
 #: apps/inventory/templates/supplies/batches/datatable.html:9
 msgid "Breakdown by batch"
 msgstr "Desglose por lote"
+
+#: apps/inventory/templates/supplies/batches/datatable.html:68
+#: apps/purchasing/models.py:91
+msgid "Unit cost"
+msgstr "Costo unitario"
 
 #: apps/inventory/templates/supplies/create_or_update.html:25
 msgid "Ranking"
@@ -841,14 +879,6 @@ msgstr "Borrador"
 msgid "Sent"
 msgstr "Enviado"
 
-#: apps/purchasing/models.py:67
-msgid "Completed"
-msgstr "Completado"
-
-#: apps/purchasing/models.py:68
-msgid "Cancelled"
-msgstr "Cancelado"
-
 #: apps/purchasing/models.py:70
 msgid "Order number"
 msgstr "Número de orden"
@@ -868,10 +898,6 @@ msgstr "Cantidad solicitada"
 #: apps/purchasing/models.py:90
 msgid "Quantity received"
 msgstr "Cantidad recibida"
-
-#: apps/purchasing/models.py:91
-msgid "Unit cost"
-msgstr "Costo unitario"
 
 #: apps/purchasing/models.py:96
 msgid "Order detail"
@@ -1120,10 +1146,6 @@ msgstr "Verificación de correo"
 #: apps/security/models/users.py:182
 msgid "Password reset"
 msgstr "Restablecer contraseña"
-
-#: apps/security/models/users.py:187
-msgid "Pending"
-msgstr "Pendiente"
 
 #: apps/security/models/users.py:188
 msgid "Used"
@@ -1537,6 +1559,10 @@ msgstr "Mi Perfil"
 msgid "Logout"
 msgstr "Cerrar Sesión"
 
+#: templates/partials/sidebar/_sidebar.html:30
+msgid "supplies"
+msgstr "insumos"
+
 #: templates/partials/sidebar/_sidebar.html:41
 msgid "administration"
 msgstr "administración"
@@ -1548,6 +1574,9 @@ msgstr "usuarios"
 #: templates/partials/sidebar/_sidebar.html:60
 msgid "admin site"
 msgstr "sitio de administración"
+
+#~ msgid "Expiration date"
+#~ msgstr "Fecha de expiración"
 
 #~ msgid "stock min"
 #~ msgstr "existencia mínima"

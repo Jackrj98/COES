@@ -1,3 +1,4 @@
+from crispy_forms.helper import FormHelper
 from django import forms
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
@@ -31,7 +32,6 @@ class SupplyBaseForm(forms.ModelForm):
         model = Supply
         fields = [
             "name",
-            "code",
             "description",
             "image_url",
             "stock_min",
@@ -43,7 +43,6 @@ class SupplyBaseForm(forms.ModelForm):
             "name": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Ej: Amoxicilina 500mg"}
             ),
-            "code": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: INS-001"}),
             "description": forms.Textarea(
                 attrs={
                     "rows": 3,
@@ -68,11 +67,16 @@ class SupplyBaseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.error_text_inline = True
+        self.helper.label_class = "form-label"
+        self.helper.form_class = "needs-validation"
 
         service = CatalogItemAppService()
         self.fields["category"].queryset = (  # noqa
             service.retrieve_catalog_items(catalog_code="cat_supply")
-            .only("id", "name")
+            .only("id", "name", "code", "extra")
             .order_by("name")
         )
         self.fields["category"].label_from_instance = lambda obj: obj.name  # noqa
@@ -86,30 +90,76 @@ class SupplyBaseForm(forms.ModelForm):
             f"{obj.name} ({obj.extra})" if obj.extra else obj.name
         )
 
+    def get_service_payload(self):
+        data = self.cleaned_data.copy()
+
+        data.pop("image_url", None)
+
+        category = data.pop("category", None)
+        unit_of_measure = data.pop("unit_of_measure", None)
+
+        if category:
+            data["category_id"] = category.id
+            data["category_code"] = category.extra
+
+        if unit_of_measure:
+            data["unit_of_measure_id"] = unit_of_measure.id
+
+        return data
+
 
 class BatchBaseForm(forms.ModelForm):
     """Form base for Batch."""
 
     class Meta:
         model = Batch
-        fields = ["supply", "number", "expiration_date", "stock", "purchase_unit_cost", "status"]
+        fields = [
+            "number",
+            "due_date",
+            "stock",
+            "purchase_unit_cost",
+            "status",
+            "purchase_order",
+        ]
         widgets = {
-            "supply": forms.Select(attrs={"class": "form-select"}),
             "number": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Ej: LOTE-2026-001"}
             ),
-            "expiration_date": forms.DateInput(
+            "due_date": forms.DateInput(
                 attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"
             ),
             "stock": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
             "purchase_unit_cost": forms.NumberInput(
-                attrs={"class": "form-control", "step": "0.01", "min": "0.01"}
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.01",
+                    "type": "number",
+                    "placeholder": "Ej: 12.50",
+                }
             ),
+            "purchase_order": forms.Select(attrs={"class": "form-select select2"}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
         validators = {
             "stock": [MinValueValidator(0)],
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.error_text_inline = True
+        self.helper.label_class = "form-label"
+        self.helper.form_class = "needs-validation"
+
+    def get_service_payload(self):
+        data = self.cleaned_data.copy()
+
+        purchase_order = data.pop("purchase_order", None)
+        if purchase_order:
+            data["purchase_order_id"] = purchase_order.id
+        return data
 
 
 class InventoryMovementBaseForm(forms.ModelForm):
@@ -125,7 +175,6 @@ class InventoryMovementBaseForm(forms.ModelForm):
             "observation",
             "previous_stock",
             "after_stock",
-            "is_increment",
         ]
         widgets = {
             "batch": forms.Select(attrs={"class": "form-select"}),
@@ -135,13 +184,20 @@ class InventoryMovementBaseForm(forms.ModelForm):
             "observation": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
             "previous_stock": forms.NumberInput(attrs={"class": "form-control", "readonly": True}),
             "after_stock": forms.NumberInput(attrs={"class": "form-control", "readonly": True}),
-            "is_increment": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
         validators = {
             "quantity": [MinValueValidator(0)],
             "previous_stock": [MinValueValidator(0)],
             "after_stock": [MinValueValidator(0)],
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.error_text_inline = True
+        self.helper.label_class = "form-label"
+        self.helper.form_class = "needs-validation"
 
 
 # ---------------------------------------------------------------------
@@ -194,7 +250,7 @@ class BatchFilterForm(BaseFilterForm, BaseFormHelperMixin):
     status = forms.ChoiceField(
         label=_("Status"),
         required=False,
-        choices=[("", _("All"))] + list(Batch.StatusChoices.choices),
+        choices=[("", _("All"))] + list(Batch.IsActiveChoices.choices),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     expiration = forms.ChoiceField(

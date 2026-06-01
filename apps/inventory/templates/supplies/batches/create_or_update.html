@@ -11,41 +11,41 @@
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col-12 col-md-6">
-                                    {{ form.name|as_crispy_field }}
+                                    {{ form.number|as_crispy_field }}
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    {{ form.code|as_crispy_field }}
+                                    {{ form.due_date|as_crispy_field }}
                                 </div>
-                                <div class="col-12 col-md-6">
-                                    {{ form.priority|as_crispy_field }}
+                                <div class="d-flex align-items-center my-3">
+                                    <div class="flex-grow-1 border-top border-secondary"></div>
+                                    <div class="px-3 text-secondary fw-bold text-uppercase" style="font-size: 0.9rem;">
+                                        {% trans "Inventory and Costs" %}
+                                    </div>
+                                    <div class="flex-grow-1 border-top border-secondary"></div>
                                 </div>
-                                <div class="col-12 col-md-6">
-                                    {{ form.extra|as_crispy_field }}
+                                <div class="col-12 col-md-4">
+                                    {{ form.stock|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    {{ form.purchase_unit_cost|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    {{ form.purchase_order|as_crispy_field }}
+                                </div>
+                                <div class="d-flex align-items-center my-3">
+                                    <div class="flex-grow-1 border-top border-secondary"></div>
+                                    <div class="px-3 text-secondary fw-bold text-uppercase" style="font-size: 0.9rem;">
+                                        {% trans "Status" %}
+                                    </div>
+                                    <div class="flex-grow-1 border-top border-secondary"></div>
                                 </div>
                                 <div class="col-12 col-md-12">
-                                    {{ form.description|as_crispy_field }}
+                                    {{ form.status|as_crispy_field }}
                                 </div>
                                 <div class="col-12 mb-2">
                                     <hr class="w-100 my-2">
                                 </div>
-                                <div class="col-12 col-md-12 mb-3">
-                                    <fieldset class="border rounded p-3 bg-secondary bg-opacity-10">
-                                        <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0">
-                                            <div>
-                                                <label class="form-check-label d-block fw-bold"
-                                                       for="{{ form.is_active.id_for_label }}">
-                                                    {{ form.is_active.label }}
-                                                </label>
-                                                {% if form.is_active.help_text %}
-                                                    <div class="text-muted small">
-                                                        {{ form.is_active.help_text }}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                            {{ form.is_active }}
-                                        </div>
-                                    </fieldset>
-                                </div>
+
 
                                 {# ACTIONS #}
                                 <div class="col-12 d-flex justify-content-end">
