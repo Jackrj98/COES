@@ -14,6 +14,7 @@ class DatatableSearch(DatatableSearchBase):
             qs = qs.filter(groups__name=group)
 
         if search:
+            search = search.strip()
             search_fields = [
                 "username",
                 "email",

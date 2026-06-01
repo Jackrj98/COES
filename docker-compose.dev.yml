@@ -7,8 +7,6 @@ services:
     ports:
       - "8026:8025"   # UI web
       - "1026:1025"   # SMTP
-
-
   web:
     build:
       context: .
@@ -16,6 +14,7 @@ services:
     command: make run-dev
     volumes:
       - .:/app/coes
+      - ./media:/app/coes/media
     environment:
       ENVIRONMENT: develop
       DOCKER: "1"
@@ -41,6 +40,7 @@ services:
       - .env
     volumes:
       - .:/app/coes
+      - ./media:/app/coes/media
     depends_on:
       db:
         condition: service_healthy
@@ -61,6 +61,7 @@ services:
       - .env
     volumes:
       - .:/app/coes
+      - ./media:/app/coes/media
     depends_on:
       db:
         condition: service_healthy

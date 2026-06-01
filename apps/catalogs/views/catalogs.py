@@ -90,7 +90,6 @@ class CatalogDetailView(CustomDetailView):
             },
         )
         ctx["actions"] = actions
-        print(actions)
 
         return ctx
 

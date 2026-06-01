@@ -16,7 +16,7 @@ class SupplierFilterForm(BaseFilterForm, BaseFormHelperMixin):
     reason = forms.ChoiceField(
         label=_("Reasons"),
         required=False,
-        widget=forms.Select(attrs={"class": "form-select choices"}),
+        widget=forms.Select(attrs={"class": "form-select select2"}),
     )
     delivery_days = forms.ChoiceField(
         label=_("Delivery days"),

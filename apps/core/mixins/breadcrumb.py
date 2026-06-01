@@ -15,7 +15,7 @@ class BreadcrumbMixin:
         if not self.model:
             return []
 
-        verbose_name_plural = _(self.model._meta.verbose_name_plural).title()
+        verbose_name_plural = _(self.model._meta.verbose_name_plural).capitalize()
         breadcrumb = [
             {
                 "name": verbose_name_plural,

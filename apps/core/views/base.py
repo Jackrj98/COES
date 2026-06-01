@@ -93,43 +93,82 @@ class CustomDetailView(BaseView, DetailView):
         ctx["status_choices"] = self.model.IsActiveChoices.choices
         ctx["status_color_choices"] = self.model.IsActiveColorChoices.choices
 
-        app_label = self.model._meta.app_label  # noqa
-        model_name = self.model._meta.model_name  # noqa
-        update_perm = f"{app_label}.change_{model_name}"
-        actions_list = []
-        edit_action = self.get_actions_map(
-            title=LabelEnum.ACTIONS.EDIT.value.format(model=model_name),
-            order=0,
-            action="update",
-            icon="bi bi-pencil-square",
-            url_name=f"{app_label}:{self.app_name}:update",
-            perm=update_perm,
-        )
-
-        if edit_action:
-            actions_list.append(edit_action)
-
+        # Build actions
+        actions_list = self._build_base_actions()
         ctx["actions"] = {
             "title": LabelEnum.ACTIONS.value,
             "actions": sorted(actions_list, key=lambda x: x["order"]),
         }
         return ctx
 
+    def _build_base_actions(self):
+        """Build the base list of actions with permission checking."""
+        app_label = self.model._meta.app_label
+        model_name = self.model._meta.model_name
+        actions_list = []
+
+        # Edit action
+        edit_action = self.get_actions_map(
+            title=LabelEnum.ACTIONS.EDIT.value.format(model=model_name),
+            order=0,
+            action="update",
+            icon="bi bi-pencil-square",
+            url_name=f"{app_label}:{self.app_name}:update",
+            perm=f"{app_label}.change_{model_name}",
+        )
+
+        if edit_action:
+            actions_list.append(edit_action)
+
+        return actions_list
+
     def get_actions_map(self, title, order, action, icon, url_name, **kwargs):
+        """Create an action dictionary if user has permission."""
+        # Check if object exists before accessing it
+        if not hasattr(self, "object") or self.object is None:
+            return None
+
         permission = kwargs.get("perm", "")
         description = kwargs.get("description", "")
+
+        # Skip permission check if no permission required
+        if permission and not self.request.user.has_perm(permission):
+            return None
+
         url_kwargs = {self.slug_url_kwarg: getattr(self.object, self.slug_field)}
 
-        if self.request.user.has_perm(permission):
-            return {
-                "icon": icon,
-                "order": order,
-                "title": title,
-                "action": action,
-                "description": description,
-                "url": self.safe_reverse(url_name, url_kwargs),
-            }
-        return None
+        return {
+            "icon": icon,
+            "order": order,
+            "title": title,
+            "action": action,
+            "description": description,
+            "url": self.safe_reverse(url_name, url_kwargs),
+        }
+
+    def add_custom_action(self, context, action, permission=None):
+
+        # Check permission if required
+        if permission and not self.request.user.has_perm(permission):
+            return
+
+        custom_action = action
+
+        actions = context.get("actions", {})
+        actions_list = actions.get("actions", [])
+
+        # Insert maintaining order (avoid duplicates by title or action)
+        existing = any(
+            a.get("action") == custom_action.name or a.get("title") == custom_action.title
+            for a in actions_list
+        )
+
+        if not existing:
+            actions_list.append(custom_action)
+            # Re-sort after adding
+            actions_list.sort(key=lambda x: x["order"])
+            actions["actions"] = actions_list
+            context["actions"] = actions
 
     @staticmethod
     def safe_reverse(name, kwargs=None):

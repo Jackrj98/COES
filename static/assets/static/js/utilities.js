@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+    $('.select2').each(function() {
+        $(this).select2({
+            theme: "bootstrap-5",
+            width: '100%',
+            dropdownParent: $(this).parent(),
+        });
+    });
     document.addEventListener("submit", (e) => {
         const form = e.target;
         if (form.tagName !== "FORM" || form.hasAttribute("data-no-loader")) return;
@@ -15,9 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+    let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            delay: {show: 200, hide: 100},
+            trigger: 'hover'
+        });
     });
 });
 
