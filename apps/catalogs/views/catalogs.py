@@ -73,7 +73,6 @@ class CatalogDetailView(CustomDetailView):
         ctx["items_url"] = reverse_lazy(
             "catalogs:items:list", kwargs={"catalog_reference": catalog.external_id}
         )
-        #   {'title': 'Accionable', 'actions': [{'icon': 'bi bi-pencil-square', 'order': 0, 'title': 'Editar', 'action': 'update', 'description': '', 'url': '/catalogs/be7e4974-2d35-4333-a226-d6801cf0854a/update/'}]}
 
         actions = ctx["actions"]
         actions["actions"].insert(

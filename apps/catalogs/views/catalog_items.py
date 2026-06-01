@@ -114,6 +114,7 @@ class CatalogItemCreateView(CustomCreateView):
         ctx = super().get_context_data(**kwargs)
         if "form" not in ctx:
             ctx["form"] = self.get_form()
+
         kwargs = {"external_id": self.kwargs.get("catalog_reference")}
         breadcrumbs = ctx.get("breadcrumb", [])
         breadcrumbs.insert(

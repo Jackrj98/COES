@@ -38,21 +38,21 @@ class DatatableSearch(DatatableSearchBase):
         return cls._prepare_response(params, qs)
 
     @classmethod
-    def retrieve_batches(cls, params):
+    def retrieve_batches(cls, params, supply_reference):
         expiration_filter = params.request.GET.get("expiration")
 
         qs = cls._build_base_query(params, Batch, "status")
+        qs = qs.select_related("supply").filter(supply__external_id=supply_reference)
 
         if expiration_filter:
             today = date.today()
             in_30_days = today + timedelta(days=30)
-
-            if expiration_filter == "valid":
-                qs = qs.filter(expiration_date__gt=in_30_days)
-            elif expiration_filter == "soon":
-                qs = qs.filter(expiration_date__gt=today, expiration_date__lte=in_30_days)
+            if expiration_filter == "current":
+                qs = qs.filter(due_date=in_30_days)
+            elif expiration_filter == "expiring":
+                qs = qs.filter(due_date=today, due_date__lte=in_30_days)
             elif expiration_filter == "expired":
-                qs = qs.filter(expiration_date__lte=today)
+                qs = qs.filter(due_date__lte=today)
 
         search = params.request.GET.get("search")
 

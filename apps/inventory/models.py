@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.validators import MinValueValidator
-from django.db import models, transaction
+from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -56,7 +56,7 @@ class Supply(AuditModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.code}"
 
     def get_absolute_url(self):
         return reverse("inventory:supplies:detail", kwargs={"external_id": self.external_id})
@@ -112,6 +112,23 @@ class Batch(AuditModel):
         ACTIVE = 1, _("Active")
         EXPIRED = 2, _("Expired")
 
+        @property
+        def style(self):
+            configs = {
+                self.DISCARDED.value: {"color": "secondary"},
+                self.ACTIVE.value: {"color": "success"},
+                self.EXPIRED.value: {"color": "danger"},
+            }
+            return configs[self.value]
+
+        @property
+        def color(self) -> str:
+            return self.style["color"]
+
+        @classmethod
+        def get_ui_map(cls):
+            return {item.value: {"color": item.color, "label": item.label} for item in cls}
+
     supply = models.ForeignKey(
         Supply,
         verbose_name=_("Supply"),
@@ -121,7 +138,7 @@ class Batch(AuditModel):
         blank=True,
     )
     number = models.CharField(_("Number"), max_length=100)
-    expiration_date = models.DateField(_("Expiration date"))
+    due_date = models.DateField(_("Due date"), null=True, blank=True)
     stock = models.PositiveIntegerField(
         _("Stock"), default=0, validators=[MinValueValidator(0)]
     )  # stock actual
@@ -141,18 +158,19 @@ class Batch(AuditModel):
         db_table = "batch"
         verbose_name = _("Batch")
         verbose_name_plural = _("Batches")
-        ordering = (
-            "number",
-            "-expiration_date",
-        )
+        ordering = ["-due_date"]
         unique_together = (("supply", "number"),)
 
     def __str__(self):
         return f"{self.supply.name} - {self.number}"
 
+    def get_absolute_url(self):
+        kwargs = {"supply_reference": self.supply.external_id, "external_id": self.external_id}
+        return reverse("inventory:batches:detail", kwargs=kwargs)
+
     @property
     def is_expired(self):
-        return self.expiration_date < timezone.now().date()
+        return self.due_date < timezone.now().date()
 
 
 class InventoryMovement(AuditModel):
@@ -165,44 +183,57 @@ class InventoryMovement(AuditModel):
         OUTBOUND = 1, _("Outbound")
         ADJUSTMENT = 2, _("Adjustment")
 
+    class Status(models.IntegerChoices):
+        PENDING = 0, _("Pending")
+        COMPLETED = 1, _("Completed")
+        CANCELLED = 2, _("Cancelled")
+
     batch = models.ForeignKey(
         Batch, verbose_name=_("Batch"), on_delete=models.PROTECT, related_name="movements"
     )
     movement_type = models.PositiveSmallIntegerField(_("Type"), choices=Type)
+    status = models.PositiveSmallIntegerField(_("Status"), choices=Status, default=Status.COMPLETED)
+
     concept = models.CharField(_("Concept"), max_length=255)
     quantity = models.PositiveIntegerField(_("Quantity"), validators=[MinValueValidator(0)])
     observation = models.CharField(_("Observation"), max_length=255)
-    previous_stock = models.PositiveIntegerField(
-        _("Previous stock"), validators=[MinValueValidator(0)], default=0
+
+    # Stock tracking
+    previous_stock = models.PositiveIntegerField(_("Previous stock"), default=0)
+    after_stock = models.PositiveIntegerField(_("After stock"), default=0)
+    is_increment = models.BooleanField(_("Increment"), editable=False)
+    unit_cost_at_movement = models.DecimalField(
+        _("Unit cost at movement"), max_digits=10, decimal_places=2, null=True, blank=True
     )
-    after_stock = models.PositiveIntegerField(_("After stock"), validators=[MinValueValidator(0)])
-    is_increment = models.BooleanField(_("Increment"), blank=True, null=True)
 
     class Meta:
         db_table = "inventory_movement"
         verbose_name = _("Inventory Movement")
         verbose_name_plural = _("Inventory Movements")
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["batch", "-created_at"]),
+            models.Index(fields=["movement_type", "status"]),
+        ]
 
     def __str__(self):
-        return self.get_movement_type_display()
+        return f"{self.get_movement_type_display()} - {self.batch} - {self.quantity}"
 
-    @transaction.atomic
     def save(self, *args, **kwargs):
+        """Calculate previous_stock, after_stock, and is_increment."""
         if not self.pk:
             self.previous_stock = self.batch.stock
-            if self.movement_type == self.Type.INBOUND:
-                self.batch.stock += self.quantity
-            elif self.movement_type == self.Type.OUTBOUND:
-                self.batch.stock -= self.quantity
-            elif self.movement_type == self.Type.ADJUSTMENT:
-                if getattr(self, "is_increment", False):
-                    self.batch.stock += self.quantity
-                else:
-                    self.batch.stock -= self.quantity
 
-            self.after_stock = self.batch.stock
+            if self.movement_type in [self.Type.INBOUND, self.Type.ADJUSTMENT]:
+                self.is_increment = True
+                self.after_stock = self.previous_stock + self.quantity
+            else:
+                self.is_increment = False
+                self.after_stock = max(0, self.previous_stock - self.quantity)
 
-            self.batch.save()
+            self.unit_cost_at_movement = self.batch.purchase_unit_cost
+
+            self.batch.stock = self.after_stock
+            self.batch.save(update_fields=["stock"])
 
         super().save(*args, **kwargs)
