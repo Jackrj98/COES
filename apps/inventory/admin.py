@@ -10,7 +10,7 @@ from .models import Batch, InventoryMovement, Supply
 class BatchInline(admin.TabularInline):
     model = Batch
     extra = 0
-    fields = ("number", "expiration_date", "stock", "purchase_unit_cost", "status")
+    fields = ("number", "due_date", "stock", "purchase_unit_cost", "status")
     readonly_fields = ("stock",)
     show_change_link = True
 
@@ -59,8 +59,8 @@ class SupplyAdmin(BaseAdminMixin):
 @admin.register(Batch)
 class BatchAdmin(BaseAdminMixin):
     inlines = [InventoryMovementInline]
-    list_display = ("number", "supply", "expiration_date", "stock", "status", "movement_count")
-    list_filter = ("status", "expiration_date", "supply")
+    list_display = ("number", "supply", "due_date", "stock", "status", "movement_count")
+    list_filter = ("status", "due_date", "supply")
     search_fields = ("number", "supply__name")
 
     fieldsets = (
@@ -70,7 +70,7 @@ class BatchAdmin(BaseAdminMixin):
                 "fields": (
                     "supply",
                     "number",
-                    "expiration_date",
+                    "due_date",
                     "stock",
                     "purchase_unit_cost",
                     "status",

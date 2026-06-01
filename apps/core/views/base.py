@@ -103,14 +103,14 @@ class CustomDetailView(BaseView, DetailView):
 
     def _build_base_actions(self):
         """Build the base list of actions with permission checking."""
-        app_label = self.model._meta.app_label
-        model_name = self.model._meta.model_name
+        app_label = self.model._meta.app_label  # noqa
+        model_name = self.model._meta.model_name  # noqa
         actions_list = []
 
         # Edit action
         edit_action = self.get_actions_map(
             title=LabelEnum.ACTIONS.EDIT.value.format(model=model_name),
-            order=0,
+            order=1,
             action="update",
             icon="bi bi-pencil-square",
             url_name=f"{app_label}:{self.app_name}:update",
@@ -123,7 +123,7 @@ class CustomDetailView(BaseView, DetailView):
         return actions_list
 
     def get_actions_map(self, title, order, action, icon, url_name, **kwargs):
-        """Create an action dictionary if user has permission."""
+        """Create an action dictionary if the user has permission."""
         # Check if object exists before accessing it
         if not hasattr(self, "object") or self.object is None:
             return None
@@ -153,13 +153,12 @@ class CustomDetailView(BaseView, DetailView):
             return
 
         custom_action = action
-
         actions = context.get("actions", {})
         actions_list = actions.get("actions", [])
 
         # Insert maintaining order (avoid duplicates by title or action)
         existing = any(
-            a.get("action") == custom_action.name or a.get("title") == custom_action.title
+            a.get("action") == custom_action["name"] or a.get("title") == custom_action["title"]
             for a in actions_list
         )
 
@@ -187,6 +186,13 @@ class BaseActionView(BaseView):
         if hasattr(self, "success_message"):
             messages.success(self.request, self.success_message)  # noqa
         return response
+
+    def form_invalid(self, form):
+        messages.warning(
+            self.request,  # noqa
+            getattr(self, "failure_message"),
+        )
+        return super().form_invalid(form)  # noqa
 
     def get_action_title(self, action_label):
         """Centralize the generation of the title."""
@@ -217,7 +223,8 @@ class CustomCreateView(BaseActionView, FormView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["title"] = self.get_action_title(LabelEnum.ADD_MODEL.value)
-
+        if "form" not in ctx:
+            ctx["form"] = self.get_form()
         return ctx
 
     def build_breadcrumb(self, extra_breadcrumb=None):

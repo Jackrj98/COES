@@ -45,7 +45,7 @@ class Command(BaseCommand):
                 Batch.objects.create(
                     supply=supply,
                     number=fake.unique.bothify(text="LOTE-####"),
-                    expiration_date=fake.future_date(end_date="+1y"),
+                    due_date=fake.future_date(end_date="+1y"),
                     stock=random.randint(10, 100),
                     purchase_unit_cost=random.uniform(1.0, 50.0),
                     status=Batch.Status.ACTIVE,

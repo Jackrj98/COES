@@ -24,7 +24,6 @@
                     </div>
                 </div>
                 <div class="card-body mt-0 pt-0">
-
                     {% block filters %}
                         {% if filter_form %}
                             <form method="GET" id="filter" class="mb-4">
@@ -62,11 +61,13 @@
                                     <th scope="col" class="text-uppercase"></th>
                                     <th scope="col" class="text-uppercase">{{ batch|field_label:'number'|upper }}</th>
                                     <th scope="col"
-                                        class="text-uppercase">{{ batch|field_label:'expiration_date'|upper }}</th>
+                                        class="text-uppercase">{% trans 'Expiration'|upper %}</th>
                                     <th scope="col" class="text-uppercase">{{ batch|field_label:'stock'|upper }}</th>
-                                    <th scope="col" class="text-uppercase">{{ batch|field_label:'stock'|upper }}</th>
+                                    <th scope="col" class="text-uppercase">% {{ batch|field_label:'stock'|upper }}</th>
                                     <th scope="col"
-                                        class="text-uppercase">{{ batch|field_label:'purchase_unit_cost'|upper }}</th>
+                                        class="text-uppercase">{% trans 'Unit cost'|upper %}</th>
+                                    <th scope="col"
+                                        class="text-uppercase">{{ batch|field_label:'purchase_order'|upper }}</th>
                                     <th scope="col" class="text-uppercase">{{ batch|field_label:'status'|upper }}</th>
                                     <th scope="col" class="text-uppercase">{% trans 'actions'|upper %}</th>
                                 {% endblock columns %}
@@ -81,3 +82,4 @@
         </div>
     </div>
 </section>
+
