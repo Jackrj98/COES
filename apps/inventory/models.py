@@ -145,6 +145,7 @@ class Batch(AuditModel):
     purchase_unit_cost = models.DecimalField(
         _("Purchase unit cost"), max_digits=10, decimal_places=2
     )
+
     status = models.PositiveIntegerField(_("Status"), choices=Status, default=Status.ACTIVE)
     purchase_order = models.ForeignKey(
         "purchasing.PurchaseOrder",
@@ -171,6 +172,22 @@ class Batch(AuditModel):
     @property
     def is_expired(self):
         return self.due_date < timezone.now().date()
+
+    @property
+    def days_until_expiry(self):
+        if not self.due_date:
+            return None
+
+        delta = self.due_date - timezone.now().date()
+        return delta.days
+
+    @property
+    def batch_total_cost(self):
+        return round(self.stock * self.purchase_unit_cost, 2)
+
+    @property
+    def color(self):
+        return self.Status(self.status).color
 
 
 class InventoryMovement(AuditModel):

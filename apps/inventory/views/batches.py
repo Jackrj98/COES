@@ -3,7 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
@@ -14,7 +14,7 @@ from apps.core.views.base import (
     CustomListView,
     CustomUpdateView,
 )
-from apps.inventory.forms import BatchBaseForm, BatchFilterForm, SupplyBaseForm
+from apps.inventory.forms import BatchBaseForm, BatchFilterForm
 from apps.inventory.layers.applications import BatchAppService
 from apps.inventory.models import Batch, Supply
 from apps.security.layers.security import SecurityService
@@ -39,10 +39,7 @@ class BatchListView(CustomListView):
         ctx = super().get_context_data(**kwargs)
         return ctx
 
-    def retrieve_data(
-        self,
-        params,
-    ):
+    def retrieve_data(self, params):
         supply_reference = self.kwargs.get(self.slug_url_kwarg)
         return BatchAppService().retrieve_batches(params, supply_reference)
 
@@ -56,36 +53,52 @@ class BatchDetailView(CustomDetailView):
 
     app_name = "supplies"
     model = DEFAULT_MODEL
-    success_url = DEFAULT_LIST_URL
-    template_name = "supplies/detail.html"
-    permission_required = ["inventory.view_supply", "inventory.view_batch"]
-
-    def get_object(self, queryset=None):
-        """Cache the object to avoid duplicate queries."""
-        if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)  # noqa
-        return self._cached_object
+    permission_required = "inventory.view_batch"
+    template_name = "supplies/batches/detail.html"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["filter_form"] = BatchFilterForm
+        ctx["title"] = _("Batch Details")
+
+        supply = Supply.objects.filter(external_id=self.kwargs.get("supply_reference")).first()
+        if supply:
+            breadcrumbs = ctx.get("breadcrumb", [])
+            supplies_crumb = {"name": _("Supplies"), "url": reverse_lazy("inventory:supplies:list")}
+            if supplies_crumb not in breadcrumbs:
+                breadcrumbs.insert(0, supplies_crumb)
+
+            if len(breadcrumbs) > 1:
+                breadcrumbs[1].update(
+                    {
+                        "name": f"{supply.name} - {supply.code}",
+                        "url": reverse_lazy(
+                            "inventory:supplies:detail", kwargs={"external_id": supply.external_id}
+                        ),
+                    }
+                )
+
+            if breadcrumbs:
+                breadcrumbs[-1].update({"name": _("Details"), "active": True, "url": None})
+
+            ctx["breadcrumbs"] = breadcrumbs
+
+        url_kwargs = {
+            "supply_reference": self.kwargs.get("supply_reference"),
+            "external_id": self.kwargs.get(self.slug_url_kwarg),
+        }
+        actions = ctx["actions"]
+        actions["actions"][0]["url"] = reverse_lazy("inventory:batches:update", kwargs=url_kwargs)
+        ctx["actions"] = actions
 
         return ctx
 
     def get_success_url(self):
-        """Return the success URL after form submission."""
-        return self.success_url
-
-    @staticmethod
-    def _calculate_stock_percentage(supply):
-        """Calculate stock percentage based on total_stock and stock_min."""
-        stock_val = getattr(supply, "total_stock", 0) or 0
-        min_val = supply.stock_min
-
-        if min_val > 0 and stock_val > 0:
-            percentage = (stock_val / min_val) * 100
-            return min(round(percentage), 100)
-        return 0
+        supply_reference = self.kwargs.get("supply_reference")
+        kwargs = {
+            "supply_reference": supply_reference,
+            "external_id": self.kwargs.get(self.slug_url_kwarg),
+        }
+        return reverse("inventory:batches:detail", kwargs=kwargs)
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
@@ -184,7 +197,7 @@ class BatchUpdateView(CustomUpdateView):
             messages.success(self.request, success_message, extra_tags="toast")
 
             # Redirect to the detail page
-            return redirect(self.get_success_url())
+            return redirect(instance.get_absolute_url())
 
         except ValidationError as e:
             self.handle_pydantic_error(e, form)

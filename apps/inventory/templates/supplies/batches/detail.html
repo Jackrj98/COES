@@ -23,90 +23,127 @@
 
 {% block content %}
     <section>
-        <div class="row g-3">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-content">
-                        <div class="card-header d-flex align-items-center gap-2">
-                            <h4 class="card-title">
-                                {{ object.name|capfirst }}
-                            </h4>
-                            <div class="ms-auto">
-                                {% with object.get_is_active_color_display as color %}
-                                    <span class="badge bg-{{ color }} bg-opacity-25 px-3 py-2 rounded-2 text-{{ color }}">
-                                       <i class="bi bi-record-fill"></i>
-                                        {{ object.get_is_active_display }}
-                                    </span>
-                                {% endwith %}
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start gap-4 mb-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center"
+                                     style="width: 60px; height: 60px;">
+                                    <span class="font-bold fs-3 text-primary">{{ object.supply.initials }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h4 class="mb-1 font-bold">{{ object.number }}</h4>
+                                <div class="text-muted mb-2">
+                                    {{ object.supply.name }} - {{ object.supply.code }}
+                                </div>
+                            </div>
+                            <div class="ms-auto text-end">
+                                <div class="small text-muted">{% trans 'Due date' %}</div>
+                                <div class="font-bold text-{% if object.is_expired %}danger{% elif object.days_until_expiry <= 30 %}warning{% else %}success{% endif %}">
+                                    {{ object.due_date|date:"d M Y" }}
+                                </div>
+                                {% if object.days_until_expiry %}
+                                    <small class="text-muted">{{ object.days_until_expiry }} {% trans 'days remaining' %}</small>
+                                {% endif %}
                             </div>
                         </div>
-                        <div class="card-body mt-0">
-                            <hr class="mt-0">
-                            <dl class="row mb-0 my-2 g-2">
-                                <div class="col-12 col-md-4 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{{ object|field_label:"code" }}</dt>
-                                    <dd class="fw-medium">
-                                        <span class="badge bg-secondary bg-opacity-25 px-2 py-1 rounded-2 text-secondary"
-                                              data-bs-toggle="tooltip" data-bs-placement="top"
-                                              data-bs-custom-class="custom-tooltip"
-                                              data-bs-title={{ object.code }}>
-                                            {{ object.code|upper|default:"-" }}
-                                        </span>
-                                    </dd>
+                        <hr>
+                        <div class="row text-center g-4 mb-4">
+                            <div class="col-4">
+                                <div class="small text-muted">Stock Actual</div>
+                                <h3 class="mb-0 font-bold text-success">{{ object.stock }}</h3>
+                            </div>
+                            <div class="col-4">
+                                <div class="small text-muted">Costo Unitario</div>
+                                <h3 class="mb-0 font-bold">${{ object.purchase_unit_cost }}</h3>
+                            </div>
+                            <div class="col-4">
+                                <div class="small text-muted">Valor Total</div>
+                                <h3 class="mb-0 font-bold">${{ object.batch_total_cost|intcomma }}</h3>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded mt-2">
+                            <div class="row g-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="small text-muted mb-1">{{ object|field_label:"created_at" }}</div>
+                                    <div class="small font-semibold">
+                                        {{ object.created_at|date:"d M Y, H:i"|default:"-" }}
+                                    </div>
                                 </div>
-
-                                <div class="col-6 col-md-4 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{{ object|field_label:"priority" }}</dt>
-                                    <dd class="fw-medium">{{ object.priority|default:"-" }}</dd>
+                                <div class="col-6 col-md-3">
+                                    <div class="small text-muted mb-1">{{ object|field_label:"created_by" }}</div>
+                                    <div class="small font-semibold">
+                                        {{ object.created_by|lower|default:"-" }}
+                                    </div>
                                 </div>
-
-                                <div class="col-6 col-md-4 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{{ object|field_label:"extra" }}</dt>
-                                    <dd class="fw-medium">
-                                        <span class="badge bg-primary bg-opacity-25 px-2 py-1 rounded-2 text-secondary text-truncate">
-                                            {{ object.extra|default:"-" }}
-                                        </span>
-                                    </dd>
+                                <div class="col-6 col-md-3">
+                                    <div class="small text-muted mb-1">{{ object|field_label:"updated_at" }}</div>
+                                    <div class="small font-semibold">
+                                        {{ object.updated_at|default:"-"|date:"d M Y, H:i" }}
+                                    </div>
                                 </div>
-
-                                <div class="col-12 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{{ object|field_label:"description" }}</dt>
-                                    <dd class="fw-medium">{{ object.description|default:"-" }}</dd>
-                                </div>
-                            </dl>
+                                {% if object.updated_by %}
+                                    <div class="col-6 col-md-3">
+                                        <div class="small text-muted mb-1">{{ object|field_label:"updated_by" }}</div>
+                                        <div class="small font-semibold">
+                                            {{ object.updated_by|default:"-"|lower }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                    {% if is_admin %}
-                        <div class="card-footer">
-                            <div class="row">
-                                <h6 class="mb-0">
-                                    <i class="bi bi-file-text me-2"></i>{% trans "Audit information" %}
-                                </h6>
-                            </div>
-                            <dl class="row mb-0 my-2 g-3">
-                                <div class="col-6 col-md-3 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{% label object 'created_at' %}</dt>
-                                    <dd class="fw-medium">{{ object.created_at|date:"d M Y, H:i"|default:"-" }}</dd>
-                                </div>
-
-                                <div class="col-6 col-md-3 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{% label object 'created_by' %}</dt>
-                                    <dd class="fw-medium">{{ object.created_by|default:"-" }}</dd>
-                                </div>
-
-                                <div class="col-6 col-md-3 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{% label object 'updated_at' %}</dt>
-                                    <dd class="fw-medium">{{ object.updated_at|date:"d M Y, H:i"|default:"-" }}</dd>
-                                </div>
-
-                                <div class="col-6 col-md-3 mb-2">
-                                    <dt class="small text-muted fw-normal mb-0">{% label object 'updated_by' %}</dt>
-                                    <dd class="fw-medium">{{ object.updated_by|default:"-" }}</dd>
-                                </div>
-                            </dl>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">{% trans 'Batch Information' %}</h5>
+
+                        <dl class="row g-3">
+                            <div class="col-6">
+                                <dt class="small text-muted">{{ object|field_label:"status" }}</dt>
+                                <dd class="font-medium">
+                                    {% with color=object.color %}
+                                        <span class="badge bg-{{ color }} bg-opacity-25 text-{{ color }} px-4 py-2 rounded-2 d-block">
+                                            {{ object.get_status_display }}
+                                        </span>
+                                    {% endwith %}
+                                </dd>
+                            </div>
+                        </dl>
+
+                        <dl class="row g-3">
+                            <div class="col-6">
+                                <dt class="small text-muted">{% trans 'Batch Number' %}</dt>
+                                <dd class="font-medium">{{ object.number }}</dd>
+                            </div>
+                            <div class="col-6">
+                                <dt class="small text-muted">{{ object|field_label:"supply"|capfirst }}</dt>
+                                <dd class="font-medium">{{ object.supply.name }}</dd>
+                            </div>
+                            <div class="col-6">
+                                <dt class="small text-muted">{{ object|field_label:"due_date"|capfirst }}</dt>
+                                <dd class="font-medium">{{ object.due_date|date:"d M Y" }}</dd>
+                            </div>
+                            <div class="col-6">
+                                <dt class="small text-muted">{% trans 'Unit cost'|capfirst %}</dt>
+                                <dd class="font-medium">${{ object.purchase_unit_cost }}</dd>
+                            </div>
+                            <div class="col-12">
+                                <dt class="small text-muted">{{ object|field_label:"purchase_order"|capfirst }}</dt>
+                                <dd class="font-medium">
+                                    {{ object.purchase_order.order_number|default:"-" }}
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 {% endblock content %}

@@ -97,7 +97,7 @@ const columns = [
         width: "10%",
         className: DataTableFactory.classes.justify,
         render: (data, type, row) => {
-            const isInactive = row.status === 2;
+            const isInactive = row.status !== 1;
             const batchStock = isInactive ? 0 : (row.stock || 0);
             const totalSupplyStock = row.total_supply_stock || 0;
 
