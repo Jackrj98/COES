@@ -237,7 +237,8 @@ class SupplyFilterForm(BaseFilterForm, BaseFormHelperMixin):
 
         self.fields["category"].choices = self.generate_categories()
 
-    def generate_categories(self):
+    @staticmethod
+    def generate_categories():
         queryset = CatalogItemAppService().retrieve_catalog_items(catalog_code="cat_supply")
 
         choices = [("", _("All categories"))]
@@ -268,6 +269,33 @@ class BatchFilterForm(BaseFilterForm, BaseFormHelperMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         search_text = _("Search by batch number")
+        if "search" in self.fields:
+            self.fields["search"].widget.attrs.update(
+                {"placeholder": search_text, "class": "form-control"}
+            )
+
+        self.setup_form_helper(
+            label_class="form-label text-sm text-muted", form_class="needs-validation"
+        )
+
+
+class InventoryMovementFilterForm(BaseFilterForm, BaseFormHelperMixin):
+    movement_type = forms.ChoiceField(
+        label=_("Type"),
+        required=False,
+        choices=[("", _("All"))] + list(InventoryMovement.Type.choices),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    status = forms.ChoiceField(
+        label=_("Status"),
+        required=False,
+        choices=[("", _("All"))] + list(InventoryMovement.Status.choices),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        search_text = _("Search by item, batch, or supply")
         if "search" in self.fields:
             self.fields["search"].widget.attrs.update(
                 {"placeholder": search_text, "class": "form-control"}
