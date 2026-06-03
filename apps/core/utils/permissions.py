@@ -42,9 +42,6 @@ class Permissions:
                         "add_batch",
                         "change_batch",
                         "view_batch",
-                        "add_movement",
-                        "change_movement",
-                        "view_movement",
                     ]
                 },
             },
@@ -164,9 +161,6 @@ class Permissions:
                         "add_batch",
                         "change_batch",
                         "view_batch",
-                        "add_movement",
-                        "change_movement",
-                        "view_movement",
                     ]
                 },
             },
