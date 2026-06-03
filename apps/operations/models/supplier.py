@@ -24,7 +24,7 @@ class Supplier(AuditModel):
     # Contact information
     email = models.EmailField(_("Email address"), unique=True, max_length=255)
     phone = models.CharField(_("Phone number"), max_length=15, validators=[MinLengthValidator(10)])
-    address = models.CharField  (_("Address"), blank=True, null=True)
+    address = models.CharField(_("Address"), blank=True, null=True)
 
     class Meta:
         db_table = "supplier"

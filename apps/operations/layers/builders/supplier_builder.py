@@ -50,6 +50,5 @@ class SupplierBuilder:
         self.supplier.is_active = not is_active
         return self
 
-
     def build(self):
         return self.supplier

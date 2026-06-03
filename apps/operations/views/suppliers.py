@@ -8,7 +8,6 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
-from pytz import reference
 
 from apps.core.views.base import (
     CustomCreateView,

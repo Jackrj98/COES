@@ -28,23 +28,26 @@ const columns = [
         render: (days) => {
             let color = "";
             let text = "";
+            const months = days / 30.44;
 
             if (days < 0) {
-                color = "text-danger";
+                color = "text-secondary";
                 text = "Vencido";
-            } else if (days <= 30) {
+            } else if (months < 6) {
+                color = "text-danger";
+                text = "Corto plazo";
+            } else if (months <= 12) {
                 color = "text-warning";
-                text = "Por vencer";
+                text = "Atención";
             } else {
                 color = "text-success";
-                text = "Vigente";
+                text = "Activo";
             }
 
             return `
                 <div class="d-flex align-items-center justify-content-center" data-bs-toggle="tooltip" title="${text}">
                     <i class="bi bi-circle-fill ${color}" style="font-size: 0.75rem;"></i>
-                </div>
-            `;
+                </div>`;
         }
     },
     {
@@ -65,15 +68,25 @@ const columns = [
             let badgeClass = "";
             let badgeText = "";
 
+            // Formato de texto: meses o días
+            const months = Math.floor(days / 30.44);
+            const timeDisplay = days < 30
+                ? `${days} días restantes`
+                : `${months} meses restantes`;
+
+            // Lógica de semaforización
             if (days < 0) {
                 badgeClass = "bg-danger bg-opacity-10 text-danger";
                 badgeText = "Vencido";
-            } else if (days <= 30) {
+            } else if (days < 180) { // < 6 meses (Rojo)
+                badgeClass = "bg-danger bg-opacity-10 text-danger";
+                badgeText = timeDisplay;
+            } else if (days <= 365) { // 6-12 meses (Amarillo)
                 badgeClass = "bg-warning bg-opacity-10 text-warning";
-                badgeText = `${days}d restantes`;
-            } else {
+                badgeText = timeDisplay;
+            } else { // > 12 meses (Verde)
                 badgeClass = "bg-success bg-opacity-10 text-success";
-                badgeText = `${days}d restantes`;
+                badgeText = timeDisplay;
             }
 
             return `
