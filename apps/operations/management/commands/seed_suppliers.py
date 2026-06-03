@@ -20,12 +20,13 @@ class Command(BaseCommand):
             [
                 Supplier(
                     business_name=fake.company().title(),
-                    reason=fake.sentence(),
+                    contact_name=fake.first_name_male(),
                     tax_id=generate_ecuadorian_id(),
                     delivery_days=random.randint(5, 20),
                     email=f"{uuid.uuid4().hex[:6]}@{fake.domain_name()}",
                     is_active=random.choice([True, False]),
                     phone=fake.numerify(text="+5939########"),
+                    address=fake.address(),
                     created_by="system",
                 )
                 for _ in range(count)
