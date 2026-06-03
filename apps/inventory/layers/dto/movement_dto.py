@@ -19,6 +19,7 @@ class MovementDTO(BaseModel):
     previous_stock: int = Field(default=0, ge=0)
     after_stock: int = Field(default=0, ge=0)
     unit_cost_at_movement: Decimal = Field(default=0, ge=0)
+    movement_date: str = Field(default=None)
 
     class Config:
         from_attributes = True

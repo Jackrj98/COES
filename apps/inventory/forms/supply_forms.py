@@ -1,6 +1,7 @@
 from crispy_forms.helper import FormHelper
 from django import forms
 from django.core.validators import MinValueValidator
+from django.forms import modelformset_factory
 from django.utils.translation import gettext_lazy as _
 
 from apps.catalogs.layers.applications import CatalogItemAppService
@@ -168,27 +169,25 @@ class InventoryMovementBaseForm(forms.ModelForm):
     class Meta:
         model = InventoryMovement
         fields = [
-            "batch",
-            "movement_type",
             "concept",
-            "quantity",
+            "movement_date",
             "observation",
-            "previous_stock",
-            "after_stock",
+            "movement_type",
         ]
         widgets = {
-            "batch": forms.Select(attrs={"class": "form-select"}),
-            "movement_type": forms.Select(attrs={"class": "form-select"}),
-            "concept": forms.TextInput(attrs={"class": "form-control"}),
-            "quantity": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
+            "concept": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "list": "concept-list",  # Conecta con el datalist
+                    "placeholder": "Seleccione o escriba un concepto...",
+                }
+            ),
+            "movement_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"},
+                format="%Y-%m-%d",
+            ),
+            "movement_type": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
             "observation": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
-            "previous_stock": forms.NumberInput(attrs={"class": "form-control", "readonly": True}),
-            "after_stock": forms.NumberInput(attrs={"class": "form-control", "readonly": True}),
-        }
-        validators = {
-            "quantity": [MinValueValidator(0)],
-            "previous_stock": [MinValueValidator(0)],
-            "after_stock": [MinValueValidator(0)],
         }
 
     def __init__(self, *args, **kwargs):
@@ -199,6 +198,50 @@ class InventoryMovementBaseForm(forms.ModelForm):
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
 
+
+class InventoryMovementForm(forms.ModelForm):
+    supply = forms.ChoiceField(
+        label=_("Supply"),
+        widget=forms.Select(
+            attrs={"class": "form-select select2", "data-placeholder": "Seleccione un insumo"}
+        ),
+        required=True,
+    )
+    batch = forms.ModelChoiceField(
+        queryset=Batch.objects.none(),  # Se llena dinámicamente
+        label=_("Batch"),
+        widget=forms.Select(
+            attrs={"class": "form-select select2", "data-placeholder": "Seleccione un lote"}
+        ),
+        required=True,
+    )
+
+    class Meta:
+        model = InventoryMovement
+        fields = ["supply", "batch", "quantity", "concept", "observation"]
+        widgets = {
+            "quantity": forms.NumberInput(
+                attrs={"class": "form-control", "min": 1, "placeholder": "Cantidad"}
+            ),
+            "concept": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Motivo del movimiento"}
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.error_text_inline = True
+        self.helper.label_class = "form-label"
+
+    # self.fields["supply"].choices = SupplyAppService().retrieve_active_choices()
+
+
+# Formset
+MovementFormSet = modelformset_factory(
+    InventoryMovement, form=InventoryMovementForm, extra=1, can_delete=True, max_num=15
+)
 
 # ---------------------------------------------------------------------
 # -----------------------FILTER FORMS----------------------------------

@@ -4,11 +4,14 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Count, F, Q, Sum
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
 from pydantic import ValidationError
 
 from apps.core.views.base import (
@@ -247,3 +250,48 @@ class SupplyUpdateView(CustomUpdateView):
             return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
+
+
+def get_supply_stock(request):
+    supply_code = request.GET.get("supply_code")
+    try:
+        supply = SupplyAppService().retrieve_stock_by_code(code=supply_code)
+        return JsonResponse({"stock": supply})
+    except Supply.DoesNotExist:
+        return JsonResponse({"stock": 0}, status=404)
+
+
+@require_GET
+@csrf_exempt
+def search_supplies(request):
+    search_term = request.GET.get("q", "").strip()
+    exclude_ids = [id for id in request.GET.get("exclude_ids", "").split(",") if id]
+
+    if not search_term:
+        supplies = SupplyAppService().retrieve_active()
+    else:
+        supplies = SupplyAppService().retrieve_by_term(search_term)
+
+    if exclude_ids:
+        supplies = supplies.exclude(code__in=exclude_ids)
+
+    supplies = supplies[:20]
+
+    results = [
+        {
+            "id": supply.code,
+            "text": f"{supply.name} - {supply.unit_of_measure.name} ({supply.unit_of_measure.extra})",
+            "code": supply.code,
+            "name": supply.name,
+            "stock": supply.total_stock,
+            "stock_min": supply.stock_min,
+        }
+        for supply in supplies
+    ]
+
+    return JsonResponse(
+        {
+            "results": results,
+            "pagination": {"more": False},
+        }
+    )

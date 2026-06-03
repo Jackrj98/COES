@@ -1,6 +1,7 @@
 import logging
 
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
@@ -127,4 +128,35 @@ class InventoryMovementAppService(BaseAppService):
             raise
         except Exception as e:
             logger.error(f"Error saving inventory movement: {e}", exc_info=True)
+            raise
+
+    def register_outbound(self, payload: dict, batch):
+        builder = InventoryMovementBuilder()
+
+        try:
+            dto = MovementDTO(**payload)
+            if batch.stock < dto.quantity:
+                raise ValueError(_(f"Stock for batch {batch.number} is insufficient."))
+
+            current_stock = max(0, int(batch.stock - dto.quantity))
+
+            reversal = (
+                builder.set_batch(dto.batch_id)
+                .set_type(self.model.TYPE.OUTBOUND)
+                .set_status(self.model.Status.PENDING)
+                .set_concept(dto.concept)
+                .set_quantity(dto.quantity)
+                .set_observation(dto.observation)
+                .set_stock_data(dto.previous_stock, current_stock)
+                .set_unit_cost(dto.unit_cost_at_movement)
+                .set_movement_date(dto.movement_date)
+                .save()
+                .build()
+            )
+            return reversal
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.json()}")
+            raise
+        except Exception as e:
+            logger.error(f"Error saving movement: {e}", exc_info=True)
             raise

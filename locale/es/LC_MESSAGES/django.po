@@ -42,8 +42,8 @@ msgstr "Información Básica"
 #: apps/catalogs/admin.py:53 apps/catalogs/admin.py:138
 #: apps/core/forms/base.py:46 apps/inventory/forms/supply_forms.py:193
 #: apps/inventory/models.py:148 apps/inventory/models.py:194
-#: apps/purchasing/admin.py:13 apps/purchasing/admin.py:79
-#: apps/purchasing/forms.py:12 apps/purchasing/models.py:72
+#: apps/operations/admin.py:13 apps/operations/admin.py:79
+#: apps/operations/forms.py:12 apps/operations/models.py:72
 #: apps/security/forms/user.py:12 apps/security/models/users.py:113
 #: apps/security/models/users.py:206
  apps/security/models/users.py:206
@@ -181,7 +181,7 @@ msgstr "elementos de catálogo"
 #: apps/catalogs/templates/catalogs/items/create_or_update.html:53
 #: apps/inventory/templates/supplies/batches/create_or_update.html:53
 #: apps/inventory/templates/supplies/create_or_update.html:65
-#: apps/purchasing/templates/suppliers/create_or_update.html:35
+#: apps/operations/templates/suppliers/create_or_update.html:35
 #: apps/security/templates/users/create_or_update.html:36
 #: apps/security/templates/users/password/password_reset_confirm.html:99
 #: templates/components/_delete.html:72
@@ -192,7 +192,7 @@ msgstr "Cancelar"
 #: apps/catalogs/templates/catalogs/items/create_or_update.html:56
 #: apps/inventory/templates/supplies/batches/create_or_update.html:56
 #: apps/inventory/templates/supplies/create_or_update.html:68
-#: apps/purchasing/templates/suppliers/create_or_update.html:38
+#: apps/operations/templates/suppliers/create_or_update.html:38
 #: apps/security/templates/users/create_or_update.html:39
 #: apps/security/templates/users/password/password_reset_confirm.html:103
 #: templates/components/_delete.html:69 templates/components/_form.html:35
@@ -201,7 +201,7 @@ msgstr "Guardar"
 
 #: apps/catalogs/templates/catalogs/datatable.html:32
 #: apps/catalogs/templates/catalogs/items/datatable.html:33
-#: apps/purchasing/templates/suppliers/datatable.html:104
+#: apps/operations/templates/suppliers/datatable.html:104
 #: apps/security/templates/users/datatable.html:38
 #: templates/components/_datatable.html:57
 msgid "Clean filters"
@@ -210,7 +210,7 @@ msgstr "Limpiar filtros"
 #: apps/catalogs/templates/catalogs/datatable.html:49
 #: apps/catalogs/templates/catalogs/items/datatable.html:53
 #: apps/inventory/templates/supplies/detail.html:147
-#: apps/purchasing/templates/suppliers/datatable.html:121
+#: apps/operations/templates/suppliers/datatable.html:121
 msgid "status"
 msgstr "estado"
 
@@ -223,7 +223,7 @@ msgstr "creado"
 #: apps/catalogs/templates/catalogs/items/datatable.html:55
 #: apps/inventory/templates/supplies/batches/datatable.html:72
 #: apps/inventory/templates/supplies/datatable.html:77
-#: apps/purchasing/templates/suppliers/datatable.html:122
+#: apps/operations/templates/suppliers/datatable.html:122
 #: apps/security/templates/users/datatable.html:57
 msgid "actions"
 msgstr "acciones"
@@ -239,7 +239,7 @@ msgstr "items activos"
 #: apps/catalogs/templates/catalogs/detail.html:92
 #: apps/catalogs/templates/catalogs/items/detail.html:83
 #: apps/inventory/templates/supplies/batches/detail.html:83
-#: apps/purchasing/templates/suppliers/detail.html:117
+#: apps/operations/templates/suppliers/detail.html:117
 msgid "Audit information"
 msgstr "Información de auditoría"
 
@@ -601,7 +601,7 @@ msgid "Notify me when stock reaches this level"
 msgstr "Informarme cuando las existencias alcancen este nivel"
 
 #: apps/inventory/models.py:54 apps/inventory/models.py:134
-#: apps/purchasing/admin.py:115
+#: apps/operations/admin.py:115
 msgid "Supply"
 msgstr "Insumo"
 
@@ -657,11 +657,11 @@ msgstr "Ajuste"
 msgid "Pending"
 msgstr "Pendiente"
 
-#: apps/inventory/models.py:187 apps/purchasing/models.py:67
+#: apps/inventory/models.py:187 apps/operations/models.py:67
 msgid "Completed"
 msgstr "Completado"
 
-#: apps/inventory/models.py:188 apps/purchasing/models.py:68
+#: apps/inventory/models.py:188 apps/operations/models.py:68
 msgid "Cancelled"
 msgstr "Cancelado"
 
@@ -712,7 +712,7 @@ msgid "Breakdown by batch"
 msgstr "Desglose por lote"
 
 #: apps/inventory/templates/supplies/batches/datatable.html:68
-#: apps/purchasing/models.py:91
+#: apps/operations/models.py:91
 msgid "Unit cost"
 msgstr "Costo unitario"
 
@@ -801,198 +801,198 @@ msgstr "por debajo del mínimo"
 msgid "Expiring Batches"
 msgstr "Lotes  por caducar"
 
-#: apps/purchasing/admin.py:64 apps/purchasing/models.py:30
+#: apps/operations/admin.py:64 apps/operations/models.py:30
 msgid "Supplier"
 msgstr "Proveedor"
 
-#: apps/purchasing/admin.py:85
+#: apps/operations/admin.py:85
 msgid "Total Items"
 msgstr "Total de ítems"
 
-#: apps/purchasing/admin.py:109
+#: apps/operations/admin.py:109
 msgid "Order Number"
 msgstr "Número de Orden"
 
-#: apps/purchasing/forms.py:17
+#: apps/operations/forms.py:17
 msgid "Reasons"
 msgstr "Motivos"
 
-#: apps/purchasing/forms.py:22 apps/purchasing/models.py:22
+#: apps/operations/forms.py:22 apps/operations/models.py:22
 msgid "Delivery days"
 msgstr "Días de entrega"
 
-#: apps/purchasing/forms.py:25
+#: apps/operations/forms.py:25
 msgid "All deadlines"
 msgstr "Todos los plazos"
 
-#: apps/purchasing/forms.py:26
+#: apps/operations/forms.py:26
 msgid "Fast (≤ 5 days)"
 msgstr "Rápido (≤ 5 días)"
 
-#: apps/purchasing/forms.py:27
+#: apps/operations/forms.py:27
 msgid "Medium (6–14 days)"
 msgstr "Medio (6-14 días)"
 
-#: apps/purchasing/forms.py:28
+#: apps/operations/forms.py:28
 msgid "Slow (> 14 days)"
 msgstr "Lento (> 14 días)"
 
-#: apps/purchasing/forms.py:35
+#: apps/operations/forms.py:35
 msgid "Search by name or ruc"
 msgstr "Buscar por nombre o RUC"
 
-#: apps/purchasing/forms.py:45
+#: apps/operations/forms.py:45
 msgid "All reasons"
 msgstr "Todos los motivos"
 
-#: apps/purchasing/models.py:15
-#: apps/purchasing/templates/suppliers/detail.html:30
+#: apps/operations/models.py:15
+#: apps/operations/templates/suppliers/detail.html:30
 msgid "Business name"
 msgstr "Razón social"
 
-#: apps/purchasing/models.py:16
-#: apps/purchasing/templates/suppliers/detail.html:32
+#: apps/operations/models.py:16
+#: apps/operations/templates/suppliers/detail.html:32
 msgid "Reason"
 msgstr "Motivo"
 
-#: apps/purchasing/models.py:18
+#: apps/operations/models.py:18
 msgid "Tax id"
 msgstr "RUC"
 
-#: apps/purchasing/models.py:25 apps/security/models/users.py:103
+#: apps/operations/models.py:25 apps/security/models/users.py:103
 msgid "Email address"
 msgstr "Correo electrónico"
 
-#: apps/purchasing/models.py:26 apps/security/models/users.py:42
+#: apps/operations/models.py:26 apps/security/models/users.py:42
 msgid "Phone number"
 msgstr "Teléfono"
 
-#: apps/purchasing/models.py:31
+#: apps/operations/models.py:31
 msgid "Suppliers"
 msgstr "Proveedores"
 
-#: apps/purchasing/models.py:65
+#: apps/operations/models.py:65
 msgid "Draft"
 msgstr "Borrador"
 
-#: apps/purchasing/models.py:66
+#: apps/operations/models.py:66
 msgid "Sent"
 msgstr "Enviado"
 
-#: apps/purchasing/models.py:70
+#: apps/operations/models.py:70
 msgid "Order number"
 msgstr "Número de orden"
 
-#: apps/purchasing/models.py:76
+#: apps/operations/models.py:76
 msgid "Purchase Order"
 msgstr "Orden de Compra"
 
-#: apps/purchasing/models.py:77
+#: apps/operations/models.py:77
 msgid "Purchase Orders"
 msgstr "Órdenes de Compra"
 
-#: apps/purchasing/models.py:89
+#: apps/operations/models.py:89
 msgid "Quantity requested"
 msgstr "Cantidad solicitada"
 
-#: apps/purchasing/models.py:90
+#: apps/operations/models.py:90
 msgid "Quantity received"
 msgstr "Cantidad recibida"
 
-#: apps/purchasing/models.py:96
+#: apps/operations/models.py:96
 msgid "Order detail"
 msgstr "Detalle de orden"
 
-#: apps/purchasing/models.py:97
+#: apps/operations/models.py:97
 msgid "Order details"
 msgstr "Detalles de orden"
 
-#: apps/purchasing/templates/suppliers/datatable.html:23
+#: apps/operations/templates/suppliers/datatable.html:23
 msgid "Number of records"
 msgstr "Número de registros"
 
-#: apps/purchasing/templates/suppliers/datatable.html:25
+#: apps/operations/templates/suppliers/datatable.html:25
 #: templates/partials/sidebar/_sidebar.html:36
 msgid "suppliers"
 msgstr "proveedores"
 
-#: apps/purchasing/templates/suppliers/datatable.html:38
+#: apps/operations/templates/suppliers/datatable.html:38
 msgid "Fast Delivery"
 msgstr "Entrega Rápida"
 
-#: apps/purchasing/templates/suppliers/datatable.html:53
+#: apps/operations/templates/suppliers/datatable.html:53
 msgid "Medium Delivery"
 msgstr "Entrega Media"
 
-#: apps/purchasing/templates/suppliers/datatable.html:68
+#: apps/operations/templates/suppliers/datatable.html:68
 msgid "Slow Delivery"
 msgstr "Entrega Lenta"
 
-#: apps/purchasing/templates/suppliers/datatable.html:116
+#: apps/operations/templates/suppliers/datatable.html:116
 msgid "supplier"
 msgstr "proveedor"
 
-#: apps/purchasing/templates/suppliers/datatable.html:118
+#: apps/operations/templates/suppliers/datatable.html:118
 msgid "delivery"
 msgstr "entrega"
 
-#: apps/purchasing/templates/suppliers/detail.html:27
+#: apps/operations/templates/suppliers/detail.html:27
 msgid "Identification"
 msgstr "Identificación"
 
-#: apps/purchasing/templates/suppliers/detail.html:34
+#: apps/operations/templates/suppliers/detail.html:34
 msgid "Tax ID"
 msgstr "RUC"
 
-#: apps/purchasing/templates/suppliers/detail.html:45
+#: apps/operations/templates/suppliers/detail.html:45
 msgid "Contact"
 msgstr "Contacto"
 
-#: apps/purchasing/templates/suppliers/detail.html:50
+#: apps/operations/templates/suppliers/detail.html:50
 msgid "Email"
 msgstr "Correo electrónico"
 
-#: apps/purchasing/templates/suppliers/detail.html:56
+#: apps/operations/templates/suppliers/detail.html:56
 msgid "Phone"
 msgstr "Teléfono"
 
-#: apps/purchasing/templates/suppliers/detail.html:69
+#: apps/operations/templates/suppliers/detail.html:69
 msgid "Delivery deadline"
 msgstr "Plazo de entrega"
 
-#: apps/purchasing/templates/suppliers/detail.html:76
+#: apps/operations/templates/suppliers/detail.html:76
 msgid "Delivery time"
 msgstr "Tiempo de entrega"
 
-#: apps/purchasing/templates/suppliers/detail.html:77
+#: apps/operations/templates/suppliers/detail.html:77
 msgid "days"
 msgstr "días"
 
-#: apps/purchasing/templates/suppliers/detail.html:96
+#: apps/operations/templates/suppliers/detail.html:96
 msgid "Fast"
 msgstr "Rápido"
 
-#: apps/purchasing/templates/suppliers/detail.html:100
+#: apps/operations/templates/suppliers/detail.html:100
 msgid "Medium"
 msgstr "Medio"
 
-#: apps/purchasing/templates/suppliers/detail.html:104
+#: apps/operations/templates/suppliers/detail.html:104
 msgid "Slow"
 msgstr "Lento"
 
-#: apps/purchasing/views/suppliers.py:41
+#: apps/operations/views/suppliers.py:41
 msgid "Management of registered suppliers"
 msgstr "Gestión de proveedores registrados"
 
-#: apps/purchasing/views/suppliers.py:93
+#: apps/operations/views/suppliers.py:93
 msgid "Supplier Details"
 msgstr "Detalles del Proveedor"
 
-#: apps/purchasing/views/suppliers.py:165
+#: apps/operations/views/suppliers.py:165
 msgid "Update Supplier"
 msgstr "Actualizar Proveedor"
 
-#: apps/purchasing/views/suppliers.py:229 apps/security/views/users.py:387
+#: apps/operations/views/suppliers.py:229 apps/security/views/users.py:387
 msgid "Change Status"
 msgstr "Cambiar Estado"
 

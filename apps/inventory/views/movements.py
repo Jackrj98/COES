@@ -17,7 +17,13 @@ from apps.core.views.base import (
     CustomListView,
     CustomUpdateView,
 )
-from apps.inventory.forms import BatchFilterForm, InventoryMovementFilterForm, SupplyBaseForm
+from apps.inventory.forms import (
+    BatchFilterForm,
+    InventoryMovementBaseForm,
+    InventoryMovementFilterForm,
+    MovementFormSet,
+    SupplyBaseForm,
+)
 from apps.inventory.layers.applications import InventoryMovementAppService, SupplyAppService
 from apps.inventory.models import Batch, InventoryMovement, Supply
 from apps.security.layers.security import SecurityService
@@ -40,12 +46,34 @@ class InventoryMovementListView(CustomListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["object"] = self.model
-        ctx["description"] = _("Management of registered inventory movements")
         ctx["ui_map"] = self.model.Status.get_ui_map()
         ctx["type_ui_map"] = self.model.Type.get_ui_map()
-        # ctx["actions"]["menu_actions"]["add"]["url"] = reverse_lazy(f"{BASE_APPS_URL}:create")
-
+        ctx["description"] = _("Management of registered inventory movements")
         return ctx
+
+    def get_actions(self):
+        return {
+            "menu_actions": {
+                "title": _("Actionable"),
+                "actions": [
+                    {
+                        "title": _("Register inbound movement"),
+                        "icon": "bi bi-plus-lg",
+                        "url": reverse_lazy(f"{BASE_APPS_URL}:inbound"),
+                    },
+                    {
+                        "title": _("Register outbound movement"),
+                        "icon": "bi bi-dash-lg",
+                        "url": reverse_lazy(f"{BASE_APPS_URL}:outbound"),
+                    },
+                    {
+                        "title": _("Register stock adjustment"),
+                        "icon": "bi bi-arrow-repeat",
+                        "url": reverse_lazy(f"{BASE_APPS_URL}:adjustment"),
+                    },
+                ],
+            }
+        }
 
     def retrieve_data(self, params):
         return InventoryMovementAppService().retrieve_movements(params)
@@ -131,10 +159,36 @@ class InventoryMovementDetailView(CustomDetailView):
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class InventoryMovementCreateView(CustomCreateView):
     model = DEFAULT_MODEL
-    form_class = SupplyBaseForm
+    form_class = InventoryMovementBaseForm
+    second_form_class = MovementFormSet
     success_url: str = DEFAULT_LIST_URL
     permission_required = "inventory.add_inventorymovement"
     template_name = "inventory_movements/create_or_update.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["movement_type"] = self.model.Type.INBOUND
+        return initial
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["movement_types"] = self.model.Type.choices
+        ctx["title"] = ctx["title"].capitalize()
+        ctx["concept_list"] = [
+            "Compra de insumos",
+            "Ajuste por inventario inicial",
+            "Devolución de proveedor",
+        ]
+        if self.request.method == "GET":
+            ctx["movement_formset"] = self.second_form_class(
+                queryset=InventoryMovement.objects.none(), prefix="movements"
+            )
+        else:
+            ctx["movement_formset"] = self.second_form_class(
+                self.request.POST or None, prefix="movements"
+            )
+
+        return ctx
 
     def form_valid(self, form, **kwargs):
         service = SupplyAppService()
@@ -157,6 +211,41 @@ class InventoryMovementCreateView(CustomCreateView):
             return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
+
+
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
+class InventoryMovementOutboundCreateView(CustomCreateView):
+    model = DEFAULT_MODEL
+    form_class = InventoryMovementBaseForm
+    second_form_class = MovementFormSet
+    success_url: str = DEFAULT_LIST_URL
+    permission_required = "inventory.add_inventorymovement"
+    template_name = "inventory_movements/create_or_update.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["movement_type"] = self.model.Type.OUTBOUND
+        return initial
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["movement_types"] = self.model.Type.choices
+        ctx["title"] = ctx["title"].capitalize()
+        ctx["concept_list"] = [
+            "Compra de insumos",
+            "Ajuste por inventario inicial",
+            "Devolución de proveedor",
+        ]
+        if self.request.method == "GET":
+            ctx["movement_formset"] = self.second_form_class(
+                queryset=InventoryMovement.objects.none(), prefix="movements"
+            )
+        else:
+            ctx["movement_formset"] = self.second_form_class(
+                self.request.POST or None, prefix="movements"
+            )
+
+        return ctx
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")

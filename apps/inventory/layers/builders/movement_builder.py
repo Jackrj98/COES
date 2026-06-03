@@ -48,6 +48,13 @@ class InventoryMovementBuilder:
             self.movement.status = status
         return self
 
+    def set_movement_date(self, movement_date: str) -> "InventoryMovementBuilder":
+        if movement_date:
+            from datetime import datetime
+
+            self.movement.movement_date = datetime.strptime(movement_date, "%Y-%m-%d").date()
+        return self
+
     def save(self) -> "InventoryMovementBuilder":
         self.movement.save()
         return self

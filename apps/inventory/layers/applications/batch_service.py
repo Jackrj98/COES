@@ -1,6 +1,6 @@
 import logging
 
-from django.db import transaction
+from django.db import models, transaction
 from django.db.models import (
     BooleanField,
     Case,
@@ -68,6 +68,19 @@ class BatchAppService(BaseAppService):
             logger.exception(f"Failed to fetch batches: {e}")
             return params.result([]) if hasattr(params, "result") else []
 
+    def retrieve_stock_total(self, supply_reference):
+        return (
+            self.model.active.filter(
+                supply__external_id=supply_reference, is_active=True
+            ).aggregate(total=models.Sum("stock"))["total"]
+            or 0
+        )
+
+    def retrieve_by_due_date(self, supply_id):
+        return self.model.active.filter(is_active=True, supply_id=supply_id, stock__gt=0).order_by(
+            "-due_date"
+        )
+
     @transaction.atomic
     def save_batch(self, payload, instance=None):
         builder = BatchBuilder(batch=instance) if instance else BatchBuilder()
@@ -104,3 +117,9 @@ class BatchAppService(BaseAppService):
 
         payload["supply_id"] = instance.supply_id
         return self.save_batch(payload, instance=instance)
+
+    @staticmethod
+    def update_batch_stock(instance, quantity):
+
+        builder = BatchBuilder(instance)
+        return builder.set_stock(quantity).save().build()

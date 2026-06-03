@@ -17,7 +17,7 @@ class Permissions:
                         "view_person",
                     ]
                 },
-                "purchasing": {
+                "operations": {
                     "details": [
                         "add_supplier",
                         "change_supplier",
@@ -116,7 +116,7 @@ class Permissions:
                         "view_person",
                     ]
                 },
-                "purchasing": {
+                "operations": {
                     "details": [
                         "add_supplier",
                         "change_supplier",

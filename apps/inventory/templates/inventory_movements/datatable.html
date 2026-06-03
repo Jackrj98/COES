@@ -3,10 +3,22 @@
 
 {% block actions %}
     {% with menu_a=actions.menu_actions %}
-        <a class="btn btn-icon btn-primary" href="{{ menu_a.add.url }}">
-            <i class="bi bi-plus-lg "></i>
-            <span class="d-none d-md-inline fw-semibold">{% trans menu_a.add.title %}</span>
-        </a>
+        <div class="dropdown">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                {{ menu_a.title|capfirst }}
+            </button>
+            <div class="dropdown-menu dropdown-menu-end" style="">
+                {% for item in menu_a.actions %}
+                    <a class="dropdown-item" href="{{ item.url|default:"#" }}">
+                        <i class="{{ item.icon }} me-2"></i>
+                        {{ item.title }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
     {% endwith %}
 {% endblock actions %}
 
@@ -40,7 +52,7 @@
                 <div class="col-12 col-sm-6 col-md-8 col-lg-4">
                     {{ filter_form.search|as_crispy_field }}
                 </div>
-                 <div class="col-12 col-sm-6 col-md-8 col-lg-3">
+                <div class="col-12 col-sm-6 col-md-8 col-lg-3">
                     {{ filter_form.date_from|as_crispy_field }}
                 </div>
                 <div class="col-12 col-sm-6 col-md-8 col-lg-3">

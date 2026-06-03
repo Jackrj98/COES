@@ -4,6 +4,7 @@ from apps.inventory.views.movements import (
     InventoryMovementCreateView,
     InventoryMovementDetailView,
     InventoryMovementListView,
+    InventoryMovementOutboundCreateView,
     InventoryMovementUpdateView,
 )
 
@@ -13,6 +14,8 @@ SLUG = "<uuid:external_id>"
 urlpatterns = [
     path("", InventoryMovementListView.as_view(), name="list"),
     path(f"{SLUG}/", InventoryMovementDetailView.as_view(), name="detail"),
-    path("create/", InventoryMovementCreateView.as_view(), name="create"),
+    path("inbound/", InventoryMovementCreateView.as_view(), name="inbound"),
+    path("outbound/", InventoryMovementOutboundCreateView.as_view(), name="outbound"),
+    path("adjustment/", InventoryMovementCreateView.as_view(), name="adjustment"),
     path(f"{SLUG}/update/", InventoryMovementUpdateView.as_view(), name="update"),
 ]

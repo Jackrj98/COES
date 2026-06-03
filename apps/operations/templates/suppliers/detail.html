@@ -1,0 +1,149 @@
+{% extends 'layouts/base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+    <section>
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 64px; height: 64px;">
+                                <span class="fw-bold fs-4 text-primary">{{ object.initials }}</span>
+                            </div>
+                            <div>
+                                <h3 class="mb-1">{{ object.business_name|title }}</h3>
+                                <p class="text-muted mb-0">{{ object.contact_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6 col-md-12">
+                <div class="card h-100">
+                    <div class="card-header bg-transparent"><h6 class="mb-0"><i
+                            class="bi bi-building me-2"></i>{% trans "Identification" %}</h6></div>
+                    <div class="card-body pt-0">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted fw-normal">{% trans "Business name" %}</dt>
+                            <dd class="col-sm-8 fw-semibold">{{ object.business_name|title }}</dd>
+                            <dt class="col-sm-4 text-muted fw-normal">{{ object|field_label:"contact_name" }}</dt>
+                            <dd class="col-sm-8 fw-semibold">{{ object.contact_name }}</dd>
+                            <dt class="col-sm-4 text-muted fw-normal">{% trans "Tax ID" %}</dt>
+                            <dd class="col-sm-8 fw-semibold">{{ object.tax_id }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6 col-md-12">
+                <div class="card h-100">
+                    <div class="card-header bg-transparent">
+                        <h6 class="mb-0">
+                            <i class="bi bi-headset me-2"></i>{% trans "Contact" %}
+                        </h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted fw-normal">{% trans "Email" %}</dt>
+                            <dd class="col-sm-8">
+                                <a href="mailto:{{ object.email }}" class="text-decoration-none">
+                                    {{ object.email }}
+                                </a>
+                            </dd>
+                            <dt class="col-sm-4 text-muted fw-normal">{% trans "Phone" %}</dt>
+                            <dd class="col-sm-8">
+                                <a href="tel:{{ object.phone }}" class="text-decoration-none">
+                                    {{ object.phone }}</a></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card h-100">
+                    <div class="card-header bg-transparent">
+                        <h6 class="mb-0">
+                            <i class="bi bi-truck me-2"></i>{% trans "Delivery deadline" %}
+                        </h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <!-- Progress Bar -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">{% trans "Delivery time" %}</small>
+                                <small class="fw-semibold">{{ object.delivery_days }} {% trans "days" %}</small>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar
+                        {% if object.delivery_days <= 5 %}bg-success
+                        {% elif object.delivery_days <= 14 %}bg-warning
+                        {% else %}bg-danger{% endif %}"
+                                     role="progressbar"
+                                     style="width: {% widthratio object.delivery_days 30 100 %}%;"
+                                     aria-valuenow="{{ object.delivery_days }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="30">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Labels -->
+                        <div class="d-flex justify-content-between mt-2">
+                            <small class="text-success">
+                                <i class="bi bi-lightning-charge"></i> {% trans "Fast" %}
+                                <span class="text-muted">(≤5 days)</span>
+                            </small>
+                            <small class="text-warning">
+                                <i class="bi bi-truck"></i> {% trans "Medium" %}
+                                <span class="text-muted">(6-14 days)</span>
+                            </small>
+                            <small class="text-danger">
+                                <i class="bi bi-calendar2-week"></i> {% trans "Slow" %}
+                                <span class="text-muted">(15+ days)</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if is_admin %}
+                <div class="col-12">
+                    <div class="card h-80">
+                        <div class="card-header bg-transparent">
+                            <h6 class="mb-0">
+                                <i class="bi bi-file-text me-2"></i>{% trans "Audit information" %}
+                            </h6>
+                        </div>
+                        <div class="card-body pt-0">
+                            <dl class="row mb-0">
+                                <div class="col-6 text-muted fw-normal">
+                                    <div class="row mb-2">
+                                        <dt class="text-sm text-muted fw-normal mb-1">{% label object 'created_by' %}</dt>
+                                        <dd class="col-sm-7">{{ object.created_by|default:"?" }}</dd>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <dt class="text-sm text-muted fw-normal mb-1">{% label object 'updated_by' %}</dt>
+                                        <dd class="col-sm-7">{{ object.updated_by|default:"-" }}</dd>
+                                    </div>
+                                </div>
+                                <div class="col-6 text-muted fw-normal">
+                                    <div class="row mb-2">
+                                        <dt class="text-sm text-muted fw-normal mb-1">{% label object 'created_at' %}</dt>
+                                        <dd class="col-sm-7">{{ object.created_at|date:"d M Y, H:i" }}</dd>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <dt class="text-sm text-muted fw-normal mb-1">{% label object 'updated_at' %}</dt>
+                                        <dd class="col-sm-7">{{ object.updated_at|date:"d M Y, H:i" }}</dd>
+                                    </div>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock content %}
