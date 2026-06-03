@@ -17,11 +17,34 @@ class Permissions:
                         "view_person",
                     ]
                 },
-                "purchasing": {
+                "catalogs": {
+                    "details": [
+                        "add_catalog",
+                        "change_catalog",
+                        "view_catalog",
+                        "add_catalogitem",
+                        "change_catalogitem",
+                        "view_catalogitem",
+                    ]
+                },
+                "operations": {
                     "details": [
                         "add_supplier",
                         "change_supplier",
                         "view_supplier",
+                    ]
+                },
+                "inventory": {
+                    "details": [
+                        "add_supply",
+                        "change_supply",
+                        "view_supply",
+                        "add_batch",
+                        "change_batch",
+                        "view_batch",
+                        "add_movement",
+                        "change_movement",
+                        "view_movement",
                     ]
                 },
             },
@@ -116,11 +139,34 @@ class Permissions:
                         "view_person",
                     ]
                 },
-                "purchasing": {
+                "catalogs": {
+                    "details": [
+                        "add_catalog",
+                        "change_catalog",
+                        "view_catalog",
+                        "add_catalogitem",
+                        "change_catalogitem",
+                        "view_catalogitem",
+                    ]
+                },
+                "operations": {
                     "details": [
                         "add_supplier",
                         "change_supplier",
                         "view_supplier",
+                    ]
+                },
+                "inventory": {
+                    "details": [
+                        "add_supply",
+                        "change_supply",
+                        "view_supply",
+                        "add_batch",
+                        "change_batch",
+                        "view_batch",
+                        "add_movement",
+                        "change_movement",
+                        "view_movement",
                     ]
                 },
             },

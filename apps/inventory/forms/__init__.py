@@ -2,14 +2,18 @@ from .supply_forms import (
     BatchBaseForm,
     BatchFilterForm,
     InventoryMovementBaseForm,
+    InventoryMovementFilterForm,
+    MovementFormSet,
     SupplyBaseForm,
     SupplyFilterForm,
 )
 
 __all__ = [
-    "BatchBaseForm",
-    "InventoryMovementBaseForm",
-    "SupplyBaseForm",
-    "SupplyFilterForm",
-    "BatchFilterForm",
+    BatchBaseForm,
+    BatchFilterForm,
+    InventoryMovementBaseForm,
+    InventoryMovementFilterForm,
+    MovementFormSet,
+    SupplyBaseForm,
+    SupplyFilterForm,
 ]

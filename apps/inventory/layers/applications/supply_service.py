@@ -2,8 +2,9 @@ import logging
 
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Value
 from django.db.models.aggregates import Count
+from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
@@ -20,6 +21,49 @@ class SupplyAppService(BaseAppService):
 
     def __init__(self):
         super().__init__(Supply)
+
+    def retrieve_stock_by_code(self, code):
+        nrm_code = self.normalize_data(code, remove_spaces=True, to_lowercase=False)
+        result = self.model.active.filter(code=nrm_code).aggregate(
+            total_stock=Coalesce(Sum("batches__stock"), Value(0))
+        )
+        return result["total_stock"]
+
+    def retrieve_active(self):
+        """Retrieve active supplies with related fields."""
+        return (
+            self.model.active.filter(is_active=True)
+            .select_related("category", "unit_of_measure")
+            .order_by("name")
+        )
+
+    def retrieve_by_term(self, search_term):
+        """Retrieve active supplies with related fields and total stock annotated."""
+        return (
+            self.model.active.filter(
+                Q(name__icontains=search_term) | Q(code__icontains=search_term), is_active=True
+            )
+            .select_related("category", "unit_of_measure")
+            .annotate(total_stock=Coalesce(Sum("batches__stock"), Value(0)))
+        )
+
+    def retrieve_active_choices(self):
+        try:
+            choices = (
+                self.model.active.filter(is_active=True)
+                .select_related("category", "unit_of_measure")
+                .order_by("name")
+            )
+            return [
+                (
+                    item.code,
+                    f"{item.name} ({item.code}) {item.unit_of_measure.name} {item.unit_of_measure.extra}",
+                )
+                for item in choices
+            ]
+        except Exception as e:
+            logger.error(f"Error retrieving supplies by category: {e}")
+            return []
 
     @staticmethod
     def retrieve_suppliers(params):

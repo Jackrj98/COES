@@ -30,9 +30,15 @@
                         <span>{% trans 'Supplies'|capfirst %}</span>
                     </a>
                 </li>
-                <li class="sidebar-item  {% active 'purchasing:suppliers:list' %}">
-                    <a href="{% url 'purchasing:suppliers:list' %}" class='sidebar-link'>
-                       <i class="bi bi-box2"></i>
+                <li class="sidebar-item  {% active 'inventory:movements:list' %}">
+                    <a href="{% url 'inventory:movements:list' %}" class='sidebar-link'>
+                        <i class="bi bi-arrow-left-right"></i>
+                        <span>{% trans 'movements'|capfirst %}</span>
+                    </a>
+                </li>
+                <li class="sidebar-item  {% active 'operations:suppliers:list' %}">
+                    <a href="{% url 'operations:suppliers:list' %}" class='sidebar-link'>
+                        <i class="bi bi-box2"></i>
                         <span>{% trans 'suppliers'|capfirst %}</span>
                     </a>
                 </li>
@@ -48,7 +54,7 @@
 
                 <li class="sidebar-item  {% active 'catalogs:catalogs:list' %}">
                     <a href="{% url 'catalogs:catalogs:list' %}" class='sidebar-link'>
-                       <i class="bi bi-file-earmark"></i>
+                        <i class="bi bi-file-earmark"></i>
                         <span>{% trans 'catalogs'|capfirst %}</span>
                     </a>
                 </li>

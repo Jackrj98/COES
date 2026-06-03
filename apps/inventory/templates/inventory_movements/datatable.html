@@ -1,0 +1,102 @@
+{% extends 'components/_datatable.html' %}
+{% load custom_tags crispy_forms_filters %}
+
+{% block actions %}
+    {% with menu_a=actions.menu_actions %}
+        <div class="dropdown">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                {{ menu_a.title|capfirst }}
+            </button>
+            <div class="dropdown-menu dropdown-menu-end" style="">
+                {% for item in menu_a.actions %}
+                    <a class="dropdown-item" href="{{ item.url|default:"#" }}">
+                        <i class="{{ item.icon }} me-2"></i>
+                        {{ item.title }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+    {% endwith %}
+{% endblock actions %}
+
+{% block metrics %}
+    <div class="row g-3">
+        {% for item in metrics_list %}
+            <div class="col-12 col-sm-6 col-md-6 col-xl-3">
+                <div class="card h-70 w-80 border-0 shadow-sm">
+                    <div class="card-body p-4 d-flex align-items-center gap-3">
+                        <div class="flex-shrink-0">
+                    <span class="btn btn-icon bg-{{ item.color }} bg-opacity-10 rounded-3 p-3">
+                        <i class="bi {{ item.icon }} fs-3 text-{{ item.color }}"></i>
+                    </span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1 small fw-medium">{{ item.title }}</h6>
+                            <h3 class="mb-0 fw-bold text-{{ item.color }}">{{ item.value|intcomma }}</h3>
+                            <small class="text-muted">{{ item.sub }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock metrics %}
+
+{% block filters %}
+    {% if filter_form %}
+        <form method="GET" id="filter" class="mb-4">
+            <div class="row align-items-end g-3">
+                <div class="col-12 col-sm-6 col-md-8 col-lg-4">
+                    {{ filter_form.search|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6 col-md-8 col-lg-3">
+                    {{ filter_form.date_from|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6 col-md-8 col-lg-3">
+                    {{ filter_form.movement_type|as_crispy_field }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-4 col-lg-2">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="flex-grow-1">
+                            {{ filter_form.status|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            <button type="button"
+                                    id="clear-filters"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 38px; height: 38px; padding: 0;">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+{% endblock filters %}
+
+{% block columns %}
+    <th scope="col" class="text-uppercase">{{ object|field_label:"movement_type"|upper }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'supply / batch'|upper %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'concept'|upper }}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'quantity'|upper }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'stock'|upper %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'status'|upper }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'date'|upper %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'actions'|upper %}</th>
+{% endblock columns %}
+
+{% block rows %} {% endblock rows %}
+
+{% block dt_javascript %}
+    <script type="text/javascript">
+        const mapStatus = {{ ui_map|safe }};
+        const baseHref = "{% get_base_href %}"
+        const urlPaginator = "{{ list_url }}";
+        const mapTypeChoices = {{ type_ui_map|safe }};
+    </script>
+    <script src="{% static 'js/inventory_movements/datatable.js' %}"></script>
+{% endblock dt_javascript %}

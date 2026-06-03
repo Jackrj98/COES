@@ -3,15 +3,12 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Count, F, Q, Sum
-from django.http import JsonResponse
+from django.db.models import F, Q, Sum
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET
 from pydantic import ValidationError
 
 from apps.core.views.base import (
@@ -20,67 +17,66 @@ from apps.core.views.base import (
     CustomListView,
     CustomUpdateView,
 )
-from apps.inventory.forms import BatchFilterForm, SupplyBaseForm, SupplyFilterForm
-from apps.inventory.layers.applications import SupplyAppService
-from apps.inventory.models import Batch, Supply
+from apps.inventory.forms import (
+    BatchFilterForm,
+    InventoryMovementBaseForm,
+    InventoryMovementFilterForm,
+    MovementFormSet,
+    SupplyBaseForm,
+)
+from apps.inventory.layers.applications import InventoryMovementAppService, SupplyAppService
+from apps.inventory.models import Batch, InventoryMovement, Supply
 from apps.security.layers.security import SecurityService
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = Supply
-SECOND_MODEL = Batch
-DEFAULT_LIST_URL = reverse_lazy("inventory:supplies:list")
+DEFAULT_MODEL = InventoryMovement
+BASE_APPS_URL = "inventory:movements"
+DEFAULT_LIST_URL = reverse_lazy(f"{BASE_APPS_URL}:list")
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
-class SupplyListView(CustomListView):
+class InventoryMovementListView(CustomListView):
     model = DEFAULT_MODEL
-    form_class = SupplyFilterForm
+    form_class = InventoryMovementFilterForm
     success_url: str = DEFAULT_LIST_URL
-    template_name = "supplies/datatable.html"
-    permission_required = "inventory.view_supply"
+    template_name = "inventory_movements/datatable.html"
+    permission_required = "inventory.view_inventorymovement"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["object"] = self.model
-        ctx["description"] = _("Management of registered supplies")
-        ctx["actions"]["menu_actions"]["add"]["url"] = reverse_lazy("inventory:supplies:create")
-
-        total_supplies, stock_normal, stock_critical, expiring_batches = self._metrics()
-        ctx["metrics_list"] = [
-            {
-                "title": _("Total Supplies"),
-                "value": total_supplies,
-                "sub": _("registered"),
-                "icon": "bi-boxes",
-                "color": "primary",
-            },
-            {
-                "title": _("Stock OK"),
-                "value": stock_normal,
-                "sub": _("above minimum"),
-                "icon": "bi-check-lg",
-                "color": "success",
-            },
-            {
-                "title": _("Stock Critical"),
-                "value": stock_critical,
-                "sub": _("below minimum"),
-                "icon": "bi bi-exclamation-circle",
-                "color": "danger",
-            },
-            {
-                "title": _("Expiring Batches"),
-                "value": expiring_batches,
-                "sub": _("next 30 days"),
-                "icon": "bi-calendar-event-fill",
-                "color": "warning",
-            },
-        ]
+        ctx["ui_map"] = self.model.Status.get_ui_map()
+        ctx["type_ui_map"] = self.model.Type.get_ui_map()
+        ctx["description"] = _("Management of registered inventory movements")
         return ctx
 
+    def get_actions(self):
+        return {
+            "menu_actions": {
+                "title": _("Actionable"),
+                "actions": [
+                    {
+                        "title": _("Register inbound movement"),
+                        "icon": "bi bi-plus-lg",
+                        "url": reverse_lazy(f"{BASE_APPS_URL}:inbound"),
+                    },
+                    {
+                        "title": _("Register outbound movement"),
+                        "icon": "bi bi-dash-lg",
+                        "url": reverse_lazy(f"{BASE_APPS_URL}:outbound"),
+                    },
+                    {
+                        "title": _("Register stock adjustment"),
+                        "icon": "bi bi-arrow-repeat",
+                        "url": reverse_lazy(f"{BASE_APPS_URL}:adjustment"),
+                    },
+                ],
+            }
+        }
+
     def retrieve_data(self, params):
-        return SupplyAppService().retrieve_suppliers(params)
+        return InventoryMovementAppService().retrieve_movements(params)
 
     def get_success_url(self):
         return self.success_url
@@ -106,34 +102,18 @@ class SupplyListView(CustomListView):
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
-class SupplyDetailView(CustomDetailView):
+class InventoryMovementDetailView(CustomDetailView):
     """View for displaying supply details with stock information."""
 
     app_name = "supplies"
     model = DEFAULT_MODEL
-    second_model = SECOND_MODEL
     success_url = DEFAULT_LIST_URL
-    template_name = "supplies/detail.html"
-    permission_required = ["inventory.view_supply", "inventory.view_batch"]
+    template_name = "inventory_movements/detail.html"
+    permission_required = "inventory.view_inventorymovement"
 
     def get_queryset(self):
         """Optimize a query with select_related and annotated stock data."""
-        batch_status = self.second_model.Status.ACTIVE
-        return (
-            super()
-            .get_queryset()
-            .select_related("category", "unit_of_measure")
-            .annotate(
-                total_stock=Sum(
-                    "batches__stock",
-                    filter=Q(batches__status=batch_status, batches__deleted_at__isnull=True),
-                ),
-                active_batches_count=Count(
-                    "batches",
-                    filter=Q(batches__status=batch_status, batches__deleted_at__isnull=True),
-                ),
-            )
-        )
+        return super().get_queryset().select_related("category", "unit_of_measure")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -177,12 +157,38 @@ class SupplyDetailView(CustomDetailView):
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
-class SupplyCreateView(CustomCreateView):
+class InventoryMovementCreateView(CustomCreateView):
     model = DEFAULT_MODEL
-    form_class = SupplyBaseForm
+    form_class = InventoryMovementBaseForm
+    second_form_class = MovementFormSet
     success_url: str = DEFAULT_LIST_URL
-    permission_required = "inventory.add_supply"
-    template_name = "supplies/create_or_update.html"
+    permission_required = "inventory.add_inventorymovement"
+    template_name = "inventory_movements/create_or_update.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["movement_type"] = self.model.Type.INBOUND
+        return initial
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["movement_types"] = self.model.Type.choices
+        ctx["title"] = ctx["title"].capitalize()
+        ctx["concept_list"] = [
+            "Compra de insumos",
+            "Ajuste por inventario inicial",
+            "Devolución de proveedor",
+        ]
+        if self.request.method == "GET":
+            ctx["movement_formset"] = self.second_form_class(
+                queryset=InventoryMovement.objects.none(), prefix="movements"
+            )
+        else:
+            ctx["movement_formset"] = self.second_form_class(
+                self.request.POST or None, prefix="movements"
+            )
+
+        return ctx
 
     def form_valid(self, form, **kwargs):
         service = SupplyAppService()
@@ -208,12 +214,47 @@ class SupplyCreateView(CustomCreateView):
 
 
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
-class SupplyUpdateView(CustomUpdateView):
+class InventoryMovementOutboundCreateView(CustomCreateView):
+    model = DEFAULT_MODEL
+    form_class = InventoryMovementBaseForm
+    second_form_class = MovementFormSet
+    success_url: str = DEFAULT_LIST_URL
+    permission_required = "inventory.add_inventorymovement"
+    template_name = "inventory_movements/create_or_update.html"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["movement_type"] = self.model.Type.OUTBOUND
+        return initial
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["movement_types"] = self.model.Type.choices
+        ctx["title"] = ctx["title"].capitalize()
+        ctx["concept_list"] = [
+            "Compra de insumos",
+            "Ajuste por inventario inicial",
+            "Devolución de proveedor",
+        ]
+        if self.request.method == "GET":
+            ctx["movement_formset"] = self.second_form_class(
+                queryset=InventoryMovement.objects.none(), prefix="movements"
+            )
+        else:
+            ctx["movement_formset"] = self.second_form_class(
+                self.request.POST or None, prefix="movements"
+            )
+
+        return ctx
+
+
+@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
+class InventoryMovementUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = SupplyBaseForm
     success_url: str = DEFAULT_LIST_URL
-    permission_required = "inventory.change_supply"
-    template_name = "supplies/create_or_update.html"
+    permission_required = "inventory.change_inventorymovement"
+    template_name = "inventory_movements/create_or_update.html"
 
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
@@ -250,48 +291,3 @@ class SupplyUpdateView(CustomUpdateView):
             return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
-
-
-def get_supply_stock(request):
-    supply_code = request.GET.get("supply_code")
-    try:
-        supply = SupplyAppService().retrieve_stock_by_code(code=supply_code)
-        return JsonResponse({"stock": supply})
-    except Supply.DoesNotExist:
-        return JsonResponse({"stock": 0}, status=404)
-
-
-@require_GET
-@csrf_exempt
-def search_supplies(request):
-    search_term = request.GET.get("q", "").strip()
-    exclude_ids = [id for id in request.GET.get("exclude_ids", "").split(",") if id]
-
-    if not search_term:
-        supplies = SupplyAppService().retrieve_active()
-    else:
-        supplies = SupplyAppService().retrieve_by_term(search_term)
-
-    if exclude_ids:
-        supplies = supplies.exclude(code__in=exclude_ids)
-
-    supplies = supplies[:20]
-
-    results = [
-        {
-            "id": supply.code,
-            "text": f"{supply.name} - {supply.unit_of_measure.name} ({supply.unit_of_measure.extra})",
-            "code": supply.code,
-            "name": supply.name,
-            "stock": supply.total_stock,
-            "stock_min": supply.stock_min,
-        }
-        for supply in supplies
-    ]
-
-    return JsonResponse(
-        {
-            "results": results,
-            "pagination": {"more": False},
-        }
-    )

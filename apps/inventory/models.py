@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.catalogs.models import Catalog
 from apps.core.models import AuditModel
 from apps.core.utils.helpers import generate_upload_path
+from apps.inventory.choices import BatchStatus, InventoryMovementStatus, InventoryMovementType
 
 
 class Supply(AuditModel):
@@ -107,36 +108,10 @@ class Supply(AuditModel):
 class Batch(AuditModel):
     """Represents a batch of supplies, defining its properties, state, and related information."""
 
-    class Status(models.IntegerChoices):
-        DISCARDED = 0, _("Discarded")
-        ACTIVE = 1, _("Active")
-        EXPIRED = 2, _("Expired")
+    # Choices
+    Status = BatchStatus
 
-        @property
-        def style(self):
-            configs = {
-                self.DISCARDED.value: {"color": "secondary"},
-                self.ACTIVE.value: {"color": "success"},
-                self.EXPIRED.value: {"color": "danger"},
-            }
-            return configs[self.value]
-
-        @property
-        def color(self) -> str:
-            return self.style["color"]
-
-        @classmethod
-        def get_ui_map(cls):
-            return {item.value: {"color": item.color, "label": item.label} for item in cls}
-
-    supply = models.ForeignKey(
-        Supply,
-        verbose_name=_("Supply"),
-        on_delete=models.PROTECT,
-        related_name="batches",
-        null=True,
-        blank=True,
-    )
+    # Fields
     number = models.CharField(_("Number"), max_length=100)
     due_date = models.DateField(_("Due date"), null=True, blank=True)
     stock = models.PositiveIntegerField(
@@ -145,10 +120,19 @@ class Batch(AuditModel):
     purchase_unit_cost = models.DecimalField(
         _("Purchase unit cost"), max_digits=10, decimal_places=2
     )
-
     status = models.PositiveIntegerField(_("Status"), choices=Status, default=Status.ACTIVE)
+
+    # Relationships
+    supply = models.ForeignKey(
+        Supply,
+        verbose_name=_("Supply"),
+        on_delete=models.PROTECT,
+        related_name="batches",
+        null=True,
+        blank=True,
+    )
     purchase_order = models.ForeignKey(
-        "purchasing.PurchaseOrder",
+        "operations.PurchaseOrder",
         verbose_name=_("Purchase order"),
         on_delete=models.SET_NULL,
         blank=True,
@@ -190,37 +174,56 @@ class Batch(AuditModel):
         return self.Status(self.status).color
 
 
+class DocumentMovement(AuditModel):
+    """Polymorphic table linking movements to their source documents."""
+
+    DOCUMENT_TYPES = [
+        ("PURCHASE_ORDER", _("Purchase Order")),
+        ("EXIT_ORDER", _("Exit Order")),
+        ("MANUAL", _("Manual Adjustment")),
+    ]
+
+    document_type = models.CharField(_("Document type"), max_length=30, choices=DOCUMENT_TYPES)
+    document_id = models.PositiveIntegerField(_("Document ID"))
+    observations = models.TextField(_("Observations"), blank=True)
+
+    class Meta:
+        db_table = "document_movement"
+        verbose_name = _("Document Movement")
+        verbose_name_plural = _("Document Movements")
+        unique_together = [["document_type", "document_id"]]
+
+
 class InventoryMovement(AuditModel):
     """Represents an inventory movement with details about the transaction type, concept, quantity,
     and its effect on stock levels.
     """
 
-    class Type(models.IntegerChoices):
-        INBOUND = 0, _("Inbound")
-        OUTBOUND = 1, _("Outbound")
-        ADJUSTMENT = 2, _("Adjustment")
+    # Choices
+    Type = InventoryMovementType
+    Status = InventoryMovementStatus
 
-    class Status(models.IntegerChoices):
-        PENDING = 0, _("Pending")
-        COMPLETED = 1, _("Completed")
-        CANCELLED = 2, _("Cancelled")
-
-    batch = models.ForeignKey(
-        Batch, verbose_name=_("Batch"), on_delete=models.PROTECT, related_name="movements"
-    )
+    # Fields
+    movement_date = models.DateField(_("Movement date"), default=timezone.localdate)
     movement_type = models.PositiveSmallIntegerField(_("Type"), choices=Type)
     status = models.PositiveSmallIntegerField(_("Status"), choices=Status, default=Status.COMPLETED)
-
     concept = models.CharField(_("Concept"), max_length=255)
     quantity = models.PositiveIntegerField(_("Quantity"), validators=[MinValueValidator(0)])
     observation = models.CharField(_("Observation"), max_length=255)
-
     # Stock tracking
     previous_stock = models.PositiveIntegerField(_("Previous stock"), default=0)
     after_stock = models.PositiveIntegerField(_("After stock"), default=0)
     is_increment = models.BooleanField(_("Increment"), editable=False)
     unit_cost_at_movement = models.DecimalField(
         _("Unit cost at movement"), max_digits=10, decimal_places=2, null=True, blank=True
+    )
+
+    # Relationships
+    batch = models.ForeignKey(
+        Batch, verbose_name=_("Batch"), on_delete=models.PROTECT, related_name="movements"
+    )
+    document_movement = models.ForeignKey(
+        DocumentMovement, on_delete=models.SET_NULL, null=True, blank=True, related_name="movements"
     )
 
     class Meta:
