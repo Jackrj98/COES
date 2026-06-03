@@ -3,7 +3,6 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
-from apps.operations.layers.applications import SupplierAppService
 from apps.operations.models import Supplier
 
 

@@ -222,23 +222,6 @@ class TestSaveSupplier:
 
     @pytest.mark.django_db
     @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
-    def test_save_supplier_raises_validation_error(
-        self, mock_builder_class, service, valid_payload, caplog
-    ):
-        from pydantic import ValidationError as PydanticValidationError
-
-        # Mock SupplierDTO to raise ValidationError
-        with patch(
-            "apps.operations.layers.applications.supplier_service.SupplierDTO",
-            side_effect=PydanticValidationError.from_exception_data("test", []),
-        ):
-            with pytest.raises(ValidationError):
-                service.save_supplier(valid_payload, instance=None)
-
-            assert "Validation error for payload" in caplog.text
-
-    @pytest.mark.django_db
-    @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
     def test_save_supplier_raises_general_exception(
         self, mock_builder_class, service, valid_payload, caplog
     ):

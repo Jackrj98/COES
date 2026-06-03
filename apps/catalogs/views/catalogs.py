@@ -31,7 +31,7 @@ class CatalogListView(CustomListView):
     form_class = CatalogFilterForm
     success_url: str = DEFAULT_LIST_URL
     template_name = "catalogs/datatable.html"
-    permission_required = "catalogs.view_Catalog"
+    permission_required = "catalogs.view_catalog"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
