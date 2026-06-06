@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
+from apps.catalogs.layers.applications import CatalogItemAppService
 from apps.core.views.base import (
     CustomCreateView,
     CustomDetailView,
@@ -18,7 +19,6 @@ from apps.operations.layers.applications import OrderAppService
 from apps.operations.layers.dto import ExitOrderDTO
 from apps.operations.models import ExitDetail, ExitOrder
 from apps.security.layers.security import SecurityService
-from apps.catalogs.layers.applications import CatalogItemAppService
 
 logger = logging.getLogger(__name__)
 
