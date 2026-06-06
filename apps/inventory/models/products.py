@@ -93,6 +93,7 @@ class Batch(AuditModel):
         DISCARDED = 0, _("Discarded")
         ACTIVE = 1, _("Active")
         EXPIRED = 2, _("Expired")
+        DEPLETED = 3, _("Depleted")
 
         @property
         def style(self):
@@ -100,6 +101,7 @@ class Batch(AuditModel):
                 self.DISCARDED.value: {"color": "secondary"},
                 self.ACTIVE.value: {"color": "success"},
                 self.EXPIRED.value: {"color": "danger"},
+                self.DEPLETED.value: {"color": "warning"},
             }
             return configs[self.value]
 

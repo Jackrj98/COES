@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 class ExitDetailDTO(BaseModel):
     supply_id: int = Field(..., gt=0)
     batch_id: int | None = None
-    quantity_requested: int = Field(..., gt=1)
+    quantity_requested: int = Field(..., gt=0)
     quantity_dispatched: int = Field(default=0, ge=0)
     unit_cost: Decimal = Field(default=Decimal("0.00"), decimal_places=2)
 
