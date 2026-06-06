@@ -46,8 +46,8 @@ class InventoryMovementListView(CustomListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["object"] = self.model
-        ctx["ui_map"] = self.model.Status.get_ui_map()
-        ctx["type_ui_map"] = self.model.Type.get_ui_map()
+        ctx["ui_map"] = self.model.MovementStatusChoices.get_ui_map()
+        ctx["type_ui_map"] = self.model.MovementTypeChoices.get_ui_map()
         ctx["description"] = _("Management of registered inventory movements")
         return ctx
 
@@ -95,7 +95,7 @@ class InventoryMovementListView(CustomListView):
         ).count()
 
         expiring_batches = Batch.objects.filter(
-            status=Batch.Status.ACTIVE, due_date__lte=thirty_days_from_now
+            status=Batch.Status.ACTIVE, expiry_date__lte=thirty_days_from_now
         ).count()
 
         return total_supplies, stock_normal, stock_critical, expiring_batches
@@ -167,12 +167,12 @@ class InventoryMovementCreateView(CustomCreateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["movement_type"] = self.model.Type.INBOUND
+        initial["movement_type"] = self.model.MovementTypeChoices.INBOUND
         return initial
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["movement_types"] = self.model.Type.choices
+        ctx["movement_types"] = self.model.MovementTypeChoices.choices
         ctx["title"] = ctx["title"].capitalize()
         ctx["concept_list"] = [
             "Compra de insumos",

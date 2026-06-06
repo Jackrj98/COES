@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MaxValueValidator,
@@ -15,6 +16,8 @@ class Catalog(AuditModel):
     class CatalogCodes:
         SUPPLY_CATEGORY = "CAT_SUPPLY"
         UNIT_OF_MEASURE = "UNI_MEASURE"
+        INBOUND_CONCEPT = "CONCEPT_IN"
+        OUTBOUND_CONCEPT = "CONCEPT_OUT"
 
     name = models.CharField(
         _("Name"),
@@ -107,3 +110,14 @@ class CatalogItem(AuditModel):
     def get_absolute_url(self):
         kwargs = {"catalog_reference": self.catalog.external_id, "external_id": self.external_id}
         return reverse("catalogs:items:detail", kwargs=kwargs)
+
+    def clean(self):
+        queryset = self.__class__.objects.filter(catalog=self.catalog, code=self.code)
+
+        if self.pk:
+            queryset = queryset.exclude(pk=self.pk)
+
+        if queryset.exists():
+            raise ValidationError(
+                {"code": _("A catalog item with this code already exists in this catalog.")}
+            )

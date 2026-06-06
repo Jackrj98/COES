@@ -87,11 +87,14 @@ class SupplyListView(CustomListView):
 
     def _metrics(self):
         supplies = self.object_list
+        batch_status = Batch.BatchStatus
         thirty_days_from_now = timezone.now() + timedelta(days=30)
 
         total_supplies = supplies.filter(deleted_at__isnull=True).count()
         supplies_with_stock = Supply.objects.annotate(
-            total_stock=Sum("batches__stock", filter=Q(batches__status=Batch.Status.ACTIVE))
+            total_stock=Sum(
+                "batches__current_quantity", filter=Q(batches__status=batch_status.ACTIVE)
+            )
         )
         stock_normal = supplies_with_stock.filter(total_stock__gt=F("stock_min")).count()
         stock_critical = supplies_with_stock.filter(
@@ -99,7 +102,7 @@ class SupplyListView(CustomListView):
         ).count()
 
         expiring_batches = Batch.objects.filter(
-            status=Batch.Status.ACTIVE, due_date__lte=thirty_days_from_now
+            status=batch_status.ACTIVE, expiry_date__lte=thirty_days_from_now
         ).count()
 
         return total_supplies, stock_normal, stock_critical, expiring_batches
@@ -118,14 +121,14 @@ class SupplyDetailView(CustomDetailView):
 
     def get_queryset(self):
         """Optimize a query with select_related and annotated stock data."""
-        batch_status = self.second_model.Status.ACTIVE
+        batch_status = self.second_model.BatchStatus.ACTIVE
         return (
             super()
             .get_queryset()
             .select_related("category", "unit_of_measure")
             .annotate(
                 total_stock=Sum(
-                    "batches__stock",
+                    "batches__current_quantity",
                     filter=Q(batches__status=batch_status, batches__deleted_at__isnull=True),
                 ),
                 active_batches_count=Count(
@@ -141,7 +144,7 @@ class SupplyDetailView(CustomDetailView):
 
         ctx["batch"] = self.second_model
         ctx["filter_form"] = BatchFilterForm
-        ctx["ui_map"] = self.second_model.Status.get_ui_map()
+        ctx["ui_map"] = self.second_model.BatchStatus.get_ui_map()
         ctx["stock_percentage"] = self._calculate_stock_percentage(supply)
         url_kwargs = {"supply_reference": supply.external_id}
         ctx["batch_list_url"] = reverse_lazy("inventory:batches:list", kwargs=url_kwargs)
@@ -252,25 +255,14 @@ class SupplyUpdateView(CustomUpdateView):
             return self.handle_error(str(e), e)
 
 
-def get_supply_stock(request):
-    supply_code = request.GET.get("supply_code")
-    try:
-        supply = SupplyAppService().retrieve_stock_by_code(code=supply_code)
-        return JsonResponse({"stock": supply})
-    except Supply.DoesNotExist:
-        return JsonResponse({"stock": 0}, status=404)
-
-
 @require_GET
 @csrf_exempt
 def search_supplies(request):
     search_term = request.GET.get("q", "").strip()
+    movement_type = request.GET.get("type", "").strip()
     exclude_ids = [id for id in request.GET.get("exclude_ids", "").split(",") if id]
 
-    if not search_term:
-        supplies = SupplyAppService().retrieve_active()
-    else:
-        supplies = SupplyAppService().retrieve_by_term(search_term)
+    supplies = SupplyAppService().retrieve_by_term(search_term, movement_type=movement_type)
 
     if exclude_ids:
         supplies = supplies.exclude(code__in=exclude_ids)

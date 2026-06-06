@@ -1,39 +1,61 @@
-from django.db import models
+import datetime
+
+from django.db import models, transaction
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AuditModel
 
 
 class BaseOrder(AuditModel):
-    """Model for purchase orders and exit orders."""
-
+    motive = models.TextField(_("Motive"), blank=True, null=True)
     order_number = models.CharField(_("Order number"), max_length=50, unique=True)
     observations = models.TextField(_("Observations"), blank=True, null=True)
 
     class Meta:
         abstract = True
 
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            prefix = getattr(self.__class__, "ORDER_PREFIX", None)
+            if not prefix:
+                raise ValueError(f"Define ORDER_PREFIX en {self.__class__.__name__}")
+
+            year = datetime.date.today().year
+            with transaction.atomic():
+                last_order = (
+                    self.__class__.objects.filter(order_number__startswith=f"{prefix}-{year}-")
+                    .select_for_update()
+                    .order_by("-order_number")
+                    .first()
+                )
+                if last_order:
+                    parts = last_order.order_number.split("-")
+                    last_num = int(parts[-1]) if parts else 0
+                    new_num = last_num + 1
+                else:
+                    new_num = 1
+
+                self.order_number = f"{prefix}-{year}-{new_num:04d}"
+                self.order_number = f"{prefix}-{year}-{new_num:04d}"
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Order #{self.order_number}"
 
 
 class BaseOrderDetail(AuditModel):
-    """Model for order details and exit details."""
-
     quantity_requested = models.PositiveIntegerField(_("Quantity requested"), default=0)
-    quantity_received = models.PositiveIntegerField(_("Quantity received"), default=0)
-    unit_cost = models.DecimalField(_("Unit cost"), max_digits=10, decimal_places=2)
-
-    @property
-    def line_total(self):
-        return self.quantity_received * self.unit_cost
+    unit_cost = models.DecimalField(_("Unit cost"), max_digits=12, decimal_places=2)
 
     class Meta:
         abstract = True
 
 
 class PurchaseOrder(BaseOrder):
-    """Represents a Purchase Order entity."""
+    ORDER_PREFIX = "IN"
 
     class Status(models.IntegerChoices):
         DRAFT = 0, _("Draft")
@@ -44,9 +66,8 @@ class PurchaseOrder(BaseOrder):
     estimated_delivery = models.DateTimeField(_("Estimated delivery"), null=True, blank=True)
     actual_delivery = models.DateField(_("Actual delivery"), null=True, blank=True)
     status = models.PositiveSmallIntegerField(_("Status"), choices=Status, default=Status.DRAFT)
-    # Relationships
     supplier = models.ForeignKey(
-        "Supplier", on_delete=models.PROTECT, related_name="purchase_orders"
+        "operations.Supplier", on_delete=models.PROTECT, related_name="purchase_orders"
     )
 
     class Meta:
@@ -59,54 +80,82 @@ class PurchaseOrder(BaseOrder):
         return f"PO #{self.order_number} - {self.supplier.business_name}"
 
 
-class OrderDetail(BaseOrderDetail):
-    """Purchase order line items."""
+class PurchaseOrderDetail(BaseOrderDetail):
+    quantity_received = models.PositiveIntegerField(_("Quantity received"), default=0)
+    observations = models.TextField(blank=True, null=True)
+
+    @property
+    def line_total(self):
+        return self.quantity_received * self.unit_cost
 
     order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name="details")
-    supply = models.ForeignKey("inventory.Supply", on_delete=models.PROTECT, related_name="details")
+    supply = models.ForeignKey(
+        "inventory.Supply", on_delete=models.PROTECT, related_name="purchase_order_details"
+    )
 
     class Meta:
-        db_table = "order_detail"
-        verbose_name = _("Order detail")
-        verbose_name_plural = _("Order details")
+        db_table = "purchase_order_detail"
         unique_together = [["order", "supply"]]
-        ordering = ["-created_at"]
 
 
 class ExitOrder(BaseOrder):
+    ORDER_PREFIX = "OU"
+
     class Status(models.IntegerChoices):
         DRAFT = 0, _("Draft")
-        PENDING = 1, _("Pending")
-        APPROVED = 2, _("Approved")
-        REJECTED = 3, _("Rejected")
-        CANCELLED = 4, _("Cancelled")
-        COMPLETED = 5, _("Completed")
+        COMPLETED = 1, _("Completed")
+        CANCELLED = 2, _("Cancelled")
 
-    status = models.SmallIntegerField(_("Status"), default=1, choices=Status)
-    processed_by = models.CharField(_("Processed by"), max_length=255, blank=True)
-    reject_reason = models.TextField(_("Reject reason"), blank=True, null=True)
+    class StatusColor(models.IntegerChoices):
+        DRAFT = 0, "secondary"
+        COMPLETED = 1, "success"
+        CANCELLED = 2, "danger"
 
-    @property
-    def total(self):
-        return sum(detail.line_total for detail in self.details.all())
+    status = models.SmallIntegerField(_("Status"), default=Status.DRAFT, choices=Status)
+    requested_by = models.CharField(_("Requested by"), max_length=150, null=True, blank=True)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
     class Meta:
         db_table = "exit_order"
-        verbose_name = _("Exit order")
-        verbose_name_plural = _("Exit orders")
+        verbose_name = _("Exit Order")
+        verbose_name_plural = _("Exit Orders")
+        ordering = ["-created_at"]
+
+    def get_absolute_url(self):
+        return reverse("operations:outbound_order:detail", kwargs={"external_id": self.external_id})
+
+    def recalculate_totals(self):
+        details = self.details.all()
+        self.subtotal = sum(d.quantity_requested * d.unit_cost for d in details)
+        self.total = self.subtotal
+
+    @property
+    def get_status_color(self):
+        return self.StatusColor(self.status).label
+
+    @property
+    def get_status_display(self):
+        return self.Status(self.status).label
 
 
 class ExitDetail(BaseOrderDetail):
-    """Exit order line items."""
+    quantity_dispatched = models.PositiveIntegerField(_("Quantity dispatched"), default=0)
 
     supply = models.ForeignKey(
-        "inventory.Supply", on_delete=models.CASCADE, related_name="exit_details"
+        "inventory.Supply", on_delete=models.PROTECT, related_name="exit_details"
+    )
+    batch = models.ForeignKey(
+        "inventory.Batch", on_delete=models.PROTECT, related_name="exit_details"
     )
     exit_order = models.ForeignKey(ExitOrder, on_delete=models.CASCADE, related_name="details")
 
     class Meta:
         db_table = "exit_detail"
-        verbose_name = _("Exit detail")
-        verbose_name_plural = _("Exit details")
-        unique_together = [["exit_order", "supply"]]
-        ordering = ["-created_at"]
+        ordering = ["quantity_requested", "-created_at"]
+        unique_together = [["exit_order", "supply", "batch"]]
+
+    @property
+    def line_total(self):
+        quantity = self.quantity_dispatched or self.quantity_requested
+        return quantity * self.unit_cost

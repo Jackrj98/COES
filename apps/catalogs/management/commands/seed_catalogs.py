@@ -35,11 +35,11 @@ class Command(BaseCommand):
 
             if catalog.code == Catalog.CatalogCodes.SUPPLY_CATEGORY:
                 data = [
-                    ("Instrumental", "INST", ""),
-                    ("Materiales", "MAT", ""),
-                    ("Equipos", "EQU", ""),
-                    ("Medicamentos", "MED", ""),
-                    ("Desechables", "DES", ""),
+                    ("Instrumental", "INST", "INST"),
+                    ("Materiales", "MAT", "MAT"),
+                    ("Equipos", "EQU", "EQU"),
+                    ("Medicamentos", "MED", "MED"),
+                    ("Desechables", "DES", "DES"),
                 ]
             else:  # UNIT_OF_MEASURE
                 data = [

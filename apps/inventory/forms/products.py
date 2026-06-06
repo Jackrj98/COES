@@ -1,13 +1,12 @@
 from crispy_forms.helper import FormHelper
 from django import forms
 from django.core.validators import MinValueValidator
-from django.forms import modelformset_factory
 from django.utils.translation import gettext_lazy as _
 
 from apps.catalogs.layers.applications import CatalogItemAppService
 from apps.catalogs.models import CatalogItem
 from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
-from apps.inventory.models import Batch, InventoryMovement, Supply
+from apps.inventory.models import Batch, Supply
 
 
 class SupplyBaseForm(forms.ModelForm):
@@ -115,22 +114,24 @@ class BatchBaseForm(forms.ModelForm):
     class Meta:
         model = Batch
         fields = [
-            "number",
-            "due_date",
-            "stock",
-            "purchase_unit_cost",
+            "batch_number",
+            "expiry_date",
+            "current_quantity",
+            "unit_cost",
             "status",
-            "purchase_order",
+            "supply",
+            "is_active",
         ]
         widgets = {
-            "number": forms.TextInput(
+            "supply": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
+            "batch_number": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Ej: LOTE-2026-001"}
             ),
-            "due_date": forms.DateInput(
+            "expiry_date": forms.DateInput(
                 attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"
             ),
-            "stock": forms.NumberInput(attrs={"class": "form-control", "min": 0}),
-            "purchase_unit_cost": forms.NumberInput(
+            "current_quantity": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+            "unit_cost": forms.NumberInput(
                 attrs={
                     "class": "form-control",
                     "step": "0.01",
@@ -139,11 +140,11 @@ class BatchBaseForm(forms.ModelForm):
                     "placeholder": "Ej: 12.50",
                 }
             ),
-            "purchase_order": forms.Select(attrs={"class": "form-select select2"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input", "role": "switch"}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
         validators = {
-            "stock": [MinValueValidator(0)],
+            "initial_quantity": [MinValueValidator(0)],
         }
 
     def __init__(self, *args, **kwargs):
@@ -154,94 +155,6 @@ class BatchBaseForm(forms.ModelForm):
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
 
-    def get_service_payload(self):
-        data = self.cleaned_data.copy()
-
-        purchase_order = data.pop("purchase_order", None)
-        if purchase_order:
-            data["purchase_order_id"] = purchase_order.id
-        return data
-
-
-class InventoryMovementBaseForm(forms.ModelForm):
-    """Form base for InventoryMovement."""
-
-    class Meta:
-        model = InventoryMovement
-        fields = [
-            "concept",
-            "movement_date",
-            "observation",
-            "movement_type",
-        ]
-        widgets = {
-            "concept": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "list": "concept-list",  # Conecta con el datalist
-                    "placeholder": "Seleccione o escriba un concepto...",
-                }
-            ),
-            "movement_date": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"},
-                format="%Y-%m-%d",
-            ),
-            "movement_type": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
-            "observation": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_show_errors = True
-        self.helper.error_text_inline = True
-        self.helper.label_class = "form-label"
-        self.helper.form_class = "needs-validation"
-
-
-class InventoryMovementForm(forms.ModelForm):
-    supply = forms.ChoiceField(
-        label=_("Supply"),
-        widget=forms.Select(
-            attrs={"class": "form-select select2", "data-placeholder": "Seleccione un insumo"}
-        ),
-        required=True,
-    )
-    batch = forms.ModelChoiceField(
-        queryset=Batch.objects.none(),  # Se llena dinámicamente
-        label=_("Batch"),
-        widget=forms.Select(
-            attrs={"class": "form-select select2", "data-placeholder": "Seleccione un lote"}
-        ),
-        required=True,
-    )
-
-    class Meta:
-        model = InventoryMovement
-        fields = ["supply", "batch", "quantity", "concept", "observation"]
-        widgets = {
-            "quantity": forms.NumberInput(
-                attrs={"class": "form-control", "min": 1, "placeholder": "Cantidad"}
-            ),
-            "concept": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Motivo del movimiento"}
-            ),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_show_errors = True
-        self.helper.error_text_inline = True
-        self.helper.label_class = "form-label"
-
-    # self.fields["supply"].choices = SupplyAppService().retrieve_active_choices()
-
-
-# Formset
-MovementFormSet = modelformset_factory(
-    InventoryMovement, form=InventoryMovementForm, extra=1, can_delete=True, max_num=15
-)
 
 # ---------------------------------------------------------------------
 # -----------------------FILTER FORMS----------------------------------
@@ -312,33 +225,6 @@ class BatchFilterForm(BaseFilterForm, BaseFormHelperMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         search_text = _("Search by batch number")
-        if "search" in self.fields:
-            self.fields["search"].widget.attrs.update(
-                {"placeholder": search_text, "class": "form-control"}
-            )
-
-        self.setup_form_helper(
-            label_class="form-label text-sm text-muted", form_class="needs-validation"
-        )
-
-
-class InventoryMovementFilterForm(BaseFilterForm, BaseFormHelperMixin):
-    movement_type = forms.ChoiceField(
-        label=_("Type"),
-        required=False,
-        choices=[("", _("All"))] + list(InventoryMovement.Type.choices),
-        widget=forms.Select(attrs={"class": "form-select"}),
-    )
-    status = forms.ChoiceField(
-        label=_("Status"),
-        required=False,
-        choices=[("", _("All"))] + list(InventoryMovement.Status.choices),
-        widget=forms.Select(attrs={"class": "form-select"}),
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        search_text = _("Search by item, batch, or supply")
         if "search" in self.fields:
             self.fields["search"].widget.attrs.update(
                 {"placeholder": search_text, "class": "form-control"}

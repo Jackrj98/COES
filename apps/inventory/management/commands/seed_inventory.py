@@ -30,25 +30,28 @@ class Command(BaseCommand):
         supplies_created = []
 
         for _ in range(count):
+            category = random.choice(categories)
             supply = Supply.objects.create(
                 name=fake.unique.word().title(),
-                code=fake.unique.bothify(text="SUP-####"),
+                code=fake.unique.bothify(text=f"{category.extra}-####"),
                 description=fake.sentence(),
                 stock_min=random.randint(5, 50),
-                category=random.choice(categories),
+                category=category,
                 unit_of_measure=random.choice(units),
                 created_by="system",
             )
             supplies_created.append(supply)
 
             for i in range(random.randint(1, 10)):
+                initial_quantity = random.randint(10, 100)
                 Batch.objects.create(
                     supply=supply,
-                    number=fake.unique.bothify(text="LOTE-####"),
-                    due_date=fake.future_date(end_date="+1y"),
-                    stock=random.randint(10, 100),
-                    purchase_unit_cost=random.uniform(1.0, 50.0),
-                    status=Batch.Status.ACTIVE,
+                    batch_number=fake.unique.bothify(text="LOTE-####"),
+                    expiry_date=fake.future_date(end_date="+1y"),
+                    initial_quantity=initial_quantity,
+                    current_quantity=initial_quantity,
+                    unit_cost=random.uniform(1.0, 50.0),
+                    status=Batch.StatusChoices.ACTIVE,
                     created_by="system",
                 )
 

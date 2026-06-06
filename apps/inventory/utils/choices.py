@@ -2,29 +2,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class BatchStatus(models.IntegerChoices):
-    DISCARDED = 0, _("Discarded")
-    ACTIVE = 1, _("Active")
-    EXPIRED = 2, _("Expired")
-
-    @property
-    def style(self):
-        configs = {
-            self.DISCARDED.value: {"color": "secondary"},
-            self.ACTIVE.value: {"color": "success"},
-            self.EXPIRED.value: {"color": "danger"},
-        }
-        return configs[self.value]
-
-    @property
-    def color(self) -> str:
-        return self.style["color"]
-
-    @classmethod
-    def get_ui_map(cls):
-        return {item.value: {"color": item.color, "label": item.label} for item in cls}
-
-
 class InventoryMovementType(models.IntegerChoices):
     INBOUND = 0, _("Inbound")
     OUTBOUND = 1, _("Outbound")

@@ -18,7 +18,7 @@ from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
 from apps.inventory.layers.builders import BatchBuilder
-from apps.inventory.layers.dto import BatchDTO, DatatableSearch
+from apps.inventory.layers.dto import DatatableSearch
 from apps.inventory.models import Batch
 
 logger = logging.getLogger(__name__)
@@ -34,13 +34,12 @@ class BatchAppService(BaseAppService):
     def retrieve_batches(params, supply_reference):
         fields = [
             "external_id",
-            "number",
-            "due_date",
-            "stock",
-            "purchase_unit_cost",
+            "batch_number",
+            "expiry_date",
+            "current_quantity",
+            "initial_quantity",
+            "unit_cost",
             "status",
-            "purchase_order__order_number",
-            "purchase_order__external_id",
             "is_active",
             "created_at",
             "updated_at",
@@ -49,15 +48,16 @@ class BatchAppService(BaseAppService):
             DatatableSearch.retrieve_batches(params, supply_reference)
             queryset = params.items.annotate(
                 is_expired=Case(
-                    When(due_date=timezone.now().date(), then=Value(True)),
+                    When(expiry_date=timezone.now().date(), then=Value(True)),
                     default=Value(False),
                     output_field=BooleanField(),
                 ),
                 total_supply_stock=Sum(
-                    "supply__batches__stock", filter=Q(supply__batches__status=Batch.Status.ACTIVE)
+                    "supply__batches__current_quantity",
+                    filter=Q(supply__batches__status=Batch.StatusChoices.ACTIVE),
                 ),
                 days_until_expiry=ExtractDay(
-                    F("due_date") - Value(timezone.now().date(), output_field=DateField())
+                    F("expiry_date") - Value(timezone.now().date(), output_field=DateField())
                 ),
             )
             qs = list(
@@ -76,29 +76,32 @@ class BatchAppService(BaseAppService):
             or 0
         )
 
-    def retrieve_by_due_date(self, supply_id):
-        return self.model.active.filter(is_active=True, supply_id=supply_id, stock__gt=0).order_by(
-            "-due_date"
+    def retrieve_by_expiry_date(self, supply_id):
+        return (
+            self.model.active.filter(is_active=True, supply_id=supply_id, current_quantity__gt=0)
+            .select_related("supply")
+            .order_by("expiry_date")
         )
 
     @transaction.atomic
     def save_batch(self, payload, instance=None):
-        builder = BatchBuilder(batch=instance) if instance else BatchBuilder()
 
+        builder = BatchBuilder(batch=instance) if instance else BatchBuilder()
         try:
-            dto = BatchDTO(**payload)
-            return (
-                builder.set_number(dto.number)
-                .set_due_date(dto.due_date)
-                .set_stock(dto.stock)
-                .set_purchase_unit_cost(dto.purchase_unit_cost)
-                .set_status(dto.status)
-                .set_supply(dto.supply_id)
-                .set_purchase_order(dto.purchase_order_id)
-                .set_status_by_expiration()
+            batch_instance = (
+                builder.set_batch_number(payload.batch_number)
+                .set_expiry_date(payload.expiry_date)
+                .set_unit_cost(payload.unit_cost)
+                .set_initial_quantity(payload.initial_quantity)
+                .set_current_quantity(payload.current_quantity)
+                .set_status(payload.status)
+                .set_is_active(payload.is_active)
+                .set_supply(payload.supply_id)
                 .save()
                 .build()
             )
+
+            return batch_instance
         except ValidationError as e:
             logger.warning(f"Validation error: {e.json()}")
             raise
@@ -115,11 +118,10 @@ class BatchAppService(BaseAppService):
         if not instance:
             raise ValueError(_("Batch instance is required."))
 
-        payload["supply_id"] = instance.supply_id
         return self.save_batch(payload, instance=instance)
 
     @staticmethod
     def update_batch_stock(instance, quantity):
 
         builder = BatchBuilder(instance)
-        return builder.set_stock(quantity).save().build()
+        return builder.set_current_quantity(quantity).save().build()

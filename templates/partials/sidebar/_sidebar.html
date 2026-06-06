@@ -36,6 +36,12 @@
                         <span>{% trans 'movements'|capfirst %}</span>
                     </a>
                 </li>
+                <li class="sidebar-item  {% active 'operations:outbound_order:list' %}">
+                    <a href="{% url 'operations:outbound_order:list' %}" class='sidebar-link'>
+                       <i class="bi bi-box-arrow-left"></i>
+                        <span>{% trans 'exit orders'|capfirst %}</span>
+                    </a>
+                </li>
                 <li class="sidebar-item  {% active 'operations:suppliers:list' %}">
                     <a href="{% url 'operations:suppliers:list' %}" class='sidebar-link'>
                         <i class="bi bi-box2"></i>

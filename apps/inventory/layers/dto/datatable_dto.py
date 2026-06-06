@@ -14,7 +14,9 @@ class DatatableSearch(DatatableSearchBase):
         category_filter = params.request.GET.get("category")
 
         qs = cls._build_base_query(params, Supply, "is_active")
-        qs = qs.annotate(total_stock=Sum("batches__stock"))
+        qs = qs.annotate(total_stock=Sum("batches__current_quantity", distinct=True)).order_by(
+            "-total_stock"
+        )
 
         if stock_filter:
             if stock_filter == "critical":
@@ -51,13 +53,13 @@ class DatatableSearch(DatatableSearchBase):
             in_12_months = today + relativedelta(months=12)
 
             if expiration_filter == "expired":
-                qs = qs.filter(due_date__lt=in_6_months)
+                qs = qs.filter(expiry_date__lt=in_6_months)
 
             elif expiration_filter == "expiring":
-                qs = qs.filter(due_date__gte=in_6_months, due_date__lte=in_12_months)
+                qs = qs.filter(expiry_date__gte=in_6_months, expiry_date__lte=in_12_months)
 
             elif expiration_filter == "current":
-                qs = qs.filter(due_date__gt=in_12_months)
+                qs = qs.filter(expiry_date__gt=in_12_months)
 
         search = params.request.GET.get("search")
 
@@ -84,9 +86,9 @@ class DatatableSearch(DatatableSearchBase):
             search = search.strip()
             search_fields = [
                 "concept",
-                "batch__number",
-                "batch__supplier__name",
-                "batch__supplier__code",
+                "batch__batch_number",
+                "batch__supply__name",
+                "batch__supply__code",
             ]
             qs = cls._apply_search(qs, search, search_fields)
 
