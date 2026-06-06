@@ -24,7 +24,8 @@ def active(context, url_name, css_class="active"):
 
     return ""
 
-@register.filter(name='has_group')
+
+@register.filter(name="has_group")
 def has_group(user, group_names):
-    groups = [g.strip() for g in group_names.split(',')]
+    groups = [g.strip() for g in group_names.split(",")]
     return user.groups.filter(name__in=groups).exists()

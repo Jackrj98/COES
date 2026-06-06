@@ -1,9 +1,20 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in, user_login_failed
+from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils import timezone
 
+from apps.security.permissions import sync_roles_and_permissions
+
 User = get_user_model()
+
+
+@receiver(post_migrate)
+def populate_groups_permissions(sender, **kwargs):
+    """Synchronize groups and permissions automatically after migrations."""
+    # Only run this on the security and core apps
+    if sender.label in ["security", "core"]:
+        sync_roles_and_permissions(verbosity=1)
 
 
 @receiver(user_login_failed)
