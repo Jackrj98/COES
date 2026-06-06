@@ -40,12 +40,18 @@ class OrderAppService:
         order = cls._create_order(payload)
         batch_service = BatchAppService()
 
+        consolidated_details = {}
         for item in payload.details:
-            remaining_to_dispatch = item.quantity_requested
+            supply_id = item.supply_id
+            qty = item.quantity_requested
+            consolidated_details[supply_id] = consolidated_details.get(supply_id, 0) + qty
 
-            available_batches = batch_service.retrieve_by_expiry_date(item.supply_id)
+        for supply_id, total_requested in consolidated_details.items():
+            remaining_to_dispatch = total_requested
+
+            available_batches = batch_service.retrieve_by_expiry_date(supply_id).select_for_update()
             if not available_batches:
-                raise ValueError(_(f"There is no stock available for supply {item.supply_id}."))
+                raise ValueError(_(f"There is no stock available for supply {supply_id}."))
 
             remaining_to_dispatch = cls._update_bath(
                 order, available_batches, remaining_to_dispatch
@@ -54,7 +60,7 @@ class OrderAppService:
             if remaining_to_dispatch > 0:
                 raise ValueError(
                     _(
-                        f"Insufficient stock for supply {item.supply_id}. {remaining_to_dispatch} items are out of stock."
+                        f"Insufficient stock for supply {supply_id}. {remaining_to_dispatch} items are out of stock."
                     )
                 )
 

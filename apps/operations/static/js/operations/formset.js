@@ -58,7 +58,17 @@ const InventoryLogic = {
                 url: supplySearchUrl,
                 dataType: 'json',
                 delay: 300,
-                data: (params) => ({q: params.term, type: 1}),
+                data: (params) => {
+                    const selectedIds = Array.from(document.querySelectorAll('select[name$="-supply"]'))
+                        .filter(s => s !== select && s.value)
+                        .map(s => s.value);
+
+                    return {
+                        q: params.term,
+                        type: 1,
+                        exclude_ids: selectedIds.join(',') // Se envía como string separado por comas
+                    };
+                },
                 processResults: (data) => ({
                     results: data.results.map(i => ({...i, id: i.id, text: i.text}))
                 })
