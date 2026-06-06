@@ -21,7 +21,7 @@ def supply(db):
 def valid_batch_payload(supply):
     return {
         "number": "BATCH-001",
-        "due_date": date.today(),
+        "expiry_date": date.today(),
         "stock": 10,
         "purchase_unit_cost": 50.0,
         "status": 1,
@@ -43,8 +43,8 @@ class TestRegisterBatch:
         assert batch.supply_id == valid_batch_payload["supply_id"]
 
     @pytest.mark.django_db
-    def test_register_invalid_due_date(self, service, valid_batch_payload):
-        invalid_payload = {**valid_batch_payload, "due_date": date.today() - timedelta(days=1)}
+    def test_register_invalid_expiry_date(self, service, valid_batch_payload):
+        invalid_payload = {**valid_batch_payload, "expiry_date": date.today() - timedelta(days=1)}
 
         with pytest.raises(ValidationError):
             service.register_batch(invalid_payload)

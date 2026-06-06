@@ -8,7 +8,7 @@ $(document).ready(function () {
         selector: "#datatable-list",
         ajaxUrl: urlPaginator,
         columns: columns,
-        order: [[2, "desc"]],
+        order: [[2, "asc"]],
         filters: [
             {selector: "#id_status", field: "status"},
             {selector: "#id_search", field: "search"},
@@ -28,12 +28,12 @@ const columns = [
         render: (days) => {
             let color = "";
             let text = "";
-            const months = days / 30.44;
+            const months = Math.floor(days / 30.44);
 
             if (days < 0) {
                 color = "text-secondary";
                 text = "Vencido";
-            } else if (months < 6) {
+            } else if (months <= 6) {
                 color = "text-danger";
                 text = "Corto plazo";
             } else if (months <= 12) {
@@ -52,13 +52,13 @@ const columns = [
     },
     {
         orderable: false,
-        data: "number",
+        data: "batch_number",
         width: "20%",
         className: DataTableFactory.classes.justify
     },
     {
         orderable: false,
-        data: "due_date",
+        data: "expiry_date",
         width: "20%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
@@ -68,23 +68,21 @@ const columns = [
             let badgeClass = "";
             let badgeText = "";
 
-            // Formato de texto: meses o días
             const months = Math.floor(days / 30.44);
             const timeDisplay = days < 30
                 ? `${days} días restantes`
                 : `${months} meses restantes`;
 
-            // Lógica de semaforización
             if (days < 0) {
                 badgeClass = "bg-danger bg-opacity-10 text-danger";
                 badgeText = "Vencido";
-            } else if (days < 180) { // < 6 meses (Rojo)
+            } else if (months <= 6) {
                 badgeClass = "bg-danger bg-opacity-10 text-danger";
                 badgeText = timeDisplay;
-            } else if (days <= 365) { // 6-12 meses (Amarillo)
+            } else if (months <= 12) {
                 badgeClass = "bg-warning bg-opacity-10 text-warning";
                 badgeText = timeDisplay;
-            } else { // > 12 meses (Verde)
+            } else {
                 badgeClass = "bg-success bg-opacity-10 text-success";
                 badgeText = timeDisplay;
             }
@@ -100,65 +98,51 @@ const columns = [
     },
     {
         orderable: false,
-        data: "stock",
-        width: "10%",
-        className: DataTableFactory.classes.center
-    },
-    {
-        orderable: false,
-        data: "total_supply_stock",
-        width: "10%",
-        className: DataTableFactory.classes.justify,
+        data: "current_quantity",
+        width: "12%", // Un poco más de espacio para asegurar que no se corte
+        className: DataTableFactory.classes.center,
         render: (data, type, row) => {
+            const initialQty = row.initial_quantity || 0;
+            const currentQty = row.current_quantity || 0;
             const isInactive = row.status !== 1;
-            const batchStock = isInactive ? 0 : (row.stock || 0);
-            const totalSupplyStock = row.total_supply_stock || 0;
 
-            const percentage = (totalSupplyStock > 0 && !isInactive)
-                ? Math.round((batchStock / totalSupplyStock) * 100)
+            const batchStock = isInactive ? 0 : currentQty;
+            const percentage = (initialQty > 0)
+                ? Math.min(Math.round((batchStock / initialQty) * 100), 100)
                 : 0;
 
+            let progressColor = '#0d6efd';
+            if (isInactive) {
+                progressColor = '#6c757d'; // Un gris más estándar de Bootstrap
+            } else if (percentage < 20) {
+                progressColor = '#dc3545';
+            } else if (percentage < 50) {
+                progressColor = '#0dcaf0';
+            }
+
             return `
-                <div class="d-flex align-items-center" style="gap: 10px;">
-                    <div class="progress flex-grow-1" style="height: 6px; background-color: #2d3748; border-radius: 3px;">
-                        <div class="progress-bar" role="progressbar" 
-                             style="width: ${percentage}%; background-color: ${isInactive ? '#4a5568' : '#6366f1'}; border-radius: 3px;">
-                        </div>
+                <div class="d-flex flex-column" style="line-height: 1.2;">
+                    <div class="fw-bold" style="font-size: 1.05rem;">
+                        ${isInactive ? '0' : data} 
+                        <small class="text-muted fw-normal" style="font-size: 0.8rem;">/ ${initialQty}</small>
                     </div>
-                    <span class="text-muted small" style="min-width: 35px; text-align: right;">${percentage}%</span>
-                </div>
-            `;
+                    <div class="d-flex align-items-center mt-1" style="gap: 6px;">
+                        <div class="progress flex-grow-1" style="height: 5px; background-color: #e9ecef; border-radius: 2px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: ${percentage}%; background-color: ${progressColor}; border-radius: 2px;">
+                            </div>
+                        </div>
+                        <span class="text-muted" style="font-size: 0.75rem; min-width: 30px; text-align: right;">${percentage}%</span>
+                    </div>
+                </div>`;
         }
     },
     {
         orderable: false,
-        data: "purchase_unit_cost",
+        data: "unit_cost",
         width: "10%",
         className: DataTableFactory.classes.center,
         render: (data) => "$" + (data || "0")
-    },
-    {
-        orderable: false,
-        data: "purchase_order__order_number",
-        width: "12%",
-        className: DataTableFactory.classes.center,
-        render: (data, type, row) => {
-            const order_number = data || " - ";
-            const detailUrl = `${urlPaginator}${row.purchase_order__external_id}/`;
-
-            return `
-                <td class="py-4">
-                    <a href="${detailUrl}" 
-                       class="font-bold text-primary" 
-                       data-bs-toggle="tooltip" 
-                       data-bs-placement="top">
-                        <span class="d-inline-block text-truncate" style="max-width: 100%;">
-                            ${order_number}
-                        </span>
-                    </a>
-                </td>
-            `
-        }
     },
     {
         orderable: false,

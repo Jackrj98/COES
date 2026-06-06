@@ -51,7 +51,7 @@ const columns = [
     },
     {
         orderable: false,
-        data: "batch__number",
+        data: "batch__batch_number",
         width: "22%",
         className: DataTableFactory.classes.justify,
         render: (data, type, row) => {

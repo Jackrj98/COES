@@ -19,18 +19,20 @@ class Command(BaseCommand):
 
         count = options["number"]
 
+        types = InventoryMovement.MovementTypeChoices
+
         for _ in range(count):
             batch = random.choice(batches)
             movement_type = random.choice(
                 [
-                    InventoryMovement.Type.INBOUND,
-                    InventoryMovement.Type.OUTBOUND,
-                    InventoryMovement.Type.ADJUSTMENT,
+                    types.INBOUND,
+                    types.OUTBOUND,
+                    types.ADJUSTMENT,
                 ]
             )
 
             is_increment = None
-            if movement_type == InventoryMovement.Type.ADJUSTMENT:
+            if movement_type == types.ADJUSTMENT:
                 is_increment = random.choice([True, False])
 
             InventoryMovement.objects.create(

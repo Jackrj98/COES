@@ -56,7 +56,7 @@ class InventoryMovementAppService(BaseAppService):
             "is_active",
             "created_at",
             "updated_at",
-            "batch__number",
+            "batch__batch_number",
             "batch__supply__name",
             "batch__supply__code",
         ]
@@ -99,6 +99,41 @@ class InventoryMovementAppService(BaseAppService):
             raise
 
     @transaction.atomic
+    def register_outbound(self, payload: dict) -> InventoryMovement:
+        """Register an outbound inventory movement."""
+        try:
+            payload["movement_type"] = InventoryMovement.MovementTypeChoices.OUTBOUND
+            payload["status"] = InventoryMovement.MovementStatusChoices.COMPLETED
+            dto = MovementDTO(**payload)
+            print("movement_type", dto)
+
+            # Build the inventory movement
+            builder = InventoryMovementBuilder()
+            movement = (
+                builder.set_batch(dto.batch_id)
+                .set_type(dto.movement_type)
+                .set_concept(dto.concept)
+                .set_quantity(dto.quantity)
+                .set_observation(dto.observation)
+                .set_stock_data(dto.previous_stock, dto.after_stock)
+                .set_unit_cost(dto.unit_cost_at_movement)
+                .set_status(dto.status)
+                .build()
+            )
+
+            movement.save()
+
+            logger.info(f"Outbound movement registered: {movement.id} - {movement.quantity} units")
+            return movement
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {e.json() if hasattr(e, 'json') else str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Error saving inventory movement: {e}", exc_info=True)
+            raise
+
+    @transaction.atomic
     def cancel_movement(self, movement_id: int, reason: str):
         """Undo a transaction by creating an offsetting entry."""
         try:
@@ -110,8 +145,8 @@ class InventoryMovementAppService(BaseAppService):
             builder = InventoryMovementBuilder()
             reversal = (
                 builder.set_batch(original.batch)
-                .set_type(InventoryMovement.Type.ADJUSTMENT)
-                .set_status(InventoryMovement.Status.COMPLETED)
+                .set_type(InventoryMovement.MovementTypeChoices.ADJUSTMENT)
+                .set_status(InventoryMovement.MovementStatusChoices.COMPLETED)
                 .set_concept(f"_('Reversal of movement') #{original.id}")
                 .set_quantity(original.quantity)
                 .set_observation(f"_('Voided'): {reason}")
@@ -130,7 +165,7 @@ class InventoryMovementAppService(BaseAppService):
             logger.error(f"Error saving inventory movement: {e}", exc_info=True)
             raise
 
-    def register_outbound(self, payload: dict, batch):
+    def register_outbounds(self, payload: dict, batch):
         builder = InventoryMovementBuilder()
 
         try:

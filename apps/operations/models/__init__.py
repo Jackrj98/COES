@@ -1,4 +1,10 @@
-from .orders import ExitDetail, ExitOrder, OrderDetail, PurchaseOrder
+from .orders import ExitDetail, ExitOrder, PurchaseOrder, PurchaseOrderDetail
 from .supplier import Supplier
 
-__all__ = [Supplier, PurchaseOrder, OrderDetail, ExitOrder, ExitDetail]
+__all__ = [
+    "Supplier",
+    "PurchaseOrder",
+    "PurchaseOrderDetail",
+    "ExitOrder",
+    "ExitDetail",
+]

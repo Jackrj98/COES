@@ -43,7 +43,7 @@
                             <div class="ms-auto text-end">
                                 <div class="small text-muted">{% trans 'Due date' %}</div>
                                 <div class="font-bold text-{% if object.is_expired %}danger{% elif object.days_until_expiry <= 30 %}warning{% else %}success{% endif %}">
-                                    {{ object.due_date|date:"d M Y" }}
+                                    {{ object.expiry_date|date:"d M Y" }}
                                 </div>
                                 {% if object.days_until_expiry %}
                                     <small class="text-muted">{{ object.days_until_expiry }} {% trans 'days remaining' %}</small>
@@ -54,11 +54,11 @@
                         <div class="row text-center g-4 mb-4">
                             <div class="col-4">
                                 <div class="small text-muted">Stock Actual</div>
-                                <h3 class="mb-0 font-bold text-success">{{ object.stock }}</h3>
+                                <h3 class="mb-0 font-bold text-success">{{ object.current_quantity }}</h3>
                             </div>
                             <div class="col-4">
                                 <div class="small text-muted">Costo Unitario</div>
-                                <h3 class="mb-0 font-bold">${{ object.purchase_unit_cost }}</h3>
+                                <h3 class="mb-0 font-bold">${{ object.unit_cost }}</h3>
                             </div>
                             <div class="col-4">
                                 <div class="small text-muted">Valor Total</div>
@@ -127,19 +127,14 @@
                                 <dd class="font-medium">{{ object.supply.name }}</dd>
                             </div>
                             <div class="col-6">
-                                <dt class="small text-muted">{{ object|field_label:"due_date"|capfirst }}</dt>
-                                <dd class="font-medium">{{ object.due_date|date:"d M Y" }}</dd>
+                                <dt class="small text-muted">{{ object|field_label:"expiry_date"|capfirst }}</dt>
+                                <dd class="font-medium">{{ object.expiry_date|date:"d M Y" }}</dd>
                             </div>
                             <div class="col-6">
                                 <dt class="small text-muted">{% trans 'Unit cost'|capfirst %}</dt>
-                                <dd class="font-medium">${{ object.purchase_unit_cost }}</dd>
+                                <dd class="font-medium">${{ object.unit_cost }}</dd>
                             </div>
-                            <div class="col-12">
-                                <dt class="small text-muted">{{ object|field_label:"purchase_order"|capfirst }}</dt>
-                                <dd class="font-medium">
-                                    {{ object.purchase_order.order_number|default:"-" }}
-                                </dd>
-                            </div>
+
                         </dl>
                     </div>
                 </div>

@@ -37,15 +37,20 @@ class SupplyAppService(BaseAppService):
             .order_by("name")
         )
 
-    def retrieve_by_term(self, search_term):
-        """Retrieve active supplies with related fields and total stock annotated."""
-        return (
-            self.model.active.filter(
-                Q(name__icontains=search_term) | Q(code__icontains=search_term), is_active=True
-            )
-            .select_related("category", "unit_of_measure")
-            .annotate(total_stock=Coalesce(Sum("batches__stock"), Value(0)))
+    def retrieve_by_term(self, search_term, movement_type=None):
+        queryset = self.model.active.filter(
+            Q(name__icontains=search_term) | Q(code__icontains=search_term), is_active=True
+        ).select_related("category", "unit_of_measure")
+
+        queryset = queryset.annotate(
+            total_stock=Coalesce(Sum("batches__current_quantity"), Value(0))
         )
+
+        # Filtro lógico: Si es salida (type=1), solo insumos con stock > 0
+        if movement_type == "1":
+            queryset = queryset.filter(total_stock__gt=0)
+
+        return queryset
 
     def retrieve_active_choices(self):
         try:
@@ -65,6 +70,14 @@ class SupplyAppService(BaseAppService):
             logger.error(f"Error retrieving supplies by category: {e}")
             return []
 
+    def retrieve_by_code(self, code):
+        try:
+            norm_code = self.normalize_data(code, remove_spaces=True, to_lowercase=False)
+            return self.model.active.filter(code=norm_code, is_active=True).first()
+        except Exception as e:
+            logger.error(f"Error retrieving supply by code: {e}")
+            return self.model.active.none()
+
     @staticmethod
     def retrieve_suppliers(params):
         fields = [
@@ -81,11 +94,14 @@ class SupplyAppService(BaseAppService):
             "updated_at",
         ]
         try:
+            batch_status = Batch.StatusChoices
             DatatableSearch.retrieve_supplies(params)
             queryset = params.items.annotate(
-                stock=Sum("batches__stock", filter=Q(batches__status=Batch.Status.ACTIVE)),
+                stock=Sum(
+                    "batches__current_quantity", filter=Q(batches__status=batch_status.ACTIVE)
+                ),
                 active_batches_count=Count(
-                    "batches", filter=Q(batches__status=Batch.Status.ACTIVE)
+                    "batches", filter=Q(batches__status=batch_status.ACTIVE)
                 ),
             )
 
