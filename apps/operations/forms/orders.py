@@ -1,5 +1,6 @@
 from crispy_forms.helper import FormHelper
 from django import forms
+from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.utils.translation import gettext_lazy as _
 
@@ -78,9 +79,11 @@ class ExitOrderDetailBaseForm(forms.ModelForm):
             "quantity_requested": forms.NumberInput(
                 attrs={
                     "class": "form-control",
+                    "min": "1",
+                    "step": "1",
                     "pattern": "[1-9][0-9]*",
-                    "oninput": "this.value = this.value.replace(/^0+/, '')",  # JS básico inline
-                }
+                    "oninput": "this.value = this.value.replace(/^0+/, '')",
+                },
             ),
         }
 
@@ -91,6 +94,15 @@ class ExitOrderDetailBaseForm(forms.ModelForm):
         self.helper.error_text_inline = True
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
+        self.fields["quantity_requested"].initial = 1
+
+    def clean_quantity_requested(self):
+        quantity = self.cleaned_data.get("quantity_requested")
+
+        if quantity is None or quantity <= 0:
+            raise ValidationError(_("The quantity must be greater than zero."))
+
+        return quantity
 
 
 ExitOrderDetailFormSet = modelformset_factory(

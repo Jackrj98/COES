@@ -3,18 +3,21 @@ from django.utils.translation import gettext_lazy as _
 
 class Permissions:
     groups_permissions = [
-        # ──────────────────────────────────────────────
-        # Specialist
-        # ──────────────────────────────────────────────
+        # Administrador
         {
-            "name": _("specialist"),
+            "name": _("administrator"),
             "permissions": {
                 "security": {
                     "details": [
+                        "add_user",
                         "change_user",
                         "view_user",
+                        "add_person",
                         "change_person",
                         "view_person",
+                        "add_usertoken",
+                        "change_usertoken",
+                        "view_usertoken",
                     ]
                 },
                 "catalogs": {
@@ -27,73 +30,36 @@ class Permissions:
                         "view_catalogitem",
                     ]
                 },
-                "operations": {
-                    "details": [
-                        "add_supplier",
-                        "change_supplier",
-                        "view_supplier",
-                    ]
-                },
                 "inventory": {
                     "details": [
-                        "add_supply",
-                        "change_supply",
-                        "view_supply",
                         "add_batch",
                         "change_batch",
                         "view_batch",
+                        "add_supply",
+                        "change_supply",
+                        "view_supply",
+                        "add_inventorymovement",
+                        "change_inventorymovement",
+                        "view_inventorymovement",
                     ]
                 },
-            },
-        },
-        # ──────────────────────────────────────────────
-        # Administrator
-        # ──────────────────────────────────────────────
-        {
-            "name": _("administrator"),
-            "permissions": {
-                "admin": {
+                "operations": {
                     "details": [
-                        "add_logentry",
-                        "change_logentry",
-                        "delete_logentry",
-                        "view_logentry",
-                    ]
-                },
-                "auth": {
-                    "details": [
-                        "add_permission",
-                        "change_permission",
-                        "delete_permission",
-                        "view_permission",
-                        "add_group",
-                        "change_group",
-                        "delete_group",
-                        "view_group",
-                    ]
-                },
-                "contenttypes": {
-                    "details": [
-                        "add_contenttype",
-                        "change_contenttype",
-                        "delete_contenttype",
-                        "view_contenttype",
-                    ]
-                },
-                "sessions": {
-                    "details": [
-                        "add_session",
-                        "change_session",
-                        "delete_session",
-                        "view_session",
-                    ]
-                },
-                "auditlog": {
-                    "details": [
-                        "add_logentry",
-                        "change_logentry",
-                        "delete_logentry",
-                        "view_logentry",
+                        "add_exitorder",
+                        "change_exitorder",
+                        "view_exitorder",
+                        "add_supplier",
+                        "change_supplier",
+                        "view_supplier",
+                        "add_purchaseorder",
+                        "change_purchaseorder",
+                        "view_purchaseorder",
+                        "add_exitdetail",
+                        "change_exitdetail",
+                        "view_exitdetail",
+                        "add_purchaseorderdetail",
+                        "change_purchaseorderdetail",
+                        "view_purchaseorderdetail",
                     ]
                 },
                 "django_celery_beat": {
@@ -124,15 +90,17 @@ class Permissions:
                         "view_clockedschedule",
                     ]
                 },
+            },
+        },
+        # Specialist
+        {
+            "name": _("specialist"),
+            "permissions": {
                 "security": {
                     "details": [
-                        "add_user",
                         "change_user",
-                        "delete_user",
                         "view_user",
-                        "add_person",
                         "change_person",
-                        "delete_person",
                         "view_person",
                     ]
                 },
@@ -146,21 +114,34 @@ class Permissions:
                         "view_catalogitem",
                     ]
                 },
-                "operations": {
-                    "details": [
-                        "add_supplier",
-                        "change_supplier",
-                        "view_supplier",
-                    ]
-                },
                 "inventory": {
                     "details": [
-                        "add_supply",
-                        "change_supply",
-                        "view_supply",
                         "add_batch",
                         "change_batch",
                         "view_batch",
+                        "add_supply",
+                        "change_supply",
+                        "view_supply",
+                        "add_inventorymovement",
+                        "change_inventorymovement",
+                        "view_inventorymovement",
+                    ]
+                },
+                "operations": {
+                    "details": [
+                        "add_exitorder",
+                        "view_exitorder",
+                        "add_supplier",
+                        "change_supplier",
+                        "view_supplier",
+                        "add_purchaseorder",
+                        "change_purchaseorder",
+                        "view_purchaseorder",
+                        "add_exitdetail",
+                        "view_exitdetail",
+                        "add_purchaseorderdetail",
+                        "change_purchaseorderdetail",
+                        "view_purchaseorderdetail",
                     ]
                 },
             },
