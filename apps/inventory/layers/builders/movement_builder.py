@@ -13,7 +13,7 @@ class InventoryMovementBuilder:
         return self
 
     def set_type(self, movement_type: int) -> "InventoryMovementBuilder":
-        if movement_type in InventoryMovement.MovementTypeChoices.values:
+        if movement_type in InventoryMovement.Type.values:
             self.movement.movement_type = movement_type
         return self
 

@@ -170,7 +170,7 @@ class BatchCreateView(CustomCreateView):
         try:
             movement_payload = {
                 "batch_id": batch.id,
-                "movement_type": InventoryMovement.MovementTypeChoices.INBOUND,
+                "movement_type": InventoryMovement.Type.INBOUND,
                 "concept": str(_("Initial stock entry")),
                 "quantity": quantity,
                 "observation": str(
@@ -297,7 +297,7 @@ class BatchUpdateView(CustomUpdateView):
         """Build a payload for inventory movement registration."""
         return {
             "batch_id": batch.id,
-            "movement_type": InventoryMovement.MovementTypeChoices.ADJUSTMENT,
+            "movement_type": InventoryMovement.Type.ADJUSTMENT,
             "concept": "Ajuste manual de lote",
             "quantity": abs(diff),
             "observation": f"Ajuste manual: {old_quantity} → {new_quantity} (Diferencia: {diff:+d})",

@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
         count = options["number"]
 
-        types = InventoryMovement.MovementTypeChoices
+        types = InventoryMovement.Type
 
         for _ in range(count):
             batch = random.choice(batches)

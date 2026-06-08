@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models, transaction
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import AuditModel
@@ -11,12 +11,12 @@ class InventoryMovement(AuditModel):
     """Represents an inventory movement with automatic stock tracking."""
 
     # Choices
-    MovementTypeChoices = InventoryMovementType
+    Type = InventoryMovementType
     MovementStatusChoices = InventoryMovementStatus
 
     # Fields
     concept = models.CharField(_("Concept"), max_length=255)
-    movement_type = models.PositiveSmallIntegerField(_("Type"), choices=MovementTypeChoices)
+    movement_type = models.PositiveSmallIntegerField(_("Type"), choices=Type)
     quantity = models.PositiveIntegerField(_("Quantity"), validators=[MinValueValidator(1)])
     observation = models.TextField(_("Observation"), blank=True)
     status = models.PositiveSmallIntegerField(
@@ -83,6 +83,7 @@ class InventoryMovement(AuditModel):
                     }
                 )
 
+    """
     def save(self, *args, **kwargs):
         if self.pk:
             raise ValidationError(_("Cannot modify existing movements"))
@@ -112,4 +113,4 @@ class InventoryMovement(AuditModel):
         with transaction.atomic():
             self.batch.current_quantity = self.after_stock
             self.batch.save(update_fields=["current_quantity"])
-            super().save(*args, **kwargs)
+            super().save(*args, **kwargs)"""
