@@ -10,7 +10,7 @@ class MovementDTO(BaseModel):
 
     # Basic information
     quantity: int = Field(..., ge=0)
-    movement_type: InventoryMovement.MovementTypeChoices
+    movement_type: InventoryMovement.Type
     observation: str = Field(..., max_length=255)
     concept: str = Field(..., min_length=1, max_length=255)
     status: InventoryMovement.MovementStatusChoices = (

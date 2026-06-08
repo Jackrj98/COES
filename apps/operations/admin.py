@@ -12,10 +12,6 @@ from apps.operations.models import (
     Supplier,
 )
 
-# ==========================================
-# FILTROS PERSONALIZADOS
-# ==========================================
-
 
 class PurchaseOrderStatusFilter(admin.SimpleListFilter):
     """Custom filter for purchase order status."""
@@ -402,7 +398,7 @@ class ExitDetailAdmin(BaseAdminMixin):
 
     ordering = ("-created_at",)
     search_fields = (
-        "exit_order__order_number",
+        "order__order_number",
         "supply__name",
         "supply__code",
         "batch__batch_number",
@@ -424,13 +420,13 @@ class ExitDetailAdmin(BaseAdminMixin):
         "is_active",
     )
 
-    list_select_related = ("exit_order", "supply", "batch")
+    list_select_related = ("order", "supply", "batch")
 
     def order_number(self, obj):
-        return obj.exit_order.order_number
+        return obj.order.order_number
 
     order_number.short_description = _("Order Number")
-    order_number.admin_order_field = "exit_order__order_number"
+    order_number.admin_order_field = "order__order_number"
 
     def supply_name(self, obj):
         return obj.supply.name
@@ -489,8 +485,8 @@ class ExitDetailAdmin(BaseAdminMixin):
         readonly = super().get_readonly_fields(request, obj)
         if (
             obj
-            and obj.exit_order
-            and obj.exit_order.status in [ExitOrder.Status.COMPLETED, ExitOrder.Status.CANCELLED]
+            and obj.order
+            and obj.order.status in [ExitOrder.Status.COMPLETED, ExitOrder.Status.CANCELLED]
         ):
             return readonly + ("quantity_dispatched", "unit_cost", "batch")
         return readonly
@@ -499,8 +495,8 @@ class ExitDetailAdmin(BaseAdminMixin):
         """Prevent deletion of details from completed/cancelled orders."""
         if (
             obj
-            and obj.exit_order
-            and obj.exit_order.status in [ExitOrder.Status.COMPLETED, ExitOrder.Status.CANCELLED]
+            and obj.order
+            and obj.order.status in [ExitOrder.Status.COMPLETED, ExitOrder.Status.CANCELLED]
         ):
             return False
         return super().has_delete_permission(request, obj)

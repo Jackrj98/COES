@@ -91,7 +91,7 @@ class InventoryMovementFilterForm(BaseFilterForm, BaseFormHelperMixin):
     movement_type = forms.ChoiceField(
         label=_("Type"),
         required=False,
-        choices=[("", _("All"))] + list(InventoryMovement.MovementTypeChoices.choices),
+        choices=[("", _("All"))] + list(InventoryMovement.Type.choices),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     status = forms.ChoiceField(

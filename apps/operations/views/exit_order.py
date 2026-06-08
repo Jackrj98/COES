@@ -2,6 +2,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -16,6 +17,7 @@ from apps.core.views.base import (
 )
 from apps.operations.forms import ExitOrderBaseForm, ExitOrderDetailFormSet, ExitOrderFilterForm
 from apps.operations.layers.applications import OrderAppService
+from apps.operations.layers.applications.inventory_service import InventoryOrchestrator
 from apps.operations.layers.dto import ExitOrderDTO
 from apps.operations.models import ExitDetail, ExitOrder
 from apps.security.layers.security import SecurityService
@@ -127,8 +129,10 @@ class ExitOrderCreateView(CustomCreateView):
         messages.warning(self.request, self.failure_message)
         return self.render_to_response(self.get_context_data(form=form, formset=formset))
 
+    @transaction.atomic
     def form_valid(self, form, **kwargs):
-        service = OrderAppService
+        order_service = OrderAppService()
+        inventory_service = InventoryOrchestrator()
         formset = kwargs.pop("formset", None)
         try:
             details_data = []
@@ -145,15 +149,15 @@ class ExitOrderCreateView(CustomCreateView):
                     }
                 )
 
-            dto = ExitOrderDTO(
+            order_dto = ExitOrderDTO(
                 requested_by=self.request.user.email,
                 observations=form.cleaned_data.get("observations", ""),
                 motive=form.cleaned_data.get("motive", ""),
                 status=self.model.Status.COMPLETED,
                 details=details_data,
             )
-
-            service.register_exit_order(dto)
+            order = order_service.create_order(payload=order_dto)
+            inventory_service.register_exit(order=order, details_payload=order_dto.details)
 
             # Show success message
             model_name = self.model._meta.verbose_name

@@ -47,7 +47,7 @@ class InventoryMovementListView(CustomListView):
         ctx = super().get_context_data(**kwargs)
         ctx["object"] = self.model
         ctx["ui_map"] = self.model.MovementStatusChoices.get_ui_map()
-        ctx["type_ui_map"] = self.model.MovementTypeChoices.get_ui_map()
+        ctx["type_ui_map"] = self.model.Type.get_ui_map()
         ctx["description"] = _("Management of registered inventory movements")
         return ctx
 
@@ -167,12 +167,12 @@ class InventoryMovementCreateView(CustomCreateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["movement_type"] = self.model.MovementTypeChoices.INBOUND
+        initial["movement_type"] = self.model.Type.INBOUND
         return initial
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["movement_types"] = self.model.MovementTypeChoices.choices
+        ctx["movement_types"] = self.model.Type.choices
         ctx["title"] = ctx["title"].capitalize()
         ctx["concept_list"] = [
             "Compra de insumos",

@@ -102,7 +102,7 @@ class InventoryMovementAppService(BaseAppService):
     def register_outbound(self, payload: dict) -> InventoryMovement:
         """Register an outbound inventory movement."""
         try:
-            payload["movement_type"] = InventoryMovement.MovementTypeChoices.OUTBOUND
+            payload["movement_type"] = InventoryMovement.Type.OUTBOUND
             payload["status"] = InventoryMovement.MovementStatusChoices.COMPLETED
             dto = MovementDTO(**payload)
             print("movement_type", dto)
@@ -145,7 +145,7 @@ class InventoryMovementAppService(BaseAppService):
             builder = InventoryMovementBuilder()
             reversal = (
                 builder.set_batch(original.batch)
-                .set_type(InventoryMovement.MovementTypeChoices.ADJUSTMENT)
+                .set_type(InventoryMovement.Type.ADJUSTMENT)
                 .set_status(InventoryMovement.MovementStatusChoices.COMPLETED)
                 .set_concept(f"_('Reversal of movement') #{original.id}")
                 .set_quantity(original.quantity)

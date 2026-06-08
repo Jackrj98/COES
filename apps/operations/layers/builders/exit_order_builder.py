@@ -1,3 +1,4 @@
+from apps.operations.management.management import OrderNumberGenerator
 from apps.operations.models import ExitDetail, ExitOrder
 
 
@@ -40,6 +41,7 @@ class ExitOrderBuilder:
         return self
 
     def save(self):
+        self.exit_order.order_number = OrderNumberGenerator.generate(ExitOrder)
         self.exit_order.save()
         return self
 

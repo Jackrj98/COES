@@ -1,6 +1,4 @@
-import datetime
-
-from django.db import models, transaction
+from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -14,33 +12,6 @@ class BaseOrder(AuditModel):
 
     class Meta:
         abstract = True
-
-    def save(self, *args, **kwargs):
-        if not self.order_number:
-            prefix = getattr(self.__class__, "ORDER_PREFIX", None)
-            if not prefix:
-                raise ValueError(f"Define ORDER_PREFIX en {self.__class__.__name__}")
-
-            year = datetime.date.today().year
-            with transaction.atomic():
-                last_order = (
-                    self.__class__.objects.filter(order_number__startswith=f"{prefix}-{year}-")
-                    .select_for_update()
-                    .order_by("-order_number")
-                    .first()
-                )
-                if last_order:
-                    parts = last_order.order_number.split("-")
-                    last_num = int(parts[-1]) if parts else 0
-                    new_num = last_num + 1
-                else:
-                    new_num = 1
-
-                self.order_number = f"{prefix}-{year}-{new_num:04d}"
-                self.order_number = f"{prefix}-{year}-{new_num:04d}"
-                super().save(*args, **kwargs)
-        else:
-            super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Order #{self.order_number}"
@@ -148,12 +119,12 @@ class ExitDetail(BaseOrderDetail):
     batch = models.ForeignKey(
         "inventory.Batch", on_delete=models.PROTECT, related_name="exit_details"
     )
-    exit_order = models.ForeignKey(ExitOrder, on_delete=models.CASCADE, related_name="details")
+    order = models.ForeignKey(ExitOrder, on_delete=models.CASCADE, related_name="details")
 
     class Meta:
         db_table = "exit_detail"
         ordering = ["quantity_requested", "-created_at"]
-        unique_together = [["exit_order", "supply", "batch"]]
+        unique_together = [["order", "supply", "batch"]]
 
     @property
     def line_total(self):

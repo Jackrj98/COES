@@ -1,74 +1,47 @@
 import logging
+from dataclasses import dataclass
 
 from django.db import transaction
-from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
-from apps.inventory.layers.applications import BatchAppService, InventoryMovementAppService
-from apps.operations.layers.builders import ExitDetailBuilder, ExitOrderBuilder
-from apps.operations.layers.dto import DatatableSearch
-
+from apps.inventory.layers.applications import BatchAppService
 from apps.inventory.models import Batch, InventoryMovement
+from apps.operations.layers.builders import ExitOrderBuilder
 from apps.operations.models import ExitDetail, ExitOrder
+
 logger = logging.getLogger(__name__)
 
 
-class InventoryService:
+@dataclass
+class StockAllocation:
+    batch: Batch
+    quantity: int
 
-    @classmethod
-    @transaction.atomic
-    def register_exit_order(cls, payload):
-        order = cls._create_order(payload)
-        batch_service = BatchAppService()
 
-        # list of batches to update
-        batches_to_update = []
-        details_to_create = []
-        movements_to_create = []
+class StockAllocator:
+    """Allocate stock to batches."""
 
-        consolidated = {}
-        for item in payload.details:
-            consolidated[item.supply_id] = consolidated.get(item.supply_id, 0) + item.quantity_requested
+    @staticmethod
+    def allocate(batches: list[Batch], quantity: int) -> list[StockAllocation]:
+        allocations = []
+        remaining = quantity
+        for batch in batches:
+            if remaining <= 0:
+                break
 
-        for supply_id, total_requested in consolidated.items():
-            # Atomic batch lock for this input
-            available_batches = batch_service.retrieve_by_expiry_date(supply_id).select_for_update()
-
-            if not available_batches.exists():
-                raise ValueError(_(f"No stock for supply {supply_id}."))
-
-            remaining = total_requested
-            for batch in available_batches:
-                if remaining <= 0:
-                    break
-
-                taken = min(remaining, batch.current_quantity)
-                if taken <= 0: 
-                    continue
-
-                # Prepare Batch Update
-                batch.current_quantity -= taken
-                if batch.current_quantity == 0:
-                    batch.status = Batch.BatchStatus.DEPLETED
-                batches_to_update.append(batch)
-
-                # 2. Preparar Detalle y Movimiento (instancias, no .save())
-                details_to_create.append(ExitDetail(order=order, supply_id=batch.supply_id, batch=batch, quantity_requested=taken, unit_cost=batch.unit_cost))
-                movements_to_create.append(InventoryMovement(batch=batch, concept=order.motive, quantity=taken, ...)) # Ajusta campos
-
+            taken = min(remaining, batch.current_quantity)
+            if taken > 0:
+                allocations.append(StockAllocation(batch, taken))
                 remaining -= taken
 
-            if remaining > 0:
-                raise ValueError(_(f"Insufficient stock for {supply_id}."))
+        if remaining > 0:
+            raise ValueError(_("Out of stock"))
+        return allocations
 
-        # 3. Persistencia Unificada (Bulk Operations)
-        Batch.objects.bulk_update(batches_to_update, ['current_quantity', 'status'])
-        ExitDetail.objects.bulk_create(details_to_create)
-        InventoryMovement.objects.bulk_create(movements_to_create)
 
-        order.recalculate_totals()
-        order.save()
-        return order
+class InventoryOrchestrator:
+    def __init__(self, batch_service=None):
+        self.batch_service = batch_service or BatchAppService()
 
     @staticmethod
     def _create_order(payload):
@@ -83,48 +56,72 @@ class InventoryService:
         )
 
     @staticmethod
-    def _register_details(order_id, batch, quantity):
-        (
-            ExitDetailBuilder()
-            .set_order(order_id)
-            .set_supply(batch.supply_id)
-            .set_batch(batch.id)
-            .set_quantity_requested(quantity)
-            .set_unit_cost(batch.unit_cost)
-            .save()
-            .build()
+    def _consolidate(details_payload: list) -> dict:
+        """Consolidate details by supply_id."""
+        consolidated = {}
+        for item in details_payload:
+            consolidated[item.supply_id] = (
+                consolidated.get(item.supply_id, 0) + item.quantity_requested
+            )
+        return consolidated
+
+    @staticmethod
+    def _build_detail(order: ExitOrder, alloc: StockAllocation) -> ExitDetail:
+        return ExitDetail(
+            order=order,
+            supply_id=alloc.batch.supply_id,
+            batch=alloc.batch,
+            quantity_requested=alloc.quantity,
+            quantity_dispatched=alloc.quantity,
+            unit_cost=alloc.batch.unit_cost,
         )
 
     @staticmethod
-    def _register_outbound_movement(order, batch, quantity):
-        supply = batch.supply
-        movement_service = InventoryMovementAppService()
-        movement_payload = {
-            "batch_id": batch.id,
-            "concept": order.motive,
-            "quantity": quantity,
-            "observation": str(_(f"Order dispatch for supply {supply.name} - {supply.code}")),
-            "previous_stock": batch.current_quantity,
-            "after_stock": batch.current_quantity - quantity,
-            "unit_cost_at_movement": batch.unit_cost,
-        }
-        movement_service.register_outbound(payload=movement_payload)
+    def _build_movement(
+        order: ExitOrder, alloc: StockAllocation, old_stock: int
+    ) -> InventoryMovement:
+        batch = alloc.batch
+        return InventoryMovement(
+            batch=batch,
+            is_increment=False,
+            concept=order.motive,
+            quantity=alloc.quantity,
+            observation=str(
+                _(f"Order dispatch for supply {batch.supply.name} - {batch.supply.code}")
+            ),
+            previous_stock=old_stock,
+            after_stock=int(old_stock - alloc.quantity),
+            unit_cost_at_movement=batch.unit_cost,
+            movement_type=InventoryMovement.Type.OUTBOUND,
+        )
 
-    @classmethod
-    def _update_bath(cls, order, available_batches, remaining_to_dispatch):
+    @staticmethod
+    def _bulk_persist(batches, details, movements):
+        Batch.objects.bulk_update(batches, ["current_quantity", "status"])
+        ExitDetail.objects.bulk_create(details)
+        InventoryMovement.objects.bulk_create(movements)
 
-        for batch in available_batches:
-            if remaining_to_dispatch <= 0:
-                break
+    @transaction.atomic
+    def register_exit(self, order: ExitOrder, details_payload: list):
 
-            taken_from_this_batch = min(remaining_to_dispatch, batch.current_quantity)
+        batches_to_update, details_to_create, movements_to_create = [], [], []
 
-            cls._register_details(order.id, batch, taken_from_this_batch)
-            cls._register_outbound_movement(order, batch, taken_from_this_batch)
+        for supply_id, quantity in self._consolidate(details_payload).items():
+            batches = self.batch_service.retrieve_by_expiry_date(supply_id).select_for_update()
+            allocations = StockAllocator.allocate(batches, quantity)
 
-            batch.current_quantity -= taken_from_this_batch
-            batch.save()
+            for alloc in allocations:
+                batch = alloc.batch
+                old_stock = batch.current_quantity
 
-            remaining_to_dispatch -= taken_from_this_batch
+                batch.current_quantity -= alloc.quantity
+                if batch.current_quantity == 0:
+                    batch.status = Batch.BatchStatus.DEPLETED
 
-        return remaining_to_dispatch
+                batches_to_update.append(batch)
+                details_to_create.append(self._build_detail(order, alloc))
+                movements_to_create.append(self._build_movement(order, alloc, old_stock))
+
+        self._bulk_persist(batches_to_update, details_to_create, movements_to_create)
+        order.recalculate_totals()
+        order.save()
