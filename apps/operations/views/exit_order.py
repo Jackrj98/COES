@@ -156,7 +156,7 @@ class ExitOrderCreateView(CustomCreateView):
                 status=self.model.Status.COMPLETED,
                 details=details_data,
             )
-            order = order_service.create_order(payload=order_dto)
+            order = order_service.create_exit_order(payload=order_dto)
             inventory_service.register_exit(order=order, details_payload=order_dto.details)
 
             # Show success message

@@ -65,7 +65,7 @@ class DatatableSearch(DatatableSearchBase):
 
         if search:
             search = search.strip()
-            search_fields = ["number"]
+            search_fields = ["batch_number"]
             qs = cls._apply_search(qs, search, search_fields)
 
         return cls._prepare_response(params, qs)

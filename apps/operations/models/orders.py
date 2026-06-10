@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -18,7 +20,9 @@ class BaseOrder(AuditModel):
 
 
 class BaseOrderDetail(AuditModel):
-    quantity_requested = models.PositiveIntegerField(_("Quantity requested"), default=0)
+    quantity_requested = models.PositiveIntegerField(
+        _("Quantity requested"), default=0, validators=[MinValueValidator(1)]
+    )
     unit_cost = models.DecimalField(_("Unit cost"), max_digits=12, decimal_places=2)
 
     class Meta:
@@ -34,11 +38,39 @@ class PurchaseOrder(BaseOrder):
         COMPLETED = 2, _("Completed")
         CANCELLED = 3, _("Cancelled")
 
+        @property
+        def ui_config(self):
+            configs = {
+                self.DRAFT: {"color": "secondary", "icon": "bi bi-pencil"},
+                self.SENT: {"color": "info", "icon": "bi bi-send"},
+                self.COMPLETED: {"color": "success", "icon": "bi bi-check-lg"},
+                self.CANCELLED: {"color": "danger", "icon": "bi bi-x-lg"},
+            }
+            return configs.get(self, {"color": "secondary", "icon": "bi bi-question"})
+
+        @property
+        def color(self):
+            return self.ui_config["color"]
+
+        @property
+        def icon(self):
+            return self.ui_config["icon"]
+
+        @classmethod
+        def get_ui_map(cls):
+            return {
+                item.value: {"color": item.color, "icon": item.icon, "label": item.label}
+                for item in cls
+            }
+
     estimated_delivery = models.DateTimeField(_("Estimated delivery"), null=True, blank=True)
     actual_delivery = models.DateField(_("Actual delivery"), null=True, blank=True)
     status = models.PositiveSmallIntegerField(_("Status"), choices=Status, default=Status.DRAFT)
     supplier = models.ForeignKey(
-        "operations.Supplier", on_delete=models.PROTECT, related_name="purchase_orders"
+        "operations.Supplier",
+        on_delete=models.PROTECT,
+        related_name="purchase_orders",
+        verbose_name=_("Supplier"),
     )
 
     class Meta:
@@ -50,23 +82,98 @@ class PurchaseOrder(BaseOrder):
     def __str__(self):
         return f"PO #{self.order_number} - {self.supplier.business_name}"
 
+    def get_absolute_url(self):
+        return reverse("operations:inbound_order:detail", kwargs={"external_id": self.external_id})
+
+    @property
+    def total(self):
+        return sum(detail.line_total for detail in self.details.all())
+
+    @property
+    def total_requested(self):
+        return (
+            self.details.filter(deleted_at__isnull=True).aggregate(
+                total=models.Sum("quantity_requested")
+            )["total"]
+            or 0
+        )
+
+    @property
+    def lines_received(self):
+        return self.details.filter(deleted_at__isnull=True, quantity_received__gt=0).count()
+
+    @property
+    def total_received(self):
+        return (
+            self.details.filter(deleted_at__isnull=True).aggregate(
+                total=models.Sum("quantity_received")
+            )["total"]
+            or 0
+        )
+
+    @property
+    def percentage_received(self):
+        if self.total_requested == 0:
+            return 0
+        return int((self.total_received / self.total_requested) * 100)
+
+    @property
+    def color(self):
+        return self.Status(self.status).color
+
 
 class PurchaseOrderDetail(BaseOrderDetail):
     quantity_received = models.PositiveIntegerField(_("Quantity received"), default=0)
     observations = models.TextField(blank=True, null=True)
+    unit_cost = models.DecimalField(
+        _("Unit cost"), max_digits=12, decimal_places=2, validators=[MinValueValidator(0.1)]
+    )
+
+    # Relationships
+    order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name="details")
+    supply = models.ForeignKey(
+        "inventory.Supply", on_delete=models.PROTECT, related_name="purchase_order_details"
+    )
+    batch = models.ForeignKey(
+        "inventory.Batch",
+        on_delete=models.PROTECT,
+        related_name="purchase_order_details",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        db_table = "purchase_order_detail"
+        unique_together = [["order", "supply", "batch"]]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        requested = self.quantity_requested
+        received = self.quantity_received
+
+        if requested is not None and received is not None:
+            if received > requested:
+                raise ValidationError(
+                    {"quantity_received": _("Quantity received cannot be greater than requested.")}
+                )
+
+        if received < 0:
+            raise ValidationError({"quantity_received": _("Quantity received cannot be negative.")})
+        return cleaned_data
 
     @property
     def line_total(self):
         return self.quantity_received * self.unit_cost
 
-    order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name="details")
-    supply = models.ForeignKey(
-        "inventory.Supply", on_delete=models.PROTECT, related_name="purchase_order_details"
-    )
+    @property
+    def is_complete(self):
+        return self.quantity_received >= self.quantity_requested
 
-    class Meta:
-        db_table = "purchase_order_detail"
-        unique_together = [["order", "supply"]]
+    @property
+    def percentage(self):
+        if self.quantity_requested == 0:
+            return 0
+        return int((self.quantity_received / self.quantity_requested) * 100)
 
 
 class ExitOrder(BaseOrder):

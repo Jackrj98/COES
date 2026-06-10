@@ -28,11 +28,11 @@ class OrderAppService:
             qs = list(queryset.values(*fields, "items"))
             return params.result(qs)
         except Exception as e:
-            logger.exception(f"Failed to fetch suppliers: {e}")
+            logger.exception(f"Failed to fetch exit orders: {e}")
             return []
 
     @staticmethod
-    def create_order(payload):
+    def create_exit_order(payload):
         return (
             ExitOrderBuilder()
             .set_status(payload.status)

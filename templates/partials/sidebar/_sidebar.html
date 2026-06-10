@@ -44,8 +44,8 @@
 
                 <li class="sidebar-title">{% trans 'Operations'|capfirst %}</li>
                 {% if request.user|has_group:"administrator,specialist" %}
-                    <li class="sidebar-item {% active 'operations:outbound_order:list' %}">
-                        <a href="{% url 'operations:outbound_order:list' %}" class='sidebar-link'>
+                    <li class="sidebar-item {% active 'operations:inbound_order:list' %}">
+                        <a href="{% url 'operations:inbound_order:list' %}" class='sidebar-link'>
                             <i class="bi bi-box-arrow-in-right"></i> <span>{% trans 'Inbound Orders'|capfirst %}</span>
                         </a>
                     </li>
