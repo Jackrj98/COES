@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-06 10:26-0500\n"
-"PO-Revision-Date: 2026-06-06 10:37-0500\n"
+"PO-Revision-Date: 2026-06-08 19:22-0500\n"
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -1100,7 +1100,7 @@ msgstr "Enviado"
 
 #: apps/operations/models/orders.py:66
 msgid "Estimated delivery"
-msgstr "Fecha estimada de entrega"
+msgstr "Entrega estimada"
 
 #: apps/operations/models/orders.py:67
 msgid "Actual delivery"
@@ -1878,7 +1878,7 @@ msgstr "Operaciones"
 
 #: templates/partials/sidebar/_sidebar.html:37
 msgid "Inbound Orders"
-msgstr "Órdenes entrantes"
+msgstr "Órdenes de compra"
 
 #: templates/partials/sidebar/_sidebar.html:52
 msgid "Reports"

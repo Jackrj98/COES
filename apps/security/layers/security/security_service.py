@@ -27,25 +27,34 @@ class SecurityService:
         return user.groups.filter(name__in=ALL_GROUP_NAMES).exists()
 
     @staticmethod
-    def require_admin(user, raise_exception=True):
-        if not SecurityService.is_admin(user):
-            if raise_exception:
-                raise PermissionDenied("You need administrator privileges")
+    def _handle_failure(user, message, raise_exception):
+        if not user or not user.is_authenticated:
             return False
-        return True
+
+        if raise_exception:
+            raise PermissionDenied(message)
+        return False
+
+    @staticmethod
+    def require_admin(user, raise_exception=True):
+        if SecurityService.is_admin(user):
+            return True
+        return SecurityService._handle_failure(
+            user, "You need administrator privileges", raise_exception
+        )
 
     @staticmethod
     def require_specialist(user, raise_exception=True):
-        if not SecurityService.is_specialist(user):
-            if raise_exception:
-                raise PermissionDenied("You need specialist privileges")
-            return False
-        return True
+        if SecurityService.is_specialist(user):
+            return True
+        return SecurityService._handle_failure(
+            user, "You need specialist privileges", raise_exception
+        )
 
     @staticmethod
     def require_access(user, raise_exception=True):
-        if not SecurityService.has_access(user):
-            if raise_exception:
-                raise PermissionDenied("You don't have permission to access this resource")
-            return False
-        return True
+        if SecurityService.has_access(user):
+            return True
+        return SecurityService._handle_failure(
+            user, "You don't have permission to access this resource", raise_exception
+        )

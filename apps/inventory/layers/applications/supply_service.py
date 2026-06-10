@@ -46,7 +46,6 @@ class SupplyAppService(BaseAppService):
             total_stock=Coalesce(Sum("batches__current_quantity"), Value(0))
         )
 
-        # Filtro lógico: Si es salida (type=1), solo insumos con stock > 0
         if movement_type == "1":
             queryset = queryset.filter(total_stock__gt=0)
 

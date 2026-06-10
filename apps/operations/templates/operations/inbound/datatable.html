@@ -1,0 +1,74 @@
+{% extends 'components/_datatable.html' %}
+{% load custom_tags crispy_forms_filters %}
+
+
+{% block actions %}
+    {% with menu_a=actions.menu_actions %}
+        {% for item in menu_a.actions %}
+            <a class="btn btn-primary" href="{{ item.url }}">
+                <i class="{{ item.icon }}"></i>
+                {{ item.title }}
+            </a>
+        {% endfor %}
+    {% endwith %}
+{% endblock actions %}
+
+{% block metrics %}
+{% endblock metrics %}
+
+
+{% block filters %}
+    {% if filter_form %}
+        <form method="GET" id="filter" class="mb-4">
+            <div class="row align-items-end g-3">
+                <div class="col-12 col-sm-6 col-md-6 col-lg-6">
+                    {{ filter_form.search|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-12 col-md-3 col-lg-3">
+                    {{ filter_form.date_from|as_crispy_field }}
+                </div>
+
+                <div class="col-12 col-sm-12 col-md-3 col-lg-3">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="flex-grow-1">
+                            {{ filter_form.status|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" id="clear-filters"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 38px; height: 38px; padding: 0;"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    data-bs-trigger="hover"
+                                    title="{% trans 'Clean filters' %}">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+{% endblock filters %}
+
+{% block columns %}
+    <th scope="col" class="text-uppercase">{% trans 'order'|upper %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'supplier' }}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'status' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'Estimated delivery'|upper %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'actual_delivery' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'Total lines'|upper %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'created_at' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'actions' %}</th>
+{% endblock columns %}
+
+{% block rows %} {% endblock rows %}
+
+{% block dt_javascript %}
+    <script>
+        const baseHref = "{% get_base_href %}"
+        const urlPaginator = "{{ list_url }}";
+    </script>
+    <script src="{% static 'js/operations/inbound/datatable.js' %}"></script>
+{% endblock dt_javascript %}
+
