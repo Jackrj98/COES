@@ -93,6 +93,8 @@ class InventoryOrchestrator:
             after_stock=int(old_stock - alloc.quantity),
             unit_cost_at_movement=batch.unit_cost,
             movement_type=InventoryMovement.Type.OUTBOUND,
+            created_by=order.requested_by,
+            exit_order=order,
         )
 
     @staticmethod

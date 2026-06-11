@@ -99,21 +99,24 @@ class PurchaseOrchestrator:
         if incremental:
             prev_stock = min(old_stock, 0)
             type_mov = InventoryMovement.Type.INBOUND
-            concept = f"Purchase Order {order.order_number}"
+            observation = f"Purchase Order {order.order_number}"
         else:
             after_stock = 0
             type_mov = InventoryMovement.Type.ADJUSTMENT
-            concept = f"Cancellation of Purchase Order {order.order_number}"
+            observation = f"Cancellation of Purchase Order {order.order_number}"
 
         return InventoryMovement(
             batch=detail.batch,
             is_increment=incremental,
-            concept=concept,
+            concept=order.motive,
             quantity=detail.quantity_received,
             previous_stock=prev_stock,
             after_stock=after_stock,
             unit_cost_at_movement=detail.unit_cost,
             movement_type=type_mov,
+            observation=observation,
+            created_by=order.created_by,
+            purchase_order=order,
         )
 
     @staticmethod
@@ -171,7 +174,6 @@ class PurchaseOrchestrator:
             if qty <= 0:
                 continue
 
-            # Obtener o crear el lote
             batch, _ = Batch.objects.update_or_create(
                 supply_id=item["supply_id"],
                 batch_number=item["batch_number"],
@@ -184,11 +186,10 @@ class PurchaseOrchestrator:
                 },
             )
 
-            # Actualizar o crear el detalle con la combinación única
             detail, created = PurchaseOrderDetail.objects.update_or_create(
                 order=order,
                 supply_id=item["supply_id"],
-                batch=batch,  # Esto respeta la restricción unique_together
+                batch=batch,
                 defaults={
                     "quantity_requested": item["quantity_requested"],
                     "quantity_received": qty,
@@ -200,7 +201,6 @@ class PurchaseOrchestrator:
             processed_detail_ids.append(detail.id)
             affected.append(detail)
 
-        # Eliminar detalles que ya no están en la orden
         order.details.exclude(id__in=processed_detail_ids).delete()
         # Batch.objects.filter(purchaseorderdetail__isnull=True).delete()
         if order.status == PurchaseOrder.Status.COMPLETED:

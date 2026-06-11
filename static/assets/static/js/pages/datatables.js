@@ -14,6 +14,7 @@ class DataTableFactory {
                     filters = [],
                     paginationClass = "pagination-primary",
                     rowClickAction = null,
+                    footerCallback = null,
                 }) {
         this.selector = selector;
         this.ajaxUrl = ajaxUrl;
@@ -22,12 +23,14 @@ class DataTableFactory {
         this.filters = filters;
         this.paginationClass = paginationClass;
         this.rowClickAction = rowClickAction;
+        this.footerCallback = footerCallback;
         this.table = null;
         this.timeout = null;
     }
 
     init() {
-        this.table = $(this.selector).DataTable({
+        const self = this;
+        const config = {
             ordering: true,
             processing: true,
             serverSide: true,
@@ -67,8 +70,17 @@ class DataTableFactory {
                     });
                 }
             }
-        });
+        };
+
+         if (this.footerCallback) {
+            config.footerCallback = function(row, data, start, end, display) {
+                self.footerCallback(this, row, data, start, end, display);
+            };
+        }
+
+        this.table = $(this.selector).DataTable(config);
         this.bindFilterEvents();
+
     }
 
     initTooltips() {

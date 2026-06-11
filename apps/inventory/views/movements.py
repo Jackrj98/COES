@@ -25,6 +25,12 @@ from apps.inventory.forms import (
     SupplyBaseForm,
 )
 from apps.inventory.layers.applications import InventoryMovementAppService, SupplyAppService
+from apps.inventory.layers.applications.report_service import (
+    CSVExportService,
+    ExcelExportService,
+    InventoryReportService,
+    MovementFilterService,
+)
 from apps.inventory.models import Batch, InventoryMovement, Supply
 from apps.security.layers.security import SecurityService
 
@@ -40,8 +46,10 @@ class InventoryMovementListView(CustomListView):
     model = DEFAULT_MODEL
     form_class = InventoryMovementFilterForm
     success_url: str = DEFAULT_LIST_URL
-    template_name = "inventory_movements/datatable.html"
+    template_name = "movements/datatable2.html"
     permission_required = "inventory.view_inventorymovement"
+    filter_service = MovementFilterService()
+    report_service = InventoryReportService()
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -77,6 +85,25 @@ class InventoryMovementListView(CustomListView):
 
     def retrieve_data(self, params):
         return InventoryMovementAppService().retrieve_movements(params)
+
+    def export_excel(self, request):
+        filters = self.filter_service.extract_filters(request)
+        report_data = self.report_service.generate_movement_report(filters)
+        exporter = ExcelExportService(report_data, "inventory_movements")
+        return exporter.generate()
+
+    def export_csv(self, request):
+        filters = self.filter_service.extract_filters(request)
+        report_data = self.report_service.generate_movement_report(filters)
+        exporter = CSVExportService(report_data, "inventory_movements")
+        return exporter.generate()
+
+    def post(self, request, *args, **kwargs):
+        if "export_excel" in request.POST:
+            return self.export_excel(request)
+        elif "export_csv" in request.POST:
+            return self.export_csv(request)
+        return self.get(request, *args, **kwargs)
 
     def get_success_url(self):
         return self.success_url

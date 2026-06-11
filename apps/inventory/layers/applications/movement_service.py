@@ -59,6 +59,9 @@ class InventoryMovementAppService(BaseAppService):
             "batch__batch_number",
             "batch__supply__name",
             "batch__supply__code",
+            "purchase_order__order_number",
+            "exit_order__order_number",
+            "created_by",
         ]
         try:
             DatatableSearch.retrieve_inventory_movements(params)

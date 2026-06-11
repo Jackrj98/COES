@@ -77,7 +77,11 @@ class DatatableSearch(DatatableSearchBase):
 
         # Generate the base query
         qs = cls._build_base_query(params, InventoryMovement, "status")
-        qs = qs.select_related("batch__supply")
+        qs = (
+            qs.select_related("batch__supply")
+            .select_related("purchase_order")
+            .select_related("exit_order")
+        )
 
         if movement_type:
             qs = qs.filter(movement_type=movement_type)
@@ -89,6 +93,11 @@ class DatatableSearch(DatatableSearchBase):
                 "batch__batch_number",
                 "batch__supply__name",
                 "batch__supply__code",
+                "purchase_order__supplier__business_name",
+                "purchase_order__supplier__contact_name",
+                "purchase_order__order_number",
+                "exit_order__order_number",
+                "created_by",
             ]
             qs = cls._apply_search(qs, search, search_fields)
 

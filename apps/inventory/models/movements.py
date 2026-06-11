@@ -82,35 +82,3 @@ class InventoryMovement(AuditModel):
                         )
                     }
                 )
-
-    """
-    def save(self, *args, **kwargs):
-        if self.pk:
-            raise ValidationError(_("Cannot modify existing movements"))
-
-        self.clean()
-
-        # Calculate stock changes
-        self.previous_stock = self.batch.current_quantity
-        if self.batch.initial_quantity == 0:
-            self.previous_stock = 0
-
-        if self.movement_type in [InventoryMovementType.INBOUND, InventoryMovementType.ADJUSTMENT]:
-            if self.after_stock is not None:
-                self.is_increment = self.after_stock > self.previous_stock
-                self.quantity = abs(self.after_stock - self.previous_stock)
-            else:
-                if self.is_increment:
-                    self.after_stock = self.previous_stock + self.quantity
-
-            self.unit_cost_at_movement = self.batch.unit_cost
-        else:  # OUTBOUND
-            self.is_increment = False
-            self.after_stock = self.previous_stock - self.quantity
-            self.unit_cost_at_movement = None
-
-        # Atomic update
-        with transaction.atomic():
-            self.batch.current_quantity = self.after_stock
-            self.batch.save(update_fields=["current_quantity"])
-            super().save(*args, **kwargs)"""
