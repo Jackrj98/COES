@@ -16,8 +16,7 @@ from apps.core.views.base import (
     CustomListView,
 )
 from apps.operations.forms import ExitOrderBaseForm, ExitOrderDetailFormSet, ExitOrderFilterForm
-from apps.operations.layers.applications import OrderAppService
-from apps.operations.layers.applications.inventory_service import InventoryOrchestrator
+from apps.operations.layers.applications import InventoryOrchestrator, OrderAppService
 from apps.operations.layers.dto import ExitOrderDTO
 from apps.operations.models import ExitDetail, ExitOrder
 from apps.security.layers.security import SecurityService

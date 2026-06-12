@@ -72,7 +72,7 @@ class BatchAppService(BaseAppService):
         return (
             self.model.active.filter(
                 supply__external_id=supply_reference, is_active=True
-            ).aggregate(total=models.Sum("stock"))["total"]
+            ).aggregate(total=models.Sum("current_quantity"))["total"]
             or 0
         )
 
@@ -117,11 +117,13 @@ class BatchAppService(BaseAppService):
         """Update an existing supply item."""
         if not instance:
             raise ValueError(_("Batch instance is required."))
-
+        if payload.current_quantity == 0:
+            payload.status = self.model.BatchStatus.DEPLETED.value
         return self.save_batch(payload, instance=instance)
 
     @staticmethod
     def update_batch_stock(instance, quantity):
-
         builder = BatchBuilder(instance)
+        if quantity == 0:
+            builder.set_status(Batch.BatchStatus.DEPLETED.value)
         return builder.set_current_quantity(quantity).save().build()
