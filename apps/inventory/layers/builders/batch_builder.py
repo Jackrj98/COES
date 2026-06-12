@@ -26,6 +26,7 @@ class BatchBuilder:
 
                 expiry_date = datetime.strptime(expiry_date, "%Y-%m-%d").date()
             self.batch.expiry_date = expiry_date
+
         return self
 
     def set_initial_quantity(self, initial_quantity: int) -> "BatchBuilder":
@@ -59,6 +60,8 @@ class BatchBuilder:
         if status is not None:
             if status in Batch.BatchStatus:
                 self.batch.status = status
+            if self.batch.expiry_date < timezone.now().date():
+                self.batch.status = Batch.BatchStatus.EXPIRED.value
         return self
 
     def set_status_by_expiration(self, force=False) -> "BatchBuilder":

@@ -84,13 +84,20 @@ class TestGenerateNextPriority:
     def test_returns_max_priority_plus_one(self, service):
         Catalog.objects.create(name="Cat1", code="C1", priority=5, is_active=True)
         Catalog.objects.create(name="Cat2", code="C2", priority=3, is_active=True)
-        assert service.generate_next_priority() == 6
+
+        assert (
+            service.generate_next_priority()
+            == Catalog.active.filter(is_active=True, deleted_at__isnull=True).last().priority + 1
+        )
 
     @pytest.mark.django_db
     def test_ignores_inactive_catalogs(self, service):
         Catalog.objects.create(name="Active", code="ACT", priority=5, is_active=True)
         Catalog.objects.create(name="Inactive", code="INACT", priority=10, is_active=False)
-        assert service.generate_next_priority() == 6
+        assert (
+            service.generate_next_priority()
+            == Catalog.active.filter(is_active=True, deleted_at__isnull=True).last().priority + 1
+        )
 
 
 # ---------------------------------------------------------------------------

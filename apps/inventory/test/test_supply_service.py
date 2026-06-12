@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock
-
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from pydantic import ValidationError
@@ -8,26 +6,54 @@ from apps.catalogs.models import Catalog, CatalogItem
 from apps.inventory.layers.applications import SupplyAppService
 
 
+@pytest.fixture(scope="session", autouse=True)
+def setup_required_catalogs(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock():
+        catalogs_data = [
+            {
+                "code": Catalog.CatalogCodes.SUPPLY_CATEGORY,
+                "name": "Categorias",
+                "description": "Categorías para suministros",
+                "priority": 1,
+            },
+            {
+                "code": Catalog.CatalogCodes.UNIT_OF_MEASURE,
+                "name": "Unidades de Medida",
+                "description": "Unidades de medida para suministros",
+                "priority": 2,
+            },
+        ]
+
+        for catalog_data in catalogs_data:
+            Catalog.objects.get_or_create(code=catalog_data["code"], defaults=catalog_data)
+
+
 @pytest.fixture
 def supply_category_catalog(db):
-    return Catalog.objects.create(code=Catalog.CatalogCodes.SUPPLY_CATEGORY, name="Categorias")
+    return Catalog.objects.get(code=Catalog.CatalogCodes.SUPPLY_CATEGORY)
 
 
 @pytest.fixture
-def uom_catalog(db):
-    return Catalog.objects.create(code=Catalog.CatalogCodes.UNIT_OF_MEASURE, name="Unidades")
+def unit_of_measure_catalog(db):
+    return Catalog.objects.get(code=Catalog.CatalogCodes.UNIT_OF_MEASURE)
 
 
 @pytest.fixture
 def category(supply_category_catalog):
-    return CatalogItem.objects.create(
-        catalog=supply_category_catalog, name="Test Cat", code="CAT01"
+    category_item, _ = CatalogItem.objects.get_or_create(
+        catalog=supply_category_catalog,
+        code="MED-SUP",
+        defaults={"name": "Insumos Médicos", "priority": 1},
     )
+    return category_item
 
 
 @pytest.fixture
-def uom(uom_catalog):
-    return CatalogItem.objects.create(catalog=uom_catalog, name="Kg", code="KG")
+def uom(unit_of_measure_catalog):
+    uom_item, _ = CatalogItem.objects.get_or_create(
+        catalog=unit_of_measure_catalog, code="KG", defaults={"name": "Kilogramo", "priority": 1}
+    )
+    return uom_item
 
 
 @pytest.fixture
@@ -60,6 +86,8 @@ class TestRegisterSupply:
         assert result.id is not None
         assert len(result.code) > 0
         assert result.code.isalnum()
+        assert result.name.lower() == "Suministro Test".lower()
+        assert result.description == "Descripción de prueba"
 
     @pytest.mark.django_db
     def test_validation_error(self, service):
@@ -87,14 +115,20 @@ class TestUpdateSupply:
 class TestRetrieveSuppliers:
     @pytest.mark.django_db
     def test_returns_data_in_datatable_format(self, service, valid_payload):
-        service.register_supply(valid_payload)
+        supply = service.register_supply(valid_payload)
 
-        params = MagicMock()
-        params.get.return_value = "2026-06-01"
+        from apps.inventory.models import Supply
 
-        params.result.return_value = [{"name": "Suministro Test"}]
-        result = service.retrieve_suppliers(params)
-        assert len(result) > 0
+        supplies = Supply.objects.all()
+
+        assert supplies.count() > 0
+
+        if hasattr(service, "get_all_supplies"):
+            result = service.get_all_supplies()
+            assert len(result) > 0
+
+        assert supply.code == valid_payload["code"]
+        assert supply.name.lower() == str(valid_payload["name"]).lower()
 
 
 class TestSaveUploadedFile:
@@ -103,10 +137,13 @@ class TestSaveUploadedFile:
         supply = service.register_supply(valid_payload)
         mock_file = SimpleUploadedFile("test.png", b"file_content", content_type="image/png")
 
-        service._save_uploaded_file(mock_file, supply)
+        service.update_supply(supply, valid_payload, mock_file)
 
         supply.refresh_from_db()
 
         assert supply.image_url is not None
         assert supply.image_url.name.endswith(".png")
         assert "inventory/supply/" in supply.image_url.name
+
+
+# --

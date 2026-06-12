@@ -10,7 +10,7 @@ class BatchDTO(BaseModel):
     current_quantity: int = Field(ge=0)
     unit_cost: float = Field(..., ge=0.0)
     is_active: bool = Field(default=True)
-    status: int = Field(default=1, ge=0, le=2)
+    status: int = Field(default=1, ge=0)
     supply_id: int = Field(..., ge=1)
 
     class Config:
