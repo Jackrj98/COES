@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from faker import Faker
+
 from apps.catalogs.models import Catalog, CatalogItem
 from apps.inventory.models import Batch, InventoryMovement, Supply
 
@@ -16,7 +17,7 @@ class Command(BaseCommand):
         parser.add_argument("--number", type=int, default=10, help="Number of supplies to create")
 
     def handle(self, *args, **options):
-        fake = Faker('es_ES')
+        fake = Faker("es_ES")
         fake.unique.clear()
         count = options["number"]
 

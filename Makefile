@@ -189,8 +189,10 @@ docker-logs:
 # =============================================================================
 
 test:
-	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest
+	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest --spec
 
+test-report:
+	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest --html=report.html --self-contained-html
 
 seed:
 	@printf "${YELLOW}Select seed to run:${NC}\n"
