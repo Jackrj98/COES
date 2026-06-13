@@ -73,34 +73,3 @@ class UserBuilder:
             self.user.groups.set(groups)
 
         return self.user
-
-    def update_password(self, new_password):
-        self.user.set_password(new_password)
-        self.user.force_password = False
-        self.user.last_password_change = timezone.now()
-        self.user.save(update_fields=["password", "force_password", "last_password_change"])
-        return self
-
-    def reset_password(self, new_password):
-        self.user.is_active = True
-        self.user.locked_at = None
-        self.user.force_password = True
-        self.user.failed_login_attempts = 0
-        self.user.status = self.user.Status.ENABLED.value
-        self.user.last_password_change = timezone.now()
-
-        self.user.set_password(new_password)
-
-        self.user.save(
-            update_fields=[
-                "password",
-                "is_active",
-                "locked_at",
-                "force_password",
-                "failed_login_attempts",
-                "status",
-                "last_password_change",
-            ]
-        )
-
-        return self

@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
@@ -190,8 +191,30 @@ class UserAppService(BaseAppService):
         try:
             if len(password) < 8:
                 raise ValueError(_("Password must be at least 8 characters long"))
+            user = (
+                builder.set_password(password)
+                .set_force_password(True)
+                .set_status(User.Status.ENABLED)
+                .set_is_active(True)
+            ).user
 
-            return builder.reset_password(new_password=password).build()
+            user.locked_at = None
+            user.force_password = True
+            user.failed_login_attempts = 0
+            user.last_password_change = timezone.now()
+
+            user.save(
+                update_fields=[
+                    "password",
+                    "is_active",
+                    "locked_at",
+                    "force_password",
+                    "failed_login_attempts",
+                    "status",
+                    "last_password_change",
+                ]
+            )
+            return user
         except ValidationError as e:
             logger.warning(f"Validation error: {e.errors()}")
             raise
