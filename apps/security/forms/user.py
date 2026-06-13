@@ -151,3 +151,23 @@ class PasswordUpdateForm(forms.ModelForm):
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
         self.fields["current_password"].widget.attrs["autofocus"] = True
+
+    def clean(self):
+        user = self.instance
+        current = self.cleaned_data.get("current_password")
+        new_password = self.cleaned_data.get("new_password")
+        confirm_password = self.cleaned_data.get("confirm_password")
+
+        if user and not user.check_password(current):
+            self.add_error("current_password", _("Current password is incorrect"))
+
+        if new_password == current:
+            self.add_error(
+                "new_password", _("New password cannot be the same as the current password")
+            )
+
+        if new_password != confirm_password:
+            self.add_error("new_password", _("Passwords do not match"))
+            self.add_error("confirm_password", _("Passwords do not match"))
+
+        return self.cleaned_data

@@ -48,6 +48,7 @@ class Catalog(AuditModel):
         verbose_name_plural = _("catalogs")
         ordering = ["-created_at", "priority"]
         indexes = [models.Index(fields=["code"]), models.Index(fields=["is_active"])]
+        permissions = (("view_catalogs", "Can view catalog list"),)
 
     def __str__(self):
         return self.code

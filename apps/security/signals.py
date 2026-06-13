@@ -13,7 +13,7 @@ User = get_user_model()
 def populate_groups_permissions(sender, **kwargs):
     """Synchronize groups and permissions automatically after migrations."""
     # Only run this on the security and core apps
-    if sender.label in ["security", "core"]:
+    if sender.label in ["security"]:
         sync_roles_and_permissions(verbosity=1)
 
 

@@ -49,11 +49,11 @@
 {% block columns %}
     <th scope="col" class="text-uppercase">#</th>
     <th scope="col" class="text-uppercase">{{ object|object_verbose_name }}</th>
-    <th scope="col" class="text-uppercase">{{ person|field_label:'document_number' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'RUC / DNI' %}</th>
     <th scope="col" class="text-uppercase">{{ person|field_label:'phone' }}</th>
     <th scope="col" class="text-uppercase">{% trans 'group' %}</th>
     <th scope="col" class="text-uppercase">{{ object|field_label:'status' }}</th>
-    <th scope="col" class="text-uppercase">{{ object|field_label:'created_at' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'created'|upper %}</th>
     <th scope="col" class="text-uppercase">{% trans 'actions'|upper %}</th>
 {% endblock columns %}
 
@@ -67,9 +67,7 @@
     <script>
         const baseHref = "{% get_base_href %}"
         const urlPaginator = "{{ list_url }}";
-        const mapStatus = {{ ui_map|safe }}
-        const tableActions = {{ table_actions|safe }}
+        const mapStatus = {{ ui_map|safe }};
     </script>
     <script src="{% static 'js/users/datatable.js' %}"></script>
 {% endblock dt_javascript %}
-

@@ -31,6 +31,7 @@ class Supplier(AuditModel):
         verbose_name = _("Supplier")
         verbose_name_plural = _("Suppliers")
         ordering = ("business_name",)
+        permissions = (("view_suppliers", "Can view suppliers list"),)
 
     def __str__(self):
         return f"{self.business_name} ({self.tax_id})"

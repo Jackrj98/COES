@@ -12,7 +12,12 @@ SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev-key-static")
 ALLOWED_HOSTS = ["*"]
 
 INTERNAL_IPS = ["127.0.0.1", "localhost", "0.0.0.0", "172.19.0.4", "*"]
-
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+    }
+}
 
 # ------------------------------------------------------------------------------
 # REDIS & CELERY CONFIG

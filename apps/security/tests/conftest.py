@@ -4,8 +4,7 @@ import pytest
 from django.contrib.auth.models import Group, Permission
 from django.db.models import Q
 
-from apps.security.layers.applications.user_service import UserAppService
-from apps.security.models import User
+from apps.security.models import Person, User
 from apps.security.permissions import (
     ROLES,
 )
@@ -57,41 +56,41 @@ def user_factory():
     """Factory fixture to create users with custom attributes."""
 
     def _create_user(force_password=False, groups=None, is_superuser=False):
-        """Create a user with custom attributes.
-
-        Args:
-            force_password (bool): Whether the user must change the password on next login
-            groups (list): List of group names to assign to the user.
-            is_superuser (bool): Whether to grant superuser privileges
-
-        Returns:
-            User: Created user instance
-        """
-        service = UserAppService()
+        """Create a user with custom attributes."""
         uid = uuid.uuid4().hex[:8]
+        username = f"user_{uid}"
+        email = f"test_{uid}@example.com"
+        password = "Password123!"
 
-        # Build user payload with default test data
-        payload = {
-            "username": f"user_{uid}",
-            "email": f"test_{uid}@example.com",
-            "password": "Password123!",
-            "first_name": "Test",
-            "last_name": "User",
-            "document_number": generate_ecuadorian_id(),
-            "phone": "+593987654321",
-            "groups": groups or [],  # Ensure groups is always a list
-        }
+        person = Person.objects.create(
+            first_name="Test",
+            last_name="User",
+            document_number=generate_ecuadorian_id(),
+            phone="+593987654321",
+        )
 
-        # Register user through the application service
-        user = service.register_user(payload)
-        user.force_password = force_password
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            force_password=force_password,
+            is_active=True,
+            status=User.Status.ENABLED,
+            person=person,
+        )
 
-        # Set superuser flags if requested
+        if groups:
+            for group_name in groups:
+                group, _ = Group.objects.get_or_create(name=group_name)
+                user.groups.add(group)
+
         if is_superuser:
             user.is_superuser = True
             user.is_staff = True
+            user.save()
 
-        user.save()
+        user.refresh_from_db()
+
         return user
 
     return _create_user

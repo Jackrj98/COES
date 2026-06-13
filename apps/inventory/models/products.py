@@ -56,6 +56,7 @@ class Supply(AuditModel):
         verbose_name_plural = _("Supplies")
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["code"]), models.Index(fields=["name"])]
+        permissions = (("view_supplies", "Can view supply list"),)
 
     def __str__(self):
         return f"{self.name} ({self.code})"

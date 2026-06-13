@@ -2,14 +2,14 @@ import unicodedata
 
 from django.contrib.auth.models import Group
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 
-from apps.security.models import Person, User
+from apps.security.models import User
 
 
 class UserBuilder:
     def __init__(self, user=None):
-        self.user = user
+        self.user = user or User()
+        self._pending_groups = None
         self.person = getattr(user, "person", None)
 
     @staticmethod
@@ -19,69 +19,60 @@ class UserBuilder:
         normalized = unicodedata.normalize("NFKD", value).encode("ASCII", "ignore").decode("utf-8")
         return normalized.strip().lower()
 
-    def create_account(self, username, email, password):
-        username = self._normalize_string(username)
-        self.user = User.objects.create_user(
-            username=username, email=email.lower(), password=password, force_password=True
-        )
+    def set_username(self, username):
+        self.user.username = self._normalize_string(username)
         return self
 
-    def add_person_details(self, first_name, last_name, document_number, phone):
-        self.person = Person.objects.create(
-            first_name=first_name.strip().title(),
-            last_name=last_name.strip().title(),
-            document_number=document_number.strip().upper(),
-            phone=phone.strip(),
-        )
-
-        self.user.person = self.person
-        self.user.save(update_fields=["person"])
+    def set_email(self, email):
+        self.user.email = email.lower()
         return self
 
-    def assign_groups(self, group_names):
-        groups = Group.objects.filter(name__in=group_names)
-        self.user.groups.set(groups)
+    def set_password(self, password):
+        self.user.set_password(password)
+        self.user.force_password = False
+        self.user.last_password_change = timezone.now()
         return self
 
-    def change_status(self):
-        current = self.user.status
-        Status = self.user.Status
-
-        statuses = {
-            Status.ENABLED: {"status": Status.DISABLED.value, "is_active": False},
-            Status.DISABLED: {"status": Status.ENABLED.value, "is_active": True},
-            Status.LOCKED: {
-                "status": Status.ENABLED.value,
-                "is_active": True,
-                "locked_at": None,
-                "failed_login_attempts": 0,
-            },
-        }
-
-        if current not in statuses:
-            raise ValueError(_(f"Invalid user state for the transition: {current}"))
-
-        transition = statuses[current]
-        self.user.status = transition["status"]
-        self.user.is_active = transition["is_active"]
-
-        update_fields = ["is_active", "status"]
-        if "locked_at" in transition:
-            self.user.locked_at = transition["locked_at"]
-            self.user.failed_login_attempts = transition["failed_login_attempts"]
-            update_fields.append("locked_at")
-            update_fields.append("failed_login_attempts")
-
-        self.user.save(update_fields=update_fields)
+    def set_force_password(self, force_password):
+        self.user.force_password = force_password
         return self
 
-    def update_person_details(self, first_name, last_name, document_number, phone):
-        self.person.first_name = first_name.strip().title()
-        self.person.last_name = last_name.strip().title()
-        self.person.document_number = document_number.strip().upper()
-        self.person.phone = phone.strip()
-        self.person.save(update_fields=["first_name", "last_name", "document_number", "phone"])
+    def set_status(self, status):
+        self.user.status = status
+        if status in [self.user.Status.LOCKED, self.user.Status.DISABLED]:
+            self.user.is_active = False
         return self
+
+    def set_is_active(self, is_active):
+        self.user.is_active = is_active
+        return self
+
+    def set_person(self, person_id):
+        self.user.person_id = person_id
+        return self
+
+    def set_groups(self, group_names):
+        self._pending_groups = group_names
+        return self
+
+    def build(self):
+        self.user.full_clean()
+        if self.user.pk is None:
+            self.user = User.objects.create_user(
+                username=self.user.username,
+                email=self.user.email,
+                password=self.user.password,
+                force_password=self.user.force_password,
+                person_id=self.user.person_id,
+            )
+        else:
+            self.user.save()
+
+        if self._pending_groups is not None:
+            groups = Group.objects.filter(name__in=self._pending_groups)
+            self.user.groups.set(groups)
+
+        return self.user
 
     def update_password(self, new_password):
         self.user.set_password(new_password)
@@ -113,6 +104,3 @@ class UserBuilder:
         )
 
         return self
-
-    def build(self):
-        return self.user

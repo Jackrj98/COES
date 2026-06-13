@@ -5,18 +5,13 @@ import string
 from django.contrib.auth.models import Group
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
-from apps.security.layers.builders.user_builder import UserBuilder
-from apps.security.layers.dto import (
-    BaseUserDTO,
-    DatatableSearch,
-    UserPasswortDTO,
-    UserRegistrationDTO,
-)
+from apps.security.layers.builders import PersonBuilder, UserBuilder
+from apps.security.layers.dto import DatatableSearch
 from apps.security.models import User
 
 logger = logging.getLogger(__name__)
@@ -64,72 +59,100 @@ class UserAppService(BaseAppService):
             return params.result([]) if hasattr(params, "result") else []
 
     @staticmethod
-    def generate_password(length=8):
+    def generate_password(length=9):
         """Generate a random password."""
         return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
     @staticmethod
+    def _update_person(builder, data):
+        return (
+            builder.set_first_name(data.get("first_name"))
+            .set_last_name(data.get("last_name"))
+            .set_document_number(data.get("document_number"))
+            .set_phone(data.get("phone"))
+            .build()
+        )
+
+    @staticmethod
+    def _update_user(builder, person, data):
+        passwd = data.get("password", "")
+        if len(passwd) < 8:
+            raise ValueError(_("Password must be at least 8 characters long"))
+
+        return (
+            builder.set_username(person.document_number)
+            .set_email(data.get("email"))
+            .set_password(person.document_number)
+            .set_person(person.id)
+            .set_groups(data.get("groups"))
+            .build()
+        )
+
     @transaction.atomic
-    def register_user(payload):
-        """Register a new user."""
-        builder = UserBuilder()
+    def save_user(self, user=None, payload=None):
+        user_builder = UserBuilder(user)
+        person_builder = PersonBuilder(getattr(user, "person", None))
+
         try:
-            dto = UserRegistrationDTO(**payload)
-            return (
-                builder.create_account(
-                    username=dto.username,
-                    email=dto.email,
-                    password=dto.password,
-                )
-                .add_person_details(
-                    first_name=dto.first_name,
-                    last_name=dto.last_name,
-                    document_number=dto.document_number,
-                    phone=dto.phone,
-                )
-                .assign_groups(dto.groups)
-                .build()
-            )
-        except IntegrityError as e:
-            logger.info(f"User registration failed - duplicate: {e}")
-            raise
+            person = self._update_person(person_builder, payload)
+            user = self._update_user(user_builder, person, payload)
+            return user
         except ValidationError as e:
-            logger.warning(f"User registration failed - validation: {e.json()}")
-            raise
+            logger.warning(f"Validation error: {e.errors()}")
+            raise e
         except Exception as e:
-            logger.critical(f"CRITICAL: User registration crashed: {e}", exc_info=True)
-            raise
+            logger.error("Failed to save user", exc_info=True)
+            raise e
+
+    def register_user(self, payload):
+        return self.save_user(user=None, payload=payload)
+
+    def update_user(self, instance, payload):
+        if not instance:
+            raise ValueError(_("User instance is required to update"))
+
+        person = instance.person
+        person_builder = PersonBuilder(person)
+        return self._update_person(person_builder, payload)
 
     @staticmethod
-    def update_user(user, payload):
-        """Update user information."""
-        builder = UserBuilder(user=user)
-        try:
-            dto = BaseUserDTO(**payload)
-            return builder.update_person_details(
-                first_name=dto.first_name,
-                last_name=dto.last_name,
-                document_number=dto.document_number,
-                phone=dto.phone,
-            ).build()
-        except ValidationError as e:
-            logger.warning(f"Validation error for payload: {e.json()}")
-            raise
-        except Exception as e:
-            logger.error(f"Error updating user: {e}", exc_info=True)
-            raise
-
-    @staticmethod
-    def update_status(user):
+    def update_status(instance):
         """Update user status."""
-        builder = UserBuilder(user=user)
+        if not instance:
+            raise ValueError(_("User instance is required to update"))
+
+        choices = User.Status
+        current_state = instance.status
+
+        transitions = {
+            choices.ENABLED: {"status": choices.DISABLED.value, "is_active": False},
+            choices.DISABLED: {"status": choices.ENABLED.value, "is_active": True},
+            choices.LOCKED: {
+                "status": choices.ENABLED.value,
+                "is_active": True,
+                "locked_at": None,
+                "failed_login_attempts": 0,
+            },
+        }
+
+        if current_state not in transitions:
+            raise ValueError(_(f"Invalid user state for transition: {current_state}"))
+
+        transition = transitions[current_state]
+        builder = UserBuilder(user=instance)
+
         try:
-            return builder.change_status().build()
-        except (ValidationError, ValueError) as e:
-            logger.warning(f"Error updating status: {e}")
-            raise
+            builder.set_status(transition["status"])
+            builder.set_is_active(transition["is_active"])
+
+            if current_state == choices.LOCKED:
+                instance.locked_at = transition["locked_at"]
+                instance.failed_login_attempts = transition["failed_login_attempts"]
+
+            return builder.build()
+
         except Exception as e:
-            logger.error(f"Error updating status: {e}", exc_info=True)
+            logger.error(f"Error updating status for user {instance.id}: {e}", exc_info=True)
             raise
 
     @staticmethod
@@ -141,12 +164,15 @@ class UserAppService(BaseAppService):
         try:
             if request_user != target_user:
                 raise PermissionDenied(_("You are not authorized to change this password"))
+            if len(data.get("new_password", "")) < 8:
+                raise ValueError(_("Password must be at least 8 characters long"))
 
             data["user"] = target_user
-            dto = UserPasswortDTO(**data)
-            builder = UserBuilder(user=dto.user)
+            builder = UserBuilder(user=target_user)
+            user = builder.set_password(payload.get("new_password")).user
+            user.save(update_fields=["password", "force_password", "last_password_change"])
+            return user
 
-            return builder.update_password(new_password=dto.new_password).build()
         except ValidationError as e:
             logger.warning(f"Validation error: {e.errors()}")
             raise
@@ -162,6 +188,9 @@ class UserAppService(BaseAppService):
         """Reset user password."""
         builder = UserBuilder(user=request_user)
         try:
+            if len(password) < 8:
+                raise ValueError(_("Password must be at least 8 characters long"))
+
             return builder.reset_password(new_password=password).build()
         except ValidationError as e:
             logger.warning(f"Validation error: {e.errors()}")

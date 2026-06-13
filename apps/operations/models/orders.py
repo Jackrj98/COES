@@ -78,6 +78,7 @@ class PurchaseOrder(BaseOrder):
         verbose_name = _("Purchase Order")
         verbose_name_plural = _("Purchase Orders")
         ordering = ["-created_at"]
+        permissions = (("view_purchaseorders", "Can view purchase list"),)
 
     def __str__(self):
         return f"PO #{self.order_number} - {self.supplier.business_name}"
@@ -199,6 +200,7 @@ class ExitOrder(BaseOrder):
         verbose_name = _("Exit Order")
         verbose_name_plural = _("Exit Orders")
         ordering = ["-created_at"]
+        permissions = (("view_exitorders", "Can view supply list"),)
 
     def get_absolute_url(self):
         return reverse("operations:outbound_order:detail", kwargs={"external_id": self.external_id})

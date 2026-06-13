@@ -2,21 +2,26 @@ from django.contrib.auth.models import Group, Permission
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+GROUP_NAMES = {
+    "administrator": "administrator",
+    "specialist": "specialist",
+}
+
+ALL_GROUP_NAMES = list(GROUP_NAMES.values())
+
 ROLES = {
     "administrator": {
         "name": _("administrator"),
         "permissions": {
             "security": {
                 "details": [
-                    "add_user",
-                    "change_user",
-                    "view_user",
                     "add_person",
                     "change_person",
                     "view_person",
-                    "add_usertoken",
-                    "change_usertoken",
-                    "view_usertoken",
+                    "add_user",
+                    "change_user",
+                    "view_user",
+                    "view_users",
                 ]
             },
             "catalogs": {
@@ -27,6 +32,7 @@ ROLES = {
                     "add_catalogitem",
                     "change_catalogitem",
                     "view_catalogitem",
+                    "view_catalogs",
                 ]
             },
             "inventory": {
@@ -40,6 +46,8 @@ ROLES = {
                     "add_inventorymovement",
                     "change_inventorymovement",
                     "view_inventorymovement",
+                    "view_supplies",
+                    "view_inventorymovements",
                 ]
             },
             "operations": {
@@ -59,36 +67,12 @@ ROLES = {
                     "add_purchaseorderdetail",
                     "change_purchaseorderdetail",
                     "view_purchaseorderdetail",
+                    "view_exitorders",
+                    "view_suppliers",
+                    "view_purchaseorders",
                 ]
             },
-            "django_celery_beat": {
-                "details": [
-                    "add_crontabschedule",
-                    "change_crontabschedule",
-                    "delete_crontabschedule",
-                    "view_crontabschedule",
-                    "add_intervalschedule",
-                    "change_intervalschedule",
-                    "delete_intervalschedule",
-                    "view_intervalschedule",
-                    "add_periodictask",
-                    "change_periodictask",
-                    "delete_periodictask",
-                    "view_periodictask",
-                    "add_periodictasks",
-                    "change_periodictasks",
-                    "delete_periodictasks",
-                    "view_periodictasks",
-                    "add_solarschedule",
-                    "change_solarschedule",
-                    "delete_solarschedule",
-                    "view_solarschedule",
-                    "add_clockedschedule",
-                    "change_clockedschedule",
-                    "delete_clockedschedule",
-                    "view_clockedschedule",
-                ]
-            },
+            "sessions": {"details": ["add_session", "change_session", "view_session"]},
         },
     },
     "specialist": {
@@ -96,10 +80,10 @@ ROLES = {
         "permissions": {
             "security": {
                 "details": [
-                    "change_user",
-                    "view_user",
                     "change_person",
                     "view_person",
+                    "change_user",
+                    "view_user",
                 ]
             },
             "catalogs": {
@@ -110,6 +94,7 @@ ROLES = {
                     "add_catalogitem",
                     "change_catalogitem",
                     "view_catalogitem",
+                    "view_catalogs",
                 ]
             },
             "inventory": {
@@ -123,11 +108,14 @@ ROLES = {
                     "add_inventorymovement",
                     "change_inventorymovement",
                     "view_inventorymovement",
+                    "view_supplies",
+                    "view_inventorymovements",
                 ]
             },
             "operations": {
                 "details": [
                     "add_exitorder",
+                    "change_exitorder",
                     "view_exitorder",
                     "add_supplier",
                     "change_supplier",
@@ -136,23 +124,20 @@ ROLES = {
                     "change_purchaseorder",
                     "view_purchaseorder",
                     "add_exitdetail",
+                    "change_exitdetail",
                     "view_exitdetail",
                     "add_purchaseorderdetail",
                     "change_purchaseorderdetail",
                     "view_purchaseorderdetail",
+                    "view_exitorders",
+                    "view_suppliers",
+                    "view_purchaseorders",
                 ]
             },
+            "sessions": {"details": ["add_session", "change_session", "view_session"]},
         },
     },
 }
-
-
-GROUP_NAMES = {
-    "administrator": "administrator",
-    "specialist": "specialist",
-}
-
-ALL_GROUP_NAMES = list(GROUP_NAMES.values())
 
 
 def get_role_names() -> list[str]:

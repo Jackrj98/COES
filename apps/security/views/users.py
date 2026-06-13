@@ -1,5 +1,4 @@
 import logging
-from uuid import uuid4
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,10 +9,11 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from pydantic import ValidationError
 
-from apps.core.utils.constants import LabelEnum, MessageEnum
+from apps.core.utils.constants import MessageEnum
 from apps.core.views.base import (
     CustomCreateView,
     CustomDetailView,
@@ -38,24 +38,21 @@ SECOND_MODEL = Person
 DEFAULT_LIST_URL = reverse_lazy("security:users:list")
 
 
-@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserListView(CustomListView):
     model = DEFAULT_MODEL
     second_model = SECOND_MODEL
     form_class = UserFilterForm
     success_url: str = DEFAULT_LIST_URL
     template_name = "users/datatable.html"
-    permission_required = ["security.view_user", "security.view_person"]
+    permission_required = ["security.view_user", "security.view_users"]
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        user = self.request.user
         ctx["description"] = _("Management of registered users")
 
         ctx["object"] = self.model
         ctx["person"] = self.second_model
         ctx["ui_map"] = self.model.Status.get_ui_map()
-        ctx["table_actions"] = self.get_table_actions(user)
         ctx["status_choices"] = self.model.StatusChoices.choices
         ctx["actions"]["menu_actions"]["add"]["url"] = reverse_lazy("security:users:create")
         return ctx
@@ -66,37 +63,7 @@ class UserListView(CustomListView):
     def get_success_url(self):
         return self.success_url
 
-    @staticmethod
-    def get_table_actions(user):
-        all_actions = {
-            "edit": {
-                "label": LabelEnum.EDIT.value,
-                "icon": "bi bi-pencil-square",
-                "url": reverse_lazy("security:users:update", kwargs={"external_id": uuid4()}),
-                "perm": user.has_perms(["security.change_user", "security.change_person"]),
-            },
-            "status": {
-                "label": LabelEnum.STATUS.value,
-                "icon": "",
-                "url": reverse_lazy("security:users:status", kwargs={"external_id": uuid4()}),
-                "perm": user.has_perms(["security.change_user", "security.change_person"]),
-            },
-            "view": {
-                "label": LabelEnum.DETAILS.value,
-                "icon": "bi bi-eye",
-                "url": reverse_lazy("security:users:detail", kwargs={"external_id": uuid4()}),
-                "perm": user.has_perms(["security.view_user", "security.view_person"]),
-            },
-        }
 
-        return {
-            key: {k: v for k, v in action.items() if k != "perm"}
-            for key, action in all_actions.items()
-            if action.get("perm") is True
-        }
-
-
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class UserDetailView(CustomDetailView):
     app_name = "users"
     model = DEFAULT_MODEL
@@ -104,32 +71,31 @@ class UserDetailView(CustomDetailView):
     template_name = "users/detail.html"
     permission_required = ["security.view_user", "security.view_person"]
 
+    @cached_property
+    def is_admin(self):
+        return any(g.name == "administrator" for g in self.request.user.groups.all())
+
     def get_queryset(self):
         """Optimize a query with select_related."""
         return (
-            self.model.objects.select_related("person")
+            super()
+            .get_queryset()
+            .select_related("person")
             .prefetch_related("groups")
             .filter(deleted_at__isnull=True)
         )
 
     def get_object(self, queryset=None):
-        """Cache the object to avoid duplicate queries."""
-        if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)  # noqa
-        return self._cached_object
+        obj = super().get_object(queryset)
 
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        current_user = request.user
-        target_user = self.object
-        is_admin = SecurityService.is_admin(current_user)
+        current_user = self.request.user
+        if obj != current_user and not self.is_admin:
+            raise PermissionDenied(_("You do not have permission to view this user's details."))
 
-        # Non-admin users cannot view other users
-        if target_user != current_user and not is_admin:
-            messages.warning(request, _("You do not have permission to view this user's details."))
-            return redirect(self.success_url)
+        return obj
 
-        return super().dispatch(request, *args, **kwargs)
+    def get_success_url(self):
+        return self.success_url
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -137,19 +103,11 @@ class UserDetailView(CustomDetailView):
         ctx["person"] = self.object.person
         ctx["ui_map"] = self.model.Status.get_ui_map()
 
-        actions_list = ctx["actions"]["actions"]
-
-        app_label = self.model._meta.app_label
-        model_name = self.model._meta.model_name
-        update_perm = f"{app_label}.change_{model_name}"
-
         target_user = self.object
         current_user = self.request.user
-        is_admin = SecurityService.is_admin(current_user)
-
         is_viewing_self = target_user == current_user
 
-        if is_viewing_self and not is_admin:
+        if is_viewing_self and not self.is_admin:
             # Remove the first breadcrumb item (the "List" action)
             if ctx.get("breadcrumb") and len(ctx["breadcrumb"]) > 0:
                 ctx["breadcrumb"][-2]["title"] = _("Profile")
@@ -157,50 +115,35 @@ class UserDetailView(CustomDetailView):
                 ctx["breadcrumb"][-2]["url"] = "#"
                 ctx["breadcrumb"][-2]["active"] = True
 
-        # Determine password action type
-        if is_admin:
-            title = _("Reset Password")
-            action = "reset_password"
-            url_name = f"{app_label}:{self.app_name}:password_reset"
-            target = target_user
-        else:
-            title = _("Update Password")
-            action = "update_password"
-            url_name = f"{app_label}:{self.app_name}:password_change"
-            target = current_user
-
-        pwd_action = self.get_actions_map(
-            title=title,
-            order=1,
-            action=action,
-            icon="bi bi-key",
-            url_name=url_name,
-            perm=update_perm,
-        )
-
-        if pwd_action:
-            pwd_action["url"] = reverse_lazy(url_name, kwargs={"external_id": target.external_id})
-            actions_list.append(pwd_action)
-
-            # Update edit action for non-admin viewing self
-            if not is_admin and target_user == current_user:
-                for action_item in actions_list:
-                    if action_item.get("action") == "edit":
-                        action_item["url"] = reverse_lazy(
-                            "security:users:update",
-                            kwargs={"external_id": current_user.external_id},
-                        )
-                        break
-
-            actions_list.sort(key=lambda x: x["order"])
-
         return ctx
 
-    def get_success_url(self):
-        return self.success_url
+    def _build_base_actions(self):
+        actions_list = super()._build_base_actions()
+        meta = self.model._meta
+        is_admin_reset = self.is_admin and self.object != self.request.user
+
+        config = {
+            "title": _("Reset Password") if is_admin_reset else _("Update Password"),
+            "action": "reset_password" if is_admin_reset else "update_password",
+            "url_name": f"security:{self.app_name}:password_reset"
+            if is_admin_reset
+            else f"{meta.app_label}:{self.app_name}:password_change",
+        }
+
+        actions_list.append(
+            self.get_actions_map(
+                title=config["title"],
+                order=3,
+                action=config["action"],
+                icon="bi bi-lock-fill",
+                url_name=config["url_name"],
+                perm=f"{meta.app_label}.change_{meta.model_name}",
+            )
+        )
+
+        return actions_list
 
 
-@method_decorator(user_passes_test(SecurityService.is_admin), name="dispatch")
 class UserCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     form_class = UserCreateForm
@@ -230,13 +173,10 @@ class UserCreateView(CustomCreateView):
     def form_valid(self, form, **kwargs):
         service = UserAppService()
         person_form = kwargs.get("person_form")
-
         try:
             user_data = form.cleaned_data
             person_data = person_form.cleaned_data
             user_data["groups"] = [user_data.pop("group")]
-            user_data["username"] = person_data["document_number"]
-            user_data["password"] = person_data["document_number"]
 
             service.register_user(payload={**person_data, **user_data})
             messages.success(
@@ -247,7 +187,7 @@ class UserCreateView(CustomCreateView):
             return redirect(self.success_url)
 
         except ValidationError as e:
-            self.handle_pydantic_error(e, form, person_form)
+            messages.warning(self.request, e.message)
             return self.form_invalid(form, person_form=person_form)
         except Exception as e:
             return self.handle_error(str(e), e)
@@ -331,7 +271,7 @@ class UserUpdateView(CustomUpdateView):
         try:
             person_data = person_form.cleaned_data
             service.update_user(
-                user=self.get_object(),
+                instance=self.object,
                 payload={**person_data},
             )
 
@@ -461,31 +401,18 @@ class UserPasswordUpdateView(CustomUpdateView):
             service = UserAppService()
             service.update_password(
                 request_user=self.request.user,
-                payload={"user": self.get_object(), **form.cleaned_data},
+                payload={"user": self.object, **form.cleaned_data},
             )
 
-            messages.success(
-                self.request,
-                self.success_message.format(
-                    model=self.model._meta.verbose_name,
-                    instance=self.object.username,
-                ),
-                extra_tags="toast",
-            )
+            msg = _("Your password has been successfully updated.")
+            messages.success(self.request, msg, extra_tags="toast")
             return redirect(self.success_url)
 
-        except ValidationError as e:
-            self.handle_pydantic_error(e, form)
-            return self.form_invalid(form)
         except PermissionDenied:
             messages.error(self.request, _("You do not have permission to perform this action."))
             return redirect("core:home")
         except Exception as e:
             self.handle_error(str(e), e)
-
-    def form_invalid(self, form):
-        messages.warning(self.request, self.failure_message)
-        return self.render_to_response(self.get_context_data(form=form))
 
 
 def send_reset_password(request, external_id):

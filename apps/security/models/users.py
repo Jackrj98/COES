@@ -134,6 +134,7 @@ class User(AbstractBaseUser, AuditModel, PermissionsMixin):
             models.Index(fields=["email"]),
             models.Index(fields=["username"]),
         ]
+        permissions = (("view_users", "Can view users list"),)
 
     def __str__(self):
         return str(self.username or self.email)

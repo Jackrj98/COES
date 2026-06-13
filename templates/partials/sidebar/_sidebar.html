@@ -23,18 +23,24 @@
                     </a>
                 </li>
 
-                <li class="sidebar-title">{% trans 'Inventory'|capfirst %}</li>
-                {% if request.user|has_group:"administrator,specialist" %}
+                {% if request.user|has_any_perm:"inventory.view_supplies,inventory.view_inventorymovements,catalogs.view_catalogs" %}
+                    <li class="sidebar-title">{% trans 'Inventory'|capfirst %}</li>
+                {% endif %}
+                {% if perms.inventory.view_supplies %}
                     <li class="sidebar-item {% active 'inventory:supplies:list' %}">
                         <a href="{% url 'inventory:supplies:list' %}" class='sidebar-link'>
                             <i class="bi bi-hexagon"></i> <span>{% trans 'Supplies'|capfirst %}</span>
                         </a>
                     </li>
+                {% endif %}
+                {% if perms.inventory.view_inventorymovements %}
                     <li class="sidebar-item {% active 'inventory:movements:list' %}">
                         <a href="{% url 'inventory:movements:list' %}" class='sidebar-link'>
                             <i class="bi bi-card-checklist"></i> <span>{% trans 'Kardex'|capfirst %}</span>
                         </a>
                     </li>
+                {% endif %}
+                {% if perms.catalogs.view_catalogs %}
                     <li class="sidebar-item {% active 'catalogs:catalogs:list' %}">
                         <a href="{% url 'catalogs:catalogs:list' %}" class='sidebar-link'>
                             <i class="bi bi-box"></i> <span>{% trans 'Catalogs'|capfirst %}</span>
@@ -42,18 +48,24 @@
                     </li>
                 {% endif %}
 
-                <li class="sidebar-title">{% trans 'Operations'|capfirst %}</li>
-                {% if request.user|has_group:"administrator,specialist" %}
+                {% if request.user|has_any_perm:"operations.view_purchaseorders,operations.view_exitorders,operations.view_suppliers" %}
+                    <li class="sidebar-title">{% trans 'Operations'|capfirst %}</li>
+                {% endif %}
+                {% if perms.operations.view_purchaseorders %}
                     <li class="sidebar-item {% active 'operations:inbound_order:list' %}">
                         <a href="{% url 'operations:inbound_order:list' %}" class='sidebar-link'>
                             <i class="bi bi-box-arrow-in-right"></i> <span>{% trans 'Inbound Orders'|capfirst %}</span>
                         </a>
                     </li>
+                {% endif %}
+                {% if perms.operations.view_exitorders %}
                     <li class="sidebar-item {% active 'operations:outbound_order:list' %}">
                         <a href="{% url 'operations:outbound_order:list' %}" class='sidebar-link'>
                             <i class="bi bi-box-arrow-left"></i> <span>{% trans 'Exit Orders'|capfirst %}</span>
                         </a>
                     </li>
+                {% endif %}
+                {% if perms.operations.view_suppliers %}
                     <li class="sidebar-item {% active 'operations:suppliers:list' %}">
                         <a href="{% url 'operations:suppliers:list' %}" class='sidebar-link'>
                             <i class="bi bi-truck"></i> <span>{% trans 'Suppliers'|capfirst %}</span>
@@ -74,7 +86,7 @@
                         </a>
                     </li>
                 {% endif %}
-                {% if request.user|has_group:"administrator" %}
+                {% if perms.security.view_users %}
                     <li class="sidebar-title">{% trans 'Administration'|capfirst %}</li>
                     <li class="sidebar-item {% active 'security:users:list' %}">
                         <a href="{% url 'security:users:list' %}" class='sidebar-link'>

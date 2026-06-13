@@ -29,3 +29,9 @@ def active(context, url_name, css_class="active"):
 def has_group(user, group_names):
     groups = [g.strip() for g in group_names.split(",")]
     return user.groups.filter(name__in=groups).exists()
+
+
+@register.filter(name="has_any_perm")
+def has_any_perm(user, perm_list_string):
+    perms = [p.strip() for p in perm_list_string.split(",")]
+    return any(user.has_perm(perm) for perm in perms)

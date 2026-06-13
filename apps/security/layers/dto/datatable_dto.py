@@ -6,7 +6,7 @@ class DatatableSearch(DatatableSearchBase):
     @classmethod
     def retrieve_users(cls, params):
         qs = cls._build_base_query(params, User, "status")
-        qs = qs.select_related("person").prefetch_related("groups")
+        qs = qs.select_related("person").prefetch_related("groups").filter(is_superuser=False)
         group = params.request.GET.get("group")
         search = params.request.GET.get("search")
 

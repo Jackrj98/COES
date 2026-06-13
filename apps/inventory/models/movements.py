@@ -66,6 +66,7 @@ class InventoryMovement(AuditModel):
             models.Index(fields=["purchase_order"]),
             models.Index(fields=["exit_order"]),
         ]
+        permissions = (("view_inventorymovements", "Can view movements list"),)
 
     def __str__(self):
         return f"{self.get_movement_type_display()} - {self.batch} - {self.quantity}"

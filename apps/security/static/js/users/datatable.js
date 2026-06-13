@@ -39,20 +39,22 @@ const userColumns = [
         render: (data, type, row) => {
             const {person__last_name: lastName, person__first_name: firstName, email_verified: emailVerified} = row;
             const fullName = lastName ? `${firstName} ${lastName}`.trim() : "-";
-            const iconClass = emailVerified ? "bi bi-envelope-check" : "bi bi-envelope-exclamation";
-            const iconColor = emailVerified ? "text-primary" : "text-secondary";
 
             return `
-                <div class="d-flex flex-column" style="max-width: 22vw; min-width: 10vw;">
-                    <h6 class="fw-semibold mb-0 text-truncate">${capitalize(fullName)}</h6>
-                    <a class="text-muted text-truncate text-sm d-block" 
-                       href="mailto:${data}" 
-                       title="${data}"
-                       style="max-width: 100%;">
-                        <i class="${iconClass} ${iconColor} me-1"></i>${data}
-                    </a>
-                </div>
-            `;
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-secondary bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 40px; height: 40px;">
+                        <span class="font-bold fs-6 text-secondary">
+                            ${fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </span>
+                    </div>
+                    <div>
+                        <div class="fw-semibold text-white">${fullName}</div>
+                        <a href="mailto:${data}" class="text-muted small text-truncate d-block" style="max-width: 280px;">
+                            ${data}
+                        </a>
+                    </div>
+                </div>`;
         }
     },
     {
@@ -77,33 +79,31 @@ const userColumns = [
         orderable: false,
         data: "group_name",
         width: "14%",
+        className: DataTableFactory.classes.center,
         render: function (data, type, row) {
             if (!data) return '';
             const translations = {
                 'specialist': {label: 'Especialista', color: 'secondary'},
-                'administrator': {label: 'Administrador', color: 'secondary'},
+                'administrator': {label: 'Administrador', color: 'primary'},
             };
             const groups = data.split(', ').map(g => translations[g] || {label: g, color: 'secondary'});
             return groups.map(g => `
-                <button type="button" class="btn btn-icon icon-left bg-${g.color} bg-opacity-25 rounded-pill px-2 py-1"
-                        style="width: 120px; cursor: default;">
-                    <span class="fw-semibold text-${g.color} text-truncate">${g.label}</span>
-                </button>
-            `).join('');
+                <span class="badge bg-${g.color} bg-opacity-10 text-${g.color} rounded-pill py-2" style="width: 10em">
+                    ${g.label}
+                </span>`).join('');
         }
     },
+
     {
         orderable: false,
-        data: "status",
-        width: "13%",
-        render: (data, type, row) => {
-            const {label, color} = mapStatus[data];
+        data: "status", width: "13%", className: DataTableFactory.classes.center,
+        render: (data) => {
+            if (!data) return '<span class="text-muted">—</span>';
+            const {color, label} = mapStatus[data] || {color: 'secondary', label: 'N/A'};
             return `
-                <button type="button" class="btn btn-icon icon-left bg-${color} bg-opacity-25 rounded-pill px-2 py-1"
-                        style="width: 120px; cursor: default;">
-                    <span class="fw-semibold text-${color} text-truncate">${label}</span>
-                </button>
-            `;
+                <span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill py-2" style="width: 10em">
+                    ${label}
+                </span>`;
         }
     },
     {
@@ -125,7 +125,7 @@ const userColumns = [
         width: "10%",
         orderable: false,
         className: DataTableFactory.classes.center,
-         render: (data, type, row) => {
+        render: (data, type, row) => {
             const detailUrl = `${urlPaginator}${data}/`;
             const editUrl = `${urlPaginator}${data}/update`;
             const statusUrl = `${urlPaginator}${data}/update-status/`;
