@@ -30,6 +30,8 @@ class UserAppService(BaseAppService):
         try:
             groups = Group.objects.all()
             return [(group.name, _(group.name)) for group in groups]
+        except Group.DoesNotExist:
+            return []
         except Exception as e:
             logger.exception(f"Unexpected error retrieving groups: {e}")
             return []

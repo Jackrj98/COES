@@ -42,8 +42,9 @@ class SupplierBaseForm(forms.ModelForm):
     class Meta:
         model = Supplier
         fields = [
-            "contact_name",
-            "tax_id",
+            "first_name",
+            "last_name",
+            "document_number",
             "business_name",
             "delivery_days",
             "email",
@@ -51,10 +52,11 @@ class SupplierBaseForm(forms.ModelForm):
             "address",
         ]
         widgets = {
-            "contact_name": forms.TextInput(
+            "first_name": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Ej: Jon Doe"}
             ),
-            "tax_id": forms.TextInput(
+            "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: Doe"}),
+            "document_number": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Ej: 1234567890", "maxlength": "13"}
             ),
             "business_name": forms.TextInput(

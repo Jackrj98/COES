@@ -23,9 +23,9 @@ class DatatableSearch(DatatableSearchBase):
             search = search.strip()
             search_fields = [
                 "business_name",
-                "contact_name",
+                "last_name",
                 "email",
-                "tax_id",
+                "document_number",
             ]
             qs = cls._apply_search(qs, search, search_fields)
 

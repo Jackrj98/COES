@@ -29,7 +29,9 @@ def supplier(db):
 
     return Supplier.objects.create(
         business_name="Test Supplier",
-        contact_name="Contact Person",
+        first_name="Contact Person",
+        last_name="Contact Person",
+        document_number="2222222222",
         email="supplier@test.com",
         phone="123456789",
     )

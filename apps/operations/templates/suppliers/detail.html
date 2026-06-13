@@ -1,6 +1,26 @@
 {% extends 'layouts/base.html' %}
 {% load custom_tags %}
 
+{% block actions %}
+    <div class="dropdown">
+        <button type="button"
+                class="btn bg-secondary bg-opacity-25 dropdown-toggle font-semibold order-1 border-light rounded-3 hov-bg-opacity-10"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {% trans actions.title %}
+        </button>
+        <div class="dropdown-menu dropdown-menu-end border-1 shadow">
+            {% for action in actions.actions %}
+                {% if action.title %}
+                    <a class="dropdown-item" href="{{ action.url }}">
+                        {% if action.icon %}<i class="{{ action.icon }} me-2"></i>{% endif %}
+                        {{ action.title }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock actions %}
+
 {% block content %}
     <section>
         <div class="row g-3">
@@ -14,7 +34,7 @@
                             </div>
                             <div>
                                 <h3 class="mb-1">{{ object.business_name|title }}</h3>
-                                <p class="text-muted mb-0">{{ object.contact_name }}</p>
+                                <p class="text-muted mb-0">{{ object.full_name }}</p>
                             </div>
                         </div>
                     </div>
@@ -29,10 +49,10 @@
                         <dl class="row mb-0">
                             <dt class="col-sm-4 text-muted fw-normal">{% trans "Business name" %}</dt>
                             <dd class="col-sm-8 fw-semibold">{{ object.business_name|title }}</dd>
-                            <dt class="col-sm-4 text-muted fw-normal">{{ object|field_label:"contact_name" }}</dt>
-                            <dd class="col-sm-8 fw-semibold">{{ object.contact_name }}</dd>
+                            <dt class="col-sm-4 text-muted fw-normal">{% trans 'Contact name'|capfirst %}</dt>
+                            <dd class="col-sm-8 fw-semibold">{{ object.full_name }}</dd>
                             <dt class="col-sm-4 text-muted fw-normal">{% trans "Tax ID" %}</dt>
-                            <dd class="col-sm-8 fw-semibold">{{ object.tax_id }}</dd>
+                            <dd class="col-sm-8 fw-semibold">{{ object.document_number }}</dd>
                         </dl>
                     </div>
                 </div>

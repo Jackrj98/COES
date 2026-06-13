@@ -98,14 +98,12 @@ class SupplierAdmin(BaseAdminMixin):
     """Admin for a Supplier model."""
 
     ordering = ("-created_at",)
-    search_fields = ("business_name", "contact_name", "tax_id", "email", "phone", "external_id")
+    search_fields = ("business_name", "email", "phone", "external_id")
     list_filter = ("is_active",)
 
     list_display = (
         "external_id",
         "business_name",
-        "contact_name",
-        "tax_id",
         "email",
         "phone",
         "delivery_days",
@@ -113,7 +111,7 @@ class SupplierAdmin(BaseAdminMixin):
     )
 
     fieldsets = (
-        (_("Basic Information"), {"fields": ("business_name", "contact_name", "tax_id")}),
+        (_("Basic Information"), {"fields": ("business_name",)}),
         (_("Contact Information"), {"fields": ("email", "phone", "address")}),
         (_("Business Information"), {"fields": ("delivery_days",)}),
         (

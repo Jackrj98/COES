@@ -24,8 +24,17 @@ $(document).ready(function () {
 const columns = [
     {
         orderable: false,
-        data: "contact_name",
-        width: "22%",
+        data: "external_id",
+        width: "3%",
+        className: DataTableFactory.classes.center,
+        render: (data, type, row, meta) => {
+            return meta.settings._iDisplayStart + meta.row + 1;
+        }
+    },
+    {
+        orderable: false,
+        data: "first_name",
+        width: "18%",
         className: DataTableFactory.classes.justify,
         render: (data, type, row) => {
             const {external_id, business_name: business} = row;
@@ -43,7 +52,7 @@ const columns = [
                     </div>
                     <a href="${detailUrl}" class="text-decoration-none text-reset d-block">
                         <div class="text-start">
-                            <div class="font-bold">${data}</div>
+                            <div class="font-bold">${data} ${row.last_name}</div>
                             <div class="small text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
                                 ${business}
                             </div>
@@ -54,7 +63,7 @@ const columns = [
     },
     {
         orderable: false,
-        data: "tax_id",
+        data: "document_number",
         width: "12%",
         className: DataTableFactory.classes.center,
         render: (data) => `<span class="fw-mono">${data || '—'}</span>`
@@ -67,23 +76,19 @@ const columns = [
         render: (data) => {
             let color = data <= 5 ? 'success' : (data <= 14 ? 'warning' : 'danger');
             return `
-               <span class="text-truncate bg-${color} bg-opacity-25 rounded-pill  
-                    d-inline-block text-center w-100"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="top"
-                      data-bs-original-title="${data}">
-                    <span class="fw-semibold text-secondary">${data}</span>
+                <span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill py-2" style="width: 4em">
+                    ${data}
                 </span>`;
         }
     },
     {
         orderable: false,
         data: "email",
-        width: "16%",
+        width: "20%",
         className: DataTableFactory.classes.justify,
         render: (data) => {
             return `
-                    <div class="d-flex flex-column"  style="max-width: 10vw; min-width: 0;">
+                    <div class="d-flex flex-column"  style="max-width: 15vw; min-width: 0;">
                         <span class="fw-semibold mb-0 text-truncate d-block" data-bs-toggle="tooltip" title="${data || '-'}">
                             ${data || '?'}
                         </span>
@@ -111,17 +116,10 @@ const columns = [
             const status = data ? 1 : 0;
             const label = statusChoices[status];
             const color = statusColorChoices[status];
-            const icon = data ? 'bi-toggle-on' : 'bi-toggle-off';
-
             return `
-                <span class="text-truncate bg-${color} bg-opacity-25 rounded-pill px-3 
-                            d-inline-block text-center w-100"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          data-bs-original-title="${label}">
-                        <span class="fw-semibold text-${color}">${label}</span>
-                    </span>
-            `;
+                <span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill py-2" style="width: 10vw">
+                    ${label}
+                </span>`;
         }
     },
     {

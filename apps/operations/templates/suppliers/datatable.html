@@ -110,8 +110,9 @@
 {% endblock filters %}
 
 {% block columns %}
+    <th scope="col" class="text-uppercase">#</th>
     <th scope="col" class="text-uppercase">{% trans 'supplier' %}</th>
-    <th scope="col" class="text-uppercase">{{ object|field_label:'tax_id' }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'document'|upper %}</th>
     <th scope="col" class="text-uppercase">{% trans 'delivery' %}</th>
     <th scope="col" class="text-uppercase">EMAIL</th>
     <th scope="col" class="text-uppercase">{{ object|field_label:'phone' }}</th>

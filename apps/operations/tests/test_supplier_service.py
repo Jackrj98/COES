@@ -2,9 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.db import IntegrityError
-from pydantic import ValidationError
 
-from apps.operations.layers.applications.supplier_service import SupplierAppService
+from apps.operations.layers.applications import SupplierAppService
 from apps.operations.models import Supplier
 
 # ---------------------------------------------------------------------------
@@ -29,12 +28,13 @@ def mock_supplier():
 def valid_payload():
     return {
         "business_name": "Distribuidora Global S.A.",
-        "contact_name": "Juan Pérez",
+        "first_name": "Juan",
+        "last_name": "Pérez",
         "address": "Av. Principal 123",
         "delivery_days": 3,
         "email": "ventas@disglobal.ec",
         "phone": "0991234567",
-        "tax_id": "2222222222",
+        "document_number": "2222222222",
     }
 
 
@@ -43,9 +43,10 @@ def existing_supplier():
     supplier = MagicMock(spec=Supplier)
     supplier.external_id = "ext-456"
     supplier.business_name = "Distribuidora Global S.A."
-    supplier.contact_name = "Juan Pérez"
+    supplier.first_name = "Juan"
+    supplier.last_name = "Pérez"
     supplier.address = "Av. Principal 123"
-    supplier.tax_id = "41414141414141"
+    supplier.document_number = "41414141414141"
     supplier.delivery_days = 3
     supplier.email = "ventas@disglobal.ec"
     supplier.phone = "0991234567"
@@ -90,6 +91,7 @@ class TestRetrieveReasons:
 
 
 class TestRetrieveSuppliers:
+    @pytest.mark.django_db
     def test_returns_result_on_success(self, service):
         mock_params = MagicMock()
         mock_params.items = MagicMock()
@@ -108,6 +110,7 @@ class TestRetrieveSuppliers:
         mock_params.result.assert_called_once()
         assert result == {"data": []}
 
+    @pytest.mark.django_db
     def test_returns_empty_list_on_exception(self, service, caplog):
         mock_params = MagicMock()
 
@@ -132,32 +135,36 @@ class TestSaveSupplier:
     def test_save_supplier_success_without_instance(
         self, mock_builder_class, service, valid_payload
     ):
-        mock_instance = mock_builder_class.return_value
+        mock_builder = mock_builder_class.return_value
         mock_supplier = MagicMock(spec=Supplier)
 
-        # Chain the builder methods
-        mock_instance.set_contact_name.return_value = mock_instance
-        mock_instance.set_business_name.return_value = mock_instance
-        mock_instance.set_tax_id.return_value = mock_instance
-        mock_instance.set_delivery_days.return_value = mock_instance
-        mock_instance.set_email.return_value = mock_instance
-        mock_instance.set_phone.return_value = mock_instance
-        mock_instance.set_address.return_value = mock_instance
-        mock_instance.save.return_value = mock_instance
-        mock_instance.build.return_value = mock_supplier
+        # Configure the builder chain
+        mock_builder.set_first_name.return_value = mock_builder
+        mock_builder.set_last_name.return_value = mock_builder
+        mock_builder.set_document_number.return_value = mock_builder
+        mock_builder.set_business_name.return_value = mock_builder
+        mock_builder.set_delivery_days.return_value = mock_builder
+        mock_builder.set_email.return_value = mock_builder
+        mock_builder.set_phone.return_value = mock_builder
+        mock_builder.set_address.return_value = mock_builder
+        mock_builder.build.return_value = mock_supplier
 
         result = service.save_supplier(valid_payload, instance=None)
 
-        mock_builder_class.assert_called_once()
-        mock_instance.set_contact_name.assert_called_once_with(valid_payload["contact_name"])
-        mock_instance.set_business_name.assert_called_once_with(valid_payload["business_name"])
-        mock_instance.set_tax_id.assert_called_once_with(valid_payload["tax_id"])
-        mock_instance.set_delivery_days.assert_called_once_with(valid_payload["delivery_days"])
-        mock_instance.set_email.assert_called_once_with(valid_payload["email"])
-        mock_instance.set_phone.assert_called_once_with(valid_payload["phone"])
-        mock_instance.set_address.assert_called_once_with(valid_payload["address"])
-        mock_instance.save.assert_called_once()
-        mock_instance.build.assert_called_once()
+        # Verify builder was created without arguments for new instance
+        mock_builder_class.assert_called_once_with()
+
+        # Verify all setters were called
+        mock_builder.set_first_name.assert_called_once_with(valid_payload["first_name"])
+        mock_builder.set_last_name.assert_called_once_with(valid_payload["last_name"])
+        mock_builder.set_document_number.assert_called_once_with(valid_payload["document_number"])
+        mock_builder.set_business_name.assert_called_once_with(valid_payload["business_name"])
+        mock_builder.set_delivery_days.assert_called_once_with(valid_payload["delivery_days"])
+        mock_builder.set_email.assert_called_once_with(valid_payload["email"])
+        mock_builder.set_phone.assert_called_once_with(valid_payload["phone"])
+        mock_builder.set_address.assert_called_once_with(valid_payload["address"])
+        mock_builder.build.assert_called_once()
+
         assert result == mock_supplier
 
     @pytest.mark.django_db
@@ -165,57 +172,89 @@ class TestSaveSupplier:
     def test_save_supplier_success_with_instance(
         self, mock_builder_class, service, existing_supplier, valid_payload
     ):
-        mock_instance = mock_builder_class.return_value
+        mock_builder = mock_builder_class.return_value
         mock_supplier = MagicMock(spec=Supplier)
 
-        mock_instance.set_contact_name.return_value = mock_instance
-        mock_instance.set_business_name.return_value = mock_instance
-        mock_instance.set_tax_id.return_value = mock_instance
-        mock_instance.set_delivery_days.return_value = mock_instance
-        mock_instance.set_email.return_value = mock_instance
-        mock_instance.set_phone.return_value = mock_instance
-        mock_instance.set_address.return_value = mock_instance
-        mock_instance.save.return_value = mock_instance
-        mock_instance.build.return_value = mock_supplier
+        # Configure the builder chain
+        mock_builder.set_first_name.return_value = mock_builder
+        mock_builder.set_last_name.return_value = mock_builder
+        mock_builder.set_document_number.return_value = mock_builder
+        mock_builder.set_business_name.return_value = mock_builder
+        mock_builder.set_delivery_days.return_value = mock_builder
+        mock_builder.set_email.return_value = mock_builder
+        mock_builder.set_phone.return_value = mock_builder
+        mock_builder.set_address.return_value = mock_builder
+        mock_builder.build.return_value = mock_supplier
 
         result = service.save_supplier(valid_payload, instance=existing_supplier)
 
-        # CORRECCIÓN: El builder recibe 'supplier' como argumento posicional, no 'instance'
+        # Verify builder was created with existing supplier
         mock_builder_class.assert_called_once_with(existing_supplier)
-        mock_instance.save.assert_called_once()
+
+        # Verify setters were called
+        mock_builder.set_first_name.assert_called_once_with(valid_payload["first_name"])
+        mock_builder.set_last_name.assert_called_once_with(valid_payload["last_name"])
+        mock_builder.set_document_number.assert_called_once_with(valid_payload["document_number"])
+        mock_builder.set_business_name.assert_called_once_with(valid_payload["business_name"])
+        mock_builder.set_delivery_days.assert_called_once_with(valid_payload["delivery_days"])
+        mock_builder.set_email.assert_called_once_with(valid_payload["email"])
+        mock_builder.set_phone.assert_called_once_with(valid_payload["phone"])
+        mock_builder.set_address.assert_called_once_with(valid_payload["address"])
+        mock_builder.build.assert_called_once()
+
         assert result == mock_supplier
 
     @pytest.mark.django_db
     @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
     def test_save_supplier_raises_integrity_error(self, mock_builder_class, service, valid_payload):
-        mock_instance = mock_builder_class.return_value
+        mock_builder = mock_builder_class.return_value
 
-        mock_instance.set_contact_name.return_value = mock_instance
-        mock_instance.set_business_name.return_value = mock_instance
-        mock_instance.set_tax_id.return_value = mock_instance
-        mock_instance.set_delivery_days.return_value = mock_instance
-        mock_instance.set_email.return_value = mock_instance
-        mock_instance.set_phone.return_value = mock_instance
-        mock_instance.set_address.return_value = mock_instance
-
-        mock_instance.save.side_effect = IntegrityError("duplicate")
+        # Configure builder chain
+        mock_builder.set_first_name.return_value = mock_builder
+        mock_builder.set_last_name.return_value = mock_builder
+        mock_builder.set_document_number.return_value = mock_builder
+        mock_builder.set_business_name.return_value = mock_builder
+        mock_builder.set_delivery_days.return_value = mock_builder
+        mock_builder.set_email.return_value = mock_builder
+        mock_builder.set_phone.return_value = mock_builder
+        mock_builder.set_address.return_value = mock_builder
+        mock_builder.build.side_effect = IntegrityError("duplicate")
 
         with pytest.raises(IntegrityError):
             service.save_supplier(valid_payload, instance=None)
 
     @pytest.mark.django_db
-    @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
-    def test_save_supplier_raises_validation_error(
-        self, mock_builder_class, service, valid_payload, caplog
-    ):
+    def test_save_supplier_raises_validation_error(self, service, valid_payload, caplog):
+        """Test validation error handling in save_supplier."""
         from pydantic import ValidationError as PydanticValidationError
 
-        # Mock SupplierDTO to raise ValidationError
+        # Mock SupplierBuilder to raise ValidationError
         with patch(
-            "apps.operations.layers.applications.supplier_service.SupplierDTO",
-            side_effect=PydanticValidationError.from_exception_data("test", []),
-        ):
-            with pytest.raises(ValidationError):
+            "apps.operations.layers.applications.supplier_service.SupplierBuilder"
+        ) as mock_builder_class:
+            mock_builder = mock_builder_class.return_value
+            mock_builder.set_first_name.return_value = mock_builder
+            mock_builder.set_last_name.return_value = mock_builder
+            mock_builder.set_document_number.return_value = mock_builder
+            mock_builder.set_business_name.return_value = mock_builder
+            mock_builder.set_delivery_days.return_value = mock_builder
+            mock_builder.set_email.return_value = mock_builder
+            mock_builder.set_phone.return_value = mock_builder
+            mock_builder.set_address.return_value = mock_builder
+
+            # Correct way to create a Pydantic ValidationError
+            try:
+                # This will raise a ValidationError that we can catch
+                from pydantic import BaseModel
+
+                class TestModel(BaseModel):
+                    field: str
+
+                TestModel(field=None)  # This will raise ValidationError
+            except PydanticValidationError as e:
+                mock_builder.build.side_effect = e
+
+            with pytest.raises(PydanticValidationError):
                 service.save_supplier(valid_payload, instance=None)
 
             assert "Validation error for payload" in caplog.text
@@ -225,8 +264,8 @@ class TestSaveSupplier:
     def test_save_supplier_raises_general_exception(
         self, mock_builder_class, service, valid_payload, caplog
     ):
-        mock_instance = mock_builder_class.return_value
-        mock_instance.set_contact_name.side_effect = Exception("Unexpected error")
+        mock_builder = mock_builder_class.return_value
+        mock_builder.set_first_name.side_effect = Exception("Unexpected error")
 
         with pytest.raises(Exception, match="Unexpected error"):
             service.save_supplier(valid_payload, instance=None)
@@ -281,41 +320,37 @@ class TestUpdateStatus:
     @pytest.mark.django_db
     @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
     def test_success(self, mock_builder_class, service, existing_supplier):
-        mock_instance = mock_builder_class.return_value
+        mock_builder = mock_builder_class.return_value
         mock_supplier = MagicMock(spec=Supplier)
 
-        mock_instance.set_is_active.return_value = mock_instance
-        mock_instance.save.return_value = mock_instance
-        mock_instance.build.return_value = mock_supplier
+        mock_builder.set_is_active.return_value = mock_builder
+        mock_builder.build.return_value = mock_supplier
 
         result = service.update_status(existing_supplier)
 
         mock_builder_class.assert_called_once_with(supplier=existing_supplier)
-        mock_instance.set_is_active.assert_called_once_with(existing_supplier.is_active)
-        mock_instance.save.assert_called_once()
-        mock_instance.build.assert_called_once()
+        mock_builder.set_is_active.assert_called_once_with(existing_supplier.is_active)
+        mock_builder.build.assert_called_once()
         assert result == mock_supplier
 
     @pytest.mark.django_db
     @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
     def test_raises_validation_error(self, mock_builder_class, service, existing_supplier, caplog):
-        from pydantic import ValidationError as PydanticValidationError
+        from django.core.exceptions import ValidationError as DjangoValidationError
 
-        mock_instance = mock_builder_class.return_value
-        mock_instance.set_is_active.side_effect = PydanticValidationError.from_exception_data(
-            "test", []
-        )
+        mock_builder = mock_builder_class.return_value
+        mock_builder.set_is_active.side_effect = DjangoValidationError("Validation error")
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(DjangoValidationError):
             service.update_status(existing_supplier)
 
-        assert "Error updating status" in caplog.text
+        assert "Error update status of supplier" in caplog.text
 
     @pytest.mark.django_db
     @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
     def test_raises_value_error(self, mock_builder_class, service, existing_supplier, caplog):
-        mock_instance = mock_builder_class.return_value
-        mock_instance.set_is_active.side_effect = ValueError("Invalid state transition")
+        mock_builder = mock_builder_class.return_value
+        mock_builder.set_is_active.side_effect = ValueError("Invalid state transition")
 
         with pytest.raises(ValueError, match="Invalid state transition"):
             service.update_status(existing_supplier)
@@ -325,8 +360,8 @@ class TestUpdateStatus:
     @pytest.mark.django_db
     @patch("apps.operations.layers.applications.supplier_service.SupplierBuilder")
     def test_raises_general_exception(self, mock_builder_class, service, existing_supplier, caplog):
-        mock_instance = mock_builder_class.return_value
-        mock_instance.set_is_active.side_effect = Exception("Unexpected error")
+        mock_builder = mock_builder_class.return_value
+        mock_builder.set_is_active.side_effect = Exception("Unexpected error")
 
         with pytest.raises(Exception, match="Unexpected error"):
             service.update_status(existing_supplier)

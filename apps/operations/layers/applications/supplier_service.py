@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
 from apps.operations.layers.builders import SupplierBuilder
-from apps.operations.layers.dto import DatatableSearch, SupplierDTO
+from apps.operations.layers.dto import DatatableSearch
 from apps.operations.models import Supplier
 
 logger = logging.getLogger(__name__)
@@ -34,11 +34,12 @@ class SupplierAppService(BaseAppService):
     def retrieve_suppliers(params):
         fields = [
             "external_id",
+            "document_number",
+            "first_name",
+            "last_name",
             "business_name",
-            "contact_name",
             "address",
             "delivery_days",
-            "tax_id",
             "phone",
             "email",
             "is_active",
@@ -59,17 +60,15 @@ class SupplierAppService(BaseAppService):
         builder = SupplierBuilder(instance) if instance else SupplierBuilder()
 
         try:
-            dto = SupplierDTO(**payload)
-
             supplier = (
-                builder.set_contact_name(dto.contact_name)
-                .set_business_name(dto.business_name)
-                .set_tax_id(dto.tax_id)
-                .set_delivery_days(dto.delivery_days)
-                .set_email(dto.email)
-                .set_phone(dto.phone)
-                .set_address(dto.address)
-                .save()
+                builder.set_first_name(payload.get("first_name"))
+                .set_last_name(payload.get("last_name"))
+                .set_document_number(payload.get("document_number"))
+                .set_business_name(payload.get("business_name"))
+                .set_delivery_days(payload.get("delivery_days"))
+                .set_email(payload.get("email"))
+                .set_phone(payload.get("phone"))
+                .set_address(payload.get("address"))
                 .build()
             )
             return supplier
@@ -94,7 +93,7 @@ class SupplierAppService(BaseAppService):
     def update_status(instance):
         builder = SupplierBuilder(supplier=instance)
         try:
-            return builder.set_is_active(instance.is_active).save().build()
+            return builder.set_is_active(instance.is_active).build()
         except (ValidationError, ValueError) as e:
             logger.warning(f"Error updating status: {e}")
             raise

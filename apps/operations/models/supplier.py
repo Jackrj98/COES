@@ -1,29 +1,20 @@
 import re
 
-from django.core.validators import MinLengthValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from apps.core.models import AuditModel
-from apps.security.utils.validators import django_id_validator
+from apps.security.models import Person
 
 
-class Supplier(AuditModel):
+class Supplier(Person):
     """Represents a Supplier entity."""
 
-    tax_id = models.CharField(
-        _("RUC / DNI"),
-        max_length=13,
-        unique=True,
-        validators=[MinLengthValidator(10), django_id_validator],
-    )
-    contact_name = models.CharField(_("Contact name"), max_length=255)
     business_name = models.CharField(_("Business name"), max_length=200)
     delivery_days = models.PositiveIntegerField(_("Delivery days"), default=0)
     # Contact information
     email = models.EmailField(_("Email address"), unique=True, max_length=255)
-    phone = models.CharField(_("Phone number"), max_length=15, validators=[MinLengthValidator(10)])
+
     address = models.CharField(_("Address"), blank=True, null=True)
 
     class Meta:
@@ -34,7 +25,7 @@ class Supplier(AuditModel):
         permissions = (("view_suppliers", "Can view suppliers list"),)
 
     def __str__(self):
-        return f"{self.business_name} ({self.tax_id})"
+        return f"{self.business_name} ({self.document_number})"
 
     @property
     def initials(self):
