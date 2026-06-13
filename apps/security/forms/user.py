@@ -1,5 +1,6 @@
 from crispy_forms.helper import FormHelper
 from django import forms
+from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
@@ -31,9 +32,10 @@ class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
         self.setup_form_helper(
             label_class="form-label text-sm text-muted", form_class="needs-validation"
         )
-
         status_choices = BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices)  # type: ignore
-        groups_choices = BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups())
+        groups_choices = (
+            BaseFilterForm.DEFAULT_CHOICE + lazy(UserAppService.retrieve_groups, list)()
+        )
         self.fields["status"].choices = status_choices
         self.fields["group"].choices = groups_choices
 

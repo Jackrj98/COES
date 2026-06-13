@@ -2,13 +2,11 @@ import logging
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Count, F, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
@@ -23,7 +21,6 @@ from apps.core.views.base import (
 from apps.inventory.forms import BatchFilterForm, SupplyBaseForm, SupplyFilterForm
 from apps.inventory.layers.applications import SupplyAppService
 from apps.inventory.models import Batch, Supply
-from apps.security.layers.security import SecurityService
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +29,6 @@ SECOND_MODEL = Batch
 DEFAULT_LIST_URL = reverse_lazy("inventory:supplies:list")
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class SupplyListView(CustomListView):
     model = DEFAULT_MODEL
     form_class = SupplyFilterForm
@@ -108,10 +104,7 @@ class SupplyListView(CustomListView):
         return total_supplies, stock_normal, stock_critical, expiring_batches
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class SupplyDetailView(CustomDetailView):
-    """View for displaying supply details with stock information."""
-
     app_name = "supplies"
     model = DEFAULT_MODEL
     second_model = SECOND_MODEL
@@ -179,7 +172,6 @@ class SupplyDetailView(CustomDetailView):
         return 0
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class SupplyCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     form_class = SupplyBaseForm
@@ -210,7 +202,6 @@ class SupplyCreateView(CustomCreateView):
             return self.handle_error(str(e), e)
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class SupplyUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = SupplyBaseForm
@@ -227,7 +218,6 @@ class SupplyUpdateView(CustomUpdateView):
         return self._cached_object
 
     def form_valid(self, form):
-        """Handle valid form submission with category and unit conversion."""
         service = SupplyAppService()
 
         try:

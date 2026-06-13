@@ -94,8 +94,10 @@ setup:
 # =============================================================================
 # Database and Migrations
 # =============================================================================
+
 migrate:
 	@printf "${YELLOW}Applying migrations ($(ENV))...${NC}\n"
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	$(MANAGE) makemigrations --settings=$(SETTINGS).$(ENV) --noinput
 	$(MANAGE) migrate --settings=$(SETTINGS).$(ENV) --noinput
 
@@ -132,12 +134,15 @@ run-prod: setup migrate
 # Celery Services
 # =============================================================================
 celery:
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) $(CELERY) -A cfg worker -l info
 
 celery-beat:
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) $(CELERY) -A cfg beat -l info
 
 celery-flower:
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	@printf "${GREEN}Starting Flower on port 5555...${NC}\n"
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) \
 	$(CELERY) -A cfg flower --port=5555 -l info

@@ -68,16 +68,9 @@ const columns = [
             className: DataTableFactory.classes.center,
             render: (data, type, row) => {
                 return `
-                    <td class="py-4">
-                        <span class="text-truncate bg-secondary bg-opacity-25 rounded-pill px-3 
-                                d-inline-block text-center w-100" 
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="top"
-                                data-bs-original-title="${data}">
-                               <span class="fw-semibold text-secondary">${data}</span>
-                        </span>
-                    </td>
-                `;
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill py-2" style="width: 10vw">
+                        ${data}
+                    </span>`;
             }
         },
         {
@@ -95,6 +88,12 @@ const columns = [
                     </td>
                 `
             }
+        },
+        {
+            orderable: false,
+            data: "stock_min",
+            width: "10%",
+            className: DataTableFactory.classes.center
         },
         {
             orderable: false,
@@ -126,26 +125,56 @@ const columns = [
         },
         {
             orderable: false,
-            data: "stock_min",
-            width: "10%",
-            className: DataTableFactory.classes.center
-        },
-        {
-            orderable: false,
             data: "active_batches_count",
             width: "8%",
             className: DataTableFactory.classes.center,
             render: (data, type, row) => {
                 return `
-                    <td class="py-4">
-                        <span class="text-truncate bg-secondary bg-opacity-25 rounded-pill px-3 
-                                d-inline-block text-center w-100" 
-                                data-bs-toggle="tooltip" data-bs-placement="top"
-                                data-bs-original-title="${data}">
-                               <span class="fw-semibold text-secondary">${data} lotes</span>
-                        </span>
-                    </td>
-                `;
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill py-2" style="width: 6vw">
+                      ${data} lotes
+                    </span>`;
+            }
+        },
+        {
+            orderable: false,
+            data: "stock",
+            width: "10%",
+            className: DataTableFactory.classes.justify,
+            render: (data, type, row) => {
+                const stock = data || 0;
+                const minStock = row.stock_min || 0;
+
+                let badgeClass = '';
+                let badgeIcon = '';
+                let badgeText = '';
+                let tooltipText = '';
+
+                if (stock <= 0) {
+                    badgeClass = 'bg-danger bg-opacity-10 text-danger';
+                    badgeText = 'Sin stock';
+                    tooltipText = `Stock actual: ${stock} | Stock mínimo: ${minStock}`;
+                } else if (stock <= minStock * 0.2) {
+                    badgeClass = 'bg-danger bg-opacity-10 text-danger';
+                    badgeText = 'Stock crítico';
+                    tooltipText = `Stock actual: ${stock} | Stock mínimo: ${minStock} | Necesita reabastecimiento urgente`;
+                } else if (stock >= minStock * 0.2 && stock < minStock) {
+                    badgeClass = 'bg-warning bg-opacity-10 text-warning';
+                    badgeText = 'Stock bajo';
+                    tooltipText = `Stock actual: ${stock} | Stock mínimo: ${minStock} | Considere reabastecer pronto`;
+                } else {
+                    badgeClass = 'bg-success bg-opacity-10 text-success';
+                    badgeText = 'Stock normal';
+                    tooltipText = `Stock actual: ${stock} | Stock mínimo: ${minStock} | Nivel adecuado`;
+                }
+
+
+
+                const color = badgeClass.includes('danger') ? '#ef4444' : (badgeClass.includes('warning') ? '#f59e0b' : '#22c55e');
+
+                return `
+                    <span class="badge ${badgeClass} rounded-pill py-2" style="width: 6vw" title="${tooltipText}">
+                       ${badgeText}
+                    </span>`;
             }
         },
         {
@@ -167,14 +196,6 @@ const columns = [
                                     title="Ver detalles"
                                     onclick="window.location.href='${detailUrl}'">
                                 <i class="bi bi-eye fs-6"></i>
-                            </button>
-                    
-                            <button type="button" class="btn btn-icon icon-left btn-outline-secondary bg-opacity-25 rounded-circle border-0"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="top"
-                                    title="Editar detalles"
-                                    onclick="window.location.href='${editUrl}'">
-                                <i class="bi bi-pencil-square fs-6"></i>
                             </button>
                         </div>
                     </td>

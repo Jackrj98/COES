@@ -1,0 +1,140 @@
+# Git
+.git
+.gitignore
+.gitattributes
+.github/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.pypirc
+*.egg-info/
+*.egg
+.eggs/
+develop-eggs/
+downloads/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/staticfiles
+/static
+/media
+*.pot
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.suo
+*.user
+*.sln
+*.bak
+
+# Documentation
+README.md
+*.md
+docs/
+*.rst
+CONTRIBUTING.md
+LICENSE
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+*.cover
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+.hypothesis/
+
+# Node (si usas Webpack, Tailwind, etc.)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package.json
+package-lock.json
+yarn.lock
+webpack.config.js
+
+# Docker
+docker-compose.yml
+docker-compose.dev.yml
+docker-compose.prod.yml
+.dockerignore
+Dockerfile
+Dockerfile.dev
+
+# Development tools
+Makefile
+.jshintrc
+.pre-commit-config.yaml
+.flake8
+pyproject.toml
+tox.ini
+
+
+# Locale - NO ignorar archivos compilados
+# Solo ignorar archivos fuente
+locale/**/*.po
+locale/**/.DS_Store
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Backup files
+*.backup
+*.old
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Sentry
+.sentry/
+
+# Database backups
+*.sql
+*.dump
+
+# Redis
+dump.rdb
+
+# Logs
+logs/
+*.out
+*.err
+
+# OS specific
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
