@@ -1,5 +1,6 @@
 import logging
 
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import (
     BooleanField,
@@ -14,7 +15,6 @@ from django.db.models import (
 from django.db.models.functions import ExtractDay
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
 from apps.inventory.layers.builders import BatchBuilder
@@ -89,21 +89,21 @@ class BatchAppService(BaseAppService):
         builder = BatchBuilder(batch=instance) if instance else BatchBuilder()
         try:
             batch_instance = (
-                builder.set_batch_number(payload.batch_number)
-                .set_expiry_date(payload.expiry_date)
-                .set_unit_cost(payload.unit_cost)
-                .set_initial_quantity(payload.initial_quantity)
-                .set_current_quantity(payload.current_quantity)
-                .set_status(payload.status)
-                .set_is_active(payload.is_active)
-                .set_supply(payload.supply_id)
-                .save()
+                builder.set_batch_number(payload.get("batch_number"))
+                .set_expiry_date(payload.get("expiry_date"))
+                .set_manufacture_date(payload.get("manufacture_date"))
+                .set_unit_cost(payload.get("unit_cost"))
+                .set_initial_quantity(payload.get("initial_quantity"))
+                .set_current_quantity(payload.get("current_quantity"))
+                .set_status(payload.get("status"))
+                .set_is_active(payload.get("is_active"))
+                .set_supply(payload.get("supply_id"))
                 .build()
             )
 
             return batch_instance
         except ValidationError as e:
-            logger.warning(f"Validation error: {e.json()}")
+            logger.warning(f"Validation error: {e.error_dict}")
             raise
         except Exception as e:
             logger.error(f"Error saving batch: {e}", exc_info=True)
@@ -113,12 +113,13 @@ class BatchAppService(BaseAppService):
         """Register a new batch item."""
         return self.save_batch(payload, instance=None)
 
-    def update_batch(self, instance, payload, file=None):
+    def update_batch(self, instance, payload):
         """Update an existing supply item."""
         if not instance:
             raise ValueError(_("Batch instance is required."))
-        if payload.current_quantity == 0:
-            payload.status = self.model.BatchStatus.DEPLETED.value
+
+        if payload["current_quantity"] == 0:
+            payload["status"] = self.model.BatchStatus.DEPLETED.value
         return self.save_batch(payload, instance=instance)
 
     @staticmethod
@@ -126,4 +127,4 @@ class BatchAppService(BaseAppService):
         builder = BatchBuilder(instance)
         if quantity == 0:
             builder.set_status(Batch.BatchStatus.DEPLETED.value)
-        return builder.set_current_quantity(quantity).save().build()
+        return builder.set_current_quantity(quantity).build()

@@ -4,7 +4,13 @@ from .movements import (
     InventoryMovementFilterForm,
     MovementFormSet,
 )
-from .products import BatchBaseForm, BatchFilterForm, SupplyBaseForm, SupplyFilterForm
+from .products import (
+    BatchCreateForm,
+    BatchFilterForm,
+    BatchUpdateForm,
+    SupplyBaseForm,
+    SupplyFilterForm,
+)
 
 __all__ = [
     InventoryMovement,
@@ -12,7 +18,8 @@ __all__ = [
     MovementFormSet,
     InventoryMovementBaseForm,
     SupplyBaseForm,
-    BatchBaseForm,
+    BatchCreateForm,
+    BatchUpdateForm,
     SupplyFilterForm,
     BatchFilterForm,
 ]

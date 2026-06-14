@@ -8,7 +8,7 @@ $(document).ready(function () {
         selector: "#datatable-list",
         ajaxUrl: urlPaginator,
         columns: columns,
-        order: [[2, "asc"]],
+        order: [[2, "asc"], [5, "asc"]],
         filters: [
             {selector: "#id_status", field: "status"},
             {selector: "#id_search", field: "search"},
@@ -22,10 +22,20 @@ $(document).ready(function () {
 const columns = [
     {
         orderable: false,
-        data: "days_until_expiry",
-        width: "4%",
+        data: "external_id",
+        width: "3%",
         className: DataTableFactory.classes.center,
-        render: (days) => {
+        render: (data, type, row, meta) => {
+            return meta.settings._iDisplayStart + meta.row + 1;
+        }
+    },
+    {
+        orderable: false,
+        data: "batch_number",
+        width: "20%",
+        className: DataTableFactory.classes.justify,
+        render: (data, type, row) => {
+            const days = row.days_until_expiry;
             let color = "";
             let text = "";
             const months = Math.floor(days / 30.44);
@@ -45,19 +55,13 @@ const columns = [
             }
 
             return `
-                <div class="d-flex align-items-center justify-content-center" data-bs-toggle="tooltip" title="${text}">
-                    <i class="bi bi-circle-fill ${color}" style="font-size: 0.75rem;"></i>
+                <div class="d-flex align-items-justify justify-content-justify" data-bs-toggle="tooltip" title="${text}">
+                    <i class="bi bi-circle-fill ${color} me-2" style="font-size: 0.75rem;"></i> ${data}
                 </div>`;
         }
     },
     {
-        orderable: false,
-        data: "batch_number",
-        width: "20%",
-        className: DataTableFactory.classes.justify
-    },
-    {
-        orderable: false,
+        orderable: true,
         data: "expiry_date",
         width: "20%",
         className: DataTableFactory.classes.center,
@@ -99,7 +103,7 @@ const columns = [
     {
         orderable: false,
         data: "current_quantity",
-        width: "12%", // Un poco más de espacio para asegurar que no se corte
+        width: "12%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
             const initialQty = row.initial_quantity || 0;
@@ -113,7 +117,7 @@ const columns = [
 
             let progressColor = '#0d6efd';
             if (isInactive) {
-                progressColor = '#6c757d'; // Un gris más estándar de Bootstrap
+                progressColor = '#6c757d';
             } else if (percentage < 20) {
                 progressColor = '#dc3545';
             } else if (percentage < 50) {
@@ -145,22 +149,16 @@ const columns = [
         render: (data) => "$" + (data || "0")
     },
     {
-        orderable: false,
+        orderable: true,
         data: "status",
-        width: "15%",
+        width: "12%",
         className: DataTableFactory.classes.center,
         render: (data) => {
             const {color, label} = mapStatus[data];
             return `
-               <td class="py-4">
-                    <span class="text-truncate bg-${color} bg-opacity-25 rounded-pill px-3 
-                            d-inline-block text-center w-100"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          data-bs-original-title="${label}">
-                        <span class="fw-semibold text-${color}">${label}</span>
-                    </span>
-                </td>
+                <span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill py-2" style="width: 9vw">
+                    ${label}
+                </span>
             `
         }
     },

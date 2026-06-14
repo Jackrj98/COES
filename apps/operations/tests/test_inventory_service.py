@@ -1,5 +1,4 @@
 # apps/operations/tests/test_exit_order_service.py
-
 import datetime
 from decimal import Decimal
 
@@ -8,9 +7,9 @@ from django.test import RequestFactory
 from django.utils import timezone
 from pydantic import ValidationError
 
+from apps.catalogs.models import Catalog, CatalogItem
 from apps.core.layers.dto import DataTableParams
 from apps.inventory.layers.applications import BatchAppService
-from apps.inventory.layers.dto import BatchDTO
 from apps.inventory.models import Batch, InventoryMovement, Supply
 from apps.operations.layers.applications import (
     InventoryOrchestrator,
@@ -26,8 +25,45 @@ from apps.operations.models import ExitDetail, ExitOrder
 
 
 @pytest.fixture
-def supply(db):
-    return Supply.objects.create(name="Test Supply", code="SUP001", description="Test Description")
+def category(db):
+    """Create a category catalog item for supplies."""
+    catalog, _ = Catalog.objects.get_or_create(
+        code="SUPPLY_CATEGORY",
+        defaults={"name": "Supply Categories", "description": "Categories for supplies"},
+    )
+
+    category_item = CatalogItem.objects.create(
+        catalog=catalog, code="CAT-MEDICINES", name="Medicines", priority=1, is_active=True
+    )
+    return category_item
+
+
+@pytest.fixture
+def unit_of_measure(db):
+    """Create a unit of measure catalog item."""
+    catalog, _ = Catalog.objects.get_or_create(
+        code="UNIT_OF_MEASURE",
+        defaults={"name": "Units of Measure", "description": "Units of measure for supplies"},
+    )
+
+    unit = CatalogItem.objects.create(
+        catalog=catalog, code="UOM-UND", name="Unit", extra="u", priority=1, is_active=True
+    )
+    return unit
+
+
+@pytest.fixture
+def supply(db, category, unit_of_measure):
+    """Create a supply with the required category and unit of measure."""
+    return Supply.objects.create(
+        name="Test Supply",
+        code="SUP001",
+        description="Test Description",
+        category=category,
+        unit_of_measure=unit_of_measure,
+        is_active=True,
+        stock_min=10,
+    )
 
 
 @pytest.fixture
@@ -39,17 +75,18 @@ def batch_service():
 def batch_factory(supply):
 
     def _create_batch(batch_number, quantity, expiry_days=365):
-        dto = BatchDTO(
-            batch_number=batch_number,
-            expiry_date=timezone.now().date() + datetime.timedelta(days=expiry_days),
-            initial_quantity=quantity,
-            current_quantity=quantity,
-            unit_cost=float("50.00"),
-            status=Batch.BatchStatus.ACTIVE,
-            supply_id=supply.id,
-            is_active=True,
-        )
-        return BatchAppService().register_batch(dto)
+        payload = {
+            "batch_number": batch_number,
+            "manufacture_date": timezone.now().date(),
+            "expiry_date": timezone.now().date() + datetime.timedelta(days=expiry_days),
+            "initial_quantity": quantity,
+            "current_quantity": quantity,
+            "unit_cost": 50.00,
+            "status": Batch.BatchStatus.ACTIVE,
+            "supply_id": supply.id,
+            "is_active": True,
+        }
+        return BatchAppService().register_batch(payload)
 
     return _create_batch
 
@@ -315,10 +352,14 @@ class TestInventoryOrchestrator:
             orchestrator.register_exit(order, details_payload)
 
     @pytest.mark.django_db
-    def test_register_exit_multiple_supplies(self, orchestrator):
+    def test_register_exit_multiple_supplies(self, orchestrator, category, unit_of_measure):
 
-        supply1 = Supply.objects.create(name="Supply 1", code="SUP002")
-        supply2 = Supply.objects.create(name="Supply 2", code="SUP003")
+        supply1 = Supply.objects.create(
+            name="Supply 1", code="SUP002", category=category, unit_of_measure=unit_of_measure
+        )
+        supply2 = Supply.objects.create(
+            name="Supply 2", code="SUP003", category=category, unit_of_measure=unit_of_measure
+        )
 
         batch1 = Batch.objects.create(
             batch_number="BATCH-S1",

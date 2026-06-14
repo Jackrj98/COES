@@ -7,6 +7,7 @@ import pytest
 from django.test import RequestFactory
 from django.utils import timezone
 
+from apps.catalogs.models import Catalog, CatalogItem
 from apps.core.layers.dto import DataTableParams
 from apps.inventory.models import Batch, InventoryMovement, Supply
 from apps.operations.layers.applications import PurchaseAppService, PurchaseOrchestrator
@@ -19,8 +20,45 @@ from apps.operations.models import PurchaseOrder, PurchaseOrderDetail
 
 
 @pytest.fixture
-def supply(db):
-    return Supply.objects.create(name="Test Supply", code="SUP001", description="Test Description")
+def category(db):
+    """Create a category catalog item for supplies."""
+    catalog, _ = Catalog.objects.get_or_create(
+        code="SUPPLY_CATEGORY",
+        defaults={"name": "Supply Categories", "description": "Categories for supplies"},
+    )
+
+    category_item = CatalogItem.objects.create(
+        catalog=catalog, code="CAT-MEDICINES", name="Medicines", priority=1, is_active=True
+    )
+    return category_item
+
+
+@pytest.fixture
+def unit_of_measure(db):
+    """Create a unit of measure catalog item."""
+    catalog, _ = Catalog.objects.get_or_create(
+        code="UNIT_OF_MEASURE",
+        defaults={"name": "Units of Measure", "description": "Units of measure for supplies"},
+    )
+
+    unit = CatalogItem.objects.create(
+        catalog=catalog, code="UOM-UND", name="Unit", extra="u", priority=1, is_active=True
+    )
+    return unit
+
+
+@pytest.fixture
+def supply(db, category, unit_of_measure):
+    """Create a supply with the required category and unit of measure."""
+    return Supply.objects.create(
+        name="Test Supply",
+        code="SUP001",
+        description="Test Description",
+        category=category,
+        unit_of_measure=unit_of_measure,
+        is_active=True,
+        stock_min=10,
+    )
 
 
 @pytest.fixture

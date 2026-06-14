@@ -14,9 +14,8 @@ from apps.core.views.base import (
     CustomListView,
     CustomUpdateView,
 )
-from apps.inventory.forms import BatchBaseForm, BatchFilterForm
+from apps.inventory.forms import BatchCreateForm, BatchFilterForm, BatchUpdateForm
 from apps.inventory.layers.applications import BatchAppService, InventoryMovementAppService
-from apps.inventory.layers.dto import BatchDTO
 from apps.inventory.models import Batch, InventoryMovement, Supply
 from apps.security.layers.security import SecurityService
 
@@ -98,10 +97,10 @@ class BatchDetailView(CustomDetailView):
 class BatchCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     second_model = Supply
-    form_class = BatchBaseForm
+    form_class = BatchCreateForm
     slug_url_kwarg = "supply_reference"
     permission_required = "inventory.add_batch"
-    template_name = "supplies/batches/create_or_update.html"
+    template_name = "supplies/batches/create.html"
 
     def get_supply(self):
         if not hasattr(self, "supply"):
@@ -132,21 +131,11 @@ class BatchCreateView(CustomCreateView):
 
         try:
             # Prepare data for service layer
-            dto = BatchDTO(
-                batch_number=batch_data["batch_number"],
-                expiry_date=batch_data["expiry_date"],
-                initial_quantity=batch_data["current_quantity"],
-                current_quantity=0,
-                unit_cost=batch_data["unit_cost"],
-                is_active=batch_data["is_active"],
-                status=batch_data["status"],
-                supply_id=batch_data["supply"].id,
-            )
+            batch_data["supply_id"] = self.get_supply().id
+            new_batch = service.register_batch(payload=batch_data)
+            self._register_initial_movement(new_batch, batch_data["initial_quantity"])
 
-            new_batch = service.register_batch(payload=dto)
-            self._register_initial_movement(new_batch, batch_data["current_quantity"])
-
-            new_batch.current_quantity = batch_data["current_quantity"]
+            new_batch.current_quantity = batch_data["initial_quantity"]
             new_batch.save(update_fields=["current_quantity"])
             # Show success message
             success_message = self.success_message.format(model=self.model._meta.verbose_name)
@@ -192,9 +181,9 @@ class BatchCreateView(CustomCreateView):
 @method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class BatchUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
-    form_class = BatchBaseForm
+    form_class = BatchUpdateForm
     permission_required = "inventory.change_batch"
-    template_name = "supplies/batches/create_or_update.html"
+    template_name = "supplies/batches/update.html"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -224,11 +213,13 @@ class BatchUpdateView(CustomUpdateView):
             old_quantity = self._get_original_quantity(batch_instance)
             new_quantity = form.cleaned_data.get("current_quantity", old_quantity)
 
-            dto = self._build_batch_dto(form, batch_instance, new_quantity)
+            payload = self._build_batch_dto(form, batch_instance, new_quantity)
             if self._has_quantity_changed(old_quantity, new_quantity):
-                self._register_stock_movement(batch_instance, old_quantity, new_quantity)
+                self._register_stock_movement(
+                    batch_instance, old_quantity, new_quantity, payload["adjustment_reason"]
+                )
 
-            updated_batch = self._update_batch(batch_instance, dto)
+            updated_batch = self._update_batch(batch_instance, payload)
             success_message = self.success_message.format(
                 model=self.model._meta.verbose_name, instance=updated_batch.batch_number[:10]
             )
@@ -270,35 +261,35 @@ class BatchUpdateView(CustomUpdateView):
         """Build Batch DTO from form data."""
         batch_data = form.cleaned_data
 
-        return BatchDTO(
-            batch_number=batch_data["batch_number"],
-            expiry_date=batch_data["expiry_date"],
-            initial_quantity=batch_instance.initial_quantity,
-            current_quantity=new_quantity,
-            unit_cost=batch_data["unit_cost"],
-            is_active=batch_data["is_active"],
-            status=batch_data["status"],
-            supply_id=batch_instance.supply_id,
-        )
+        batch_data["supply_id"] = batch_instance.supply_id
+        batch_data["initial_quantity"] = batch_instance.initial_quantity
 
-    def _register_stock_movement(self, batch: Batch, old_quantity: int, new_quantity: int) -> None:
+        return batch_data
+
+    def _register_stock_movement(
+        self, batch: Batch, old_quantity: int, new_quantity: int, concept: str
+    ) -> None:
         """Register inventory movement for quantity adjustment."""
         diff = new_quantity - old_quantity
 
         movement_payload = self._build_movement_payload(
-            batch=batch, old_quantity=old_quantity, new_quantity=new_quantity, diff=diff
+            batch=batch,
+            old_quantity=old_quantity,
+            new_quantity=new_quantity,
+            diff=diff,
+            concept=concept,
         )
 
         logger.info(f"Registering stock adjustment: {diff:+d} units for batch {batch.id}")
         InventoryMovementAppService().register_movement(movement_payload)
 
     @staticmethod
-    def _build_movement_payload(batch, old_quantity, new_quantity, diff) -> dict:
+    def _build_movement_payload(batch, old_quantity, new_quantity, diff, concept) -> dict:
         """Build a payload for inventory movement registration."""
         return {
             "batch_id": batch.id,
             "movement_type": InventoryMovement.Type.ADJUSTMENT,
-            "concept": "Ajuste manual de lote",
+            "concept": concept,
             "quantity": abs(diff),
             "observation": f"Ajuste manual: {old_quantity} → {new_quantity} (Diferencia: {diff:+d})",
             "previous_stock": old_quantity,
@@ -308,7 +299,7 @@ class BatchUpdateView(CustomUpdateView):
         }
 
     @staticmethod
-    def _update_batch(batch_instance: Batch, dto: BatchDTO) -> Batch:
+    def _update_batch(batch_instance: Batch, payload) -> Batch:
         """Update a batch using the service layer."""
         service = BatchAppService()
-        return service.update_batch(instance=batch_instance, payload=dto)
+        return service.update_batch(instance=batch_instance, payload=payload)

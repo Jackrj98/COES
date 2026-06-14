@@ -111,18 +111,27 @@ class SupplyBaseForm(forms.ModelForm):
 
 
 class BatchBaseForm(forms.ModelForm):
-    """Form base for Batch."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_errors = True
+        self.helper.label_class = "form-label"
+        self.helper.form_class = "needs-validation"
 
+
+class BatchCreateForm(BatchBaseForm):
     class Meta:
         model = Batch
         fields = [
             "batch_number",
+            "manufacture_date",
             "expiry_date",
-            "current_quantity",
+            "initial_quantity",
             "unit_cost",
             "status",
             "supply",
             "is_active",
+            "notes",
         ]
         widgets = {
             "supply": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
@@ -130,6 +139,56 @@ class BatchBaseForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Ej: LOTE-2026-001"}
             ),
             "expiry_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"
+            ),
+            "manufacture_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"
+            ),
+            "initial_quantity": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+            "unit_cost": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.01",
+                    "type": "number",
+                    "placeholder": "Ej: 12.50",
+                }
+            ),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input", "role": "switch"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }
+
+
+class BatchUpdateForm(BatchBaseForm):
+    adjustment_reason = forms.CharField(
+        label=_("Reason for adjustment"),
+        required=True,
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+    )
+
+    class Meta:
+        model = Batch
+        fields = [
+            "batch_number",
+            "manufacture_date",
+            "expiry_date",
+            "current_quantity",
+            "unit_cost",
+            "status",
+            "supply",
+            "is_active",
+            "status",
+            "notes",
+        ]
+        widgets = {
+            "supply": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
+            "batch_number": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Ej: LOTE-2026-001"}
+            ),
+            "expiry_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"
+            ),
+            "manufacture_date": forms.DateInput(
                 attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"
             ),
             "current_quantity": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
@@ -142,20 +201,25 @@ class BatchBaseForm(forms.ModelForm):
                     "placeholder": "Ej: 12.50",
                 }
             ),
-            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input", "role": "switch"}),
             "status": forms.Select(attrs={"class": "form-select"}),
-        }
-        validators = {
-            "initial_quantity": [MinValueValidator(0)],
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input", "role": "switch"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_show_errors = True
-        self.helper.error_text_inline = True
-        self.helper.label_class = "form-label"
-        self.helper.form_class = "needs-validation"
+    def clean(self):
+        cleaned_data = super().clean()
+        original_qty = self.instance.current_quantity
+        new_qty = cleaned_data.get("current_quantity")
+        reason = cleaned_data.get("adjustment_reason")
+
+        if original_qty != new_qty:
+            if not reason:
+                self.add_error(
+                    "adjustment_reason",
+                    _("Reason for adjustment is required when quantity changes."),
+                )
+
+        return cleaned_data
 
 
 # ---------------------------------------------------------------------

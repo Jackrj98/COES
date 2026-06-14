@@ -100,7 +100,7 @@ class DatatableSearch(DatatableSearchBase):
                 "batch__supply__name",
                 "batch__supply__code",
                 "purchase_order__supplier__business_name",
-                "purchase_order__supplier__contact_name",
+                "purchase_order__supplier__last_name",
                 "purchase_order__order_number",
                 "exit_order__order_number",
                 "created_by",
