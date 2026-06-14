@@ -164,15 +164,45 @@ class Batch(AuditModel):
         return reverse("inventory:batches:detail", kwargs=kwargs)
 
     def clean(self):
-        queryset = self.__class__.objects.filter(supply=self.supply, batch_number=self.batch_number)
-
-        if self.pk:
-            queryset = queryset.exclude(pk=self.pk)
-
-        if queryset.exists():
+        if (
+            Batch.objects.filter(supply=self.supply, batch_number=self.batch_number)
+            .exclude(pk=self.pk)
+            .exists()
+        ):
             raise ValidationError(
                 {"batch_number": _("A batch with this number already exists for this supply.")}
             )
+
+        if self.initial_quantity < 0:
+            raise ValidationError({"initial_quantity": _("Initial quantity cannot be negative.")})
+
+        if self.current_quantity:
+            if self.current_quantity < 0:
+                raise ValidationError(
+                    {"current_quantity": _("Current quantity cannot be negative.")}
+                )
+
+        stock_max = getattr(self.supply, "stock_max", 0) or 0
+
+        if stock_max > 0:
+            if self.initial_quantity > stock_max:
+                raise ValidationError(
+                    {
+                        "initial_quantity": _(
+                            f"Initial quantity ({self.initial_quantity}) exceeds maximum stock ({stock_max})."
+                        )
+                    }
+                )
+
+            if self.current_quantity:
+                if self.current_quantity > stock_max:
+                    raise ValidationError(
+                        {
+                            "current_quantity": _(
+                                f"Current quantity ({self.current_quantity}) exceeds maximum stock ({stock_max})."
+                            )
+                        }
+                    )
 
     @property
     def is_expired(self):
