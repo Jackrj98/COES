@@ -1,16 +1,16 @@
 import logging
 
+from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import Q, Sum, Value
 from django.db.models.aggregates import Count
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
-from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
 from apps.inventory.layers.builders import SupplyBuilder
-from apps.inventory.layers.dto import DatatableSearch, SupplyDTO
+from apps.inventory.layers.dto import DatatableSearch
 from apps.inventory.models import Batch, Supply
 
 logger = logging.getLogger(__name__)
@@ -85,6 +85,7 @@ class SupplyAppService(BaseAppService):
             "code",
             "description",
             "stock_min",
+            "stock_max",
             "category__name",
             "unit_of_measure__name",
             "unit_of_measure__extra",
@@ -123,17 +124,16 @@ class SupplyAppService(BaseAppService):
         builder = SupplyBuilder(supply=instance) if instance else SupplyBuilder()
 
         try:
-            dto = SupplyDTO(**payload)
-
             supply = (
-                builder.set_name(dto.name)
-                .set_code(dto.code)
-                .set_description(dto.description)
-                .set_active(dto.is_active)
-                .set_stock_min(dto.stock_min)
-                .set_category(dto.category_id)
-                .set_unit_of_measure(dto.unit_of_measure_id)
-                .save()
+                builder.set_name(payload.get("name"))
+                .set_code(payload.get("code"))
+                .set_barcode(payload.get("barcode"))
+                .set_description(payload.get("description", ""))
+                .set_active(payload.get("is_active", True))
+                .set_stock_min(payload.get("stock_min", 10))
+                .set_stock_max(payload.get("stock_max", 100))
+                .set_category(payload.get("category_id"))
+                .set_unit_of_measure(payload.get("unit_of_measure_id"))
             ).build()
 
             if file:
@@ -142,7 +142,10 @@ class SupplyAppService(BaseAppService):
             return supply
 
         except ValidationError as e:
-            logger.warning(f"Validation error: {e.json()}")
+            print(f"DEBUG - Atributos disponibles: {dir(e)}")
+            print(f"DEBUG - message_dict: {getattr(e, 'message_dict', 'NO DISPONIBLE')}")
+            print(f"DEBUG - error_dict: {getattr(e, 'error_dict', 'NO DISPONIBLE')}")
+            logger.warning(f"Validation error: {e}")
             raise
         except Exception as e:
             logger.error(f"Error saving supply: {e}", exc_info=True)
@@ -176,7 +179,6 @@ class SupplyAppService(BaseAppService):
     def register_supply(self, payload, file=None):
         """Register a new supply item."""
         category_code = payload.get("category_code", None)
-        payload.pop("category_code", None)
         payload["code"] = self._generate_unique_code(category_code)
 
         return self.save_supply(payload, file=file, instance=None)

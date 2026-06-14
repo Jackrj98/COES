@@ -13,8 +13,11 @@
                                 <div class="col-12 col-md-12">
                                     {{ form.image_url|as_crispy_field }}
                                 </div>
-                                <div class="col-12 col-md-12">
+                                <div class="col-12 col-md-6">
                                     {{ form.name|as_crispy_field }}
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    {{ form.barcode|as_crispy_field }}
                                 </div>
                                 <div class="col-12 col-md-12">
                                     {{ form.description|as_crispy_field }}
@@ -26,16 +29,18 @@
                                     </div>
                                     <div class="flex-grow-1 border-top border-secondary"></div>
                                 </div>
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-3">
                                     {{ form.category|as_crispy_field }}
                                 </div>
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-3">
                                     {{ form.unit_of_measure|as_crispy_field }}
                                 </div>
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-3">
                                     {{ form.stock_min|as_crispy_field }}
                                 </div>
-
+                                <div class="col-12 col-md-3">
+                                    {{ form.stock_max|as_crispy_field }}
+                                </div>
                                 <div class="col-12 mb-2">
                                     <hr class="w-100 my-2">
                                 </div>

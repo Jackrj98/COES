@@ -71,9 +71,9 @@
     <th scope="col" class="text-uppercase">{{ object|object_verbose_name|upper }}</th>
     <th scope="col" class="text-uppercase">{{ object|field_label:'category'|upper }}</th>
     <th scope="col" class="text-uppercase">{% trans 'unit'|upper %}</th>
-    <th scope="col" class="text-uppercase">STOCK MIN.</th>
     <th scope="col" class="text-uppercase">STOCK</th>
-    <th scope="col" class="text-uppercase">{% trans 'batches'|upper %}</th>
+    <th scope="col" class="text-uppercase">MIN.</th>
+    <th scope="col" class="text-uppercase">MAX.</th>
     <th scope="col" class="text-uppercase">{% trans 'status'|upper %}</th>
     <th scope="col" class="text-uppercase">{% trans 'actions'|upper %}</th>
 {% endblock columns %}

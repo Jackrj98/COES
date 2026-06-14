@@ -73,13 +73,24 @@
                         <div class="fw-bold fs-5 text-success">{{ object.total_stock|default:"0" }}</div>
                         <div class="text-muted" style="font-size:11px">{% trans "available units" %}</div>
                     </div>
-                    <div class="col-6 col-md-3 py-3 px-3 border-end">
-                        <div class="small text-muted mb-1"
-                             style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">{% trans "Stock min." %}</div>
-                        <div class="fw-bold fs-5">{{ object.stock_min|default:"0" }}</div>
-                        <div class="text-muted" style="font-size:11px">{% trans "reorder alert" %}</div>
+                    <div class="col-6 col-md-2 py-3 px-3 border-end">
+                        <div class="text-uppercase text-muted fw-bold mb-1"
+                             style="font-size: 0.65rem; letter-spacing: 0.06em;">
+                            {% trans "Stock min." %}
+                        </div>
+                        <div class="fw-bolder fs-5">{{ object.stock_min|default:"0" }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">{% trans "Alert threshold" %}</div>
                     </div>
-                    <div class="col-6 col-md-3 py-3 px-3 border-end">
+
+                    <div class="col-6 col-md-2 py-3 px-3 border-end">
+                        <div class="text-uppercase text-muted fw-bold mb-1"
+                             style="font-size: 0.65rem; letter-spacing: 0.06em;">
+                            {% trans "Stock max." %}
+                        </div>
+                        <div class="fw-bolder fs-5">{{ object.stock_max|default:"0" }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">{% trans "Maximum capacity" %}</div>
+                    </div>
+                    <div class="col-6 col-md-2 py-3 px-3 border-end">
                         <div class="small text-muted mb-1"
                              style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">{% trans "Active batches" %}</div>
                         <div class="fw-bold fs-5 text-primary">{{ object.active_batches_count|default:"0" }}</div>
@@ -120,7 +131,7 @@
 
                 <hr>
                 <!-- Section label -->
-                <div class="text-muted mb-2 pt-2 borde"
+                <div class="text-muted mb-2 pt-2 borde pb-3"
                      style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;">
                     {% trans "Supply information" %}
                 </div>
@@ -128,6 +139,10 @@
                     <div class="col-6 col-md-3">
                         <div class="small text-muted mb-1">{{ object|field_label:"code" }}</div>
                         <div class="small fw-semibold">{{ object.code|upper|default:"-" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="small text-muted mb-1">{{ object|field_label:"barcode" }}</div>
+                        <div class="small fw-semibold">{{ object.barcode|upper|default:"-" }}</div>
                     </div>
 
                     <div class="col-6 col-md-3">

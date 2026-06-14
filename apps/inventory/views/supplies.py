@@ -1,16 +1,13 @@
 import logging
-from datetime import timedelta
 
 from django.contrib import messages
 from django.db.models import Count, F, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
-from pydantic import ValidationError
 
 from apps.core.views.base import (
     CustomCreateView,
@@ -42,7 +39,7 @@ class SupplyListView(CustomListView):
         ctx["description"] = _("Management of registered supplies")
         ctx["actions"]["menu_actions"]["add"]["url"] = reverse_lazy("inventory:supplies:create")
 
-        total_supplies, stock_normal, stock_critical, expiring_batches = self._metrics()
+        total_supplies, stock_normal, stock_critical, stock_low = self._metrics()
         ctx["metrics_list"] = [
             {
                 "title": _("Total Supplies"),
@@ -52,11 +49,18 @@ class SupplyListView(CustomListView):
                 "color": "primary",
             },
             {
-                "title": _("Stock OK"),
+                "title": _("Stock normal"),
                 "value": stock_normal,
                 "sub": _("above minimum"),
-                "icon": "bi-check-lg",
+                "icon": "bi-list-check",
                 "color": "success",
+            },
+            {
+                "title": _("Stock low"),
+                "value": stock_low,
+                "sub": _("Below 50% of the minimum"),
+                "icon": "bi-exclamation-triangle-fill",
+                "color": "warning",
             },
             {
                 "title": _("Stock Critical"),
@@ -64,13 +68,6 @@ class SupplyListView(CustomListView):
                 "sub": _("below minimum"),
                 "icon": "bi bi-exclamation-circle",
                 "color": "danger",
-            },
-            {
-                "title": _("Expiring Batches"),
-                "value": expiring_batches,
-                "sub": _("next 30 days"),
-                "icon": "bi-calendar-event-fill",
-                "color": "warning",
             },
         ]
         return ctx
@@ -84,7 +81,6 @@ class SupplyListView(CustomListView):
     def _metrics(self):
         supplies = self.object_list
         batch_status = Batch.BatchStatus
-        thirty_days_from_now = timezone.now() + timedelta(days=30)
 
         total_supplies = supplies.filter(deleted_at__isnull=True).count()
         supplies_with_stock = Supply.objects.annotate(
@@ -92,16 +88,16 @@ class SupplyListView(CustomListView):
                 "batches__current_quantity", filter=Q(batches__status=batch_status.ACTIVE)
             )
         )
+
+        stock_low = supplies_with_stock.filter(
+            total_stock__gt=F("stock_min"), total_stock__lte=F("stock_min") * 1.5
+        ).count()
         stock_normal = supplies_with_stock.filter(total_stock__gt=F("stock_min")).count()
         stock_critical = supplies_with_stock.filter(
             Q(total_stock__lte=F("stock_min")) | Q(total_stock__isnull=True)
         ).count()
 
-        expiring_batches = Batch.objects.filter(
-            status=batch_status.ACTIVE, expiry_date__lte=thirty_days_from_now
-        ).count()
-
-        return total_supplies, stock_normal, stock_critical, expiring_batches
+        return total_supplies, stock_normal, stock_critical, stock_low
 
 
 class SupplyDetailView(CustomDetailView):
@@ -195,8 +191,7 @@ class SupplyCreateView(CustomCreateView):
             messages.success(self.request, msg, extra_tags="toast")
             return redirect(self.success_url)
 
-        except ValidationError as e:
-            self.handle_pydantic_error(e, form)
+        except ValueError:
             return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
@@ -211,11 +206,6 @@ class SupplyUpdateView(CustomUpdateView):
 
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
-
-    def get_object(self, queryset=None):
-        if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)  # noqa
-        return self._cached_object
 
     def form_valid(self, form):
         service = SupplyAppService()
@@ -238,8 +228,7 @@ class SupplyUpdateView(CustomUpdateView):
             messages.success(self.request, msg, extra_tags="toast")
             return redirect(self.get_success_url())
 
-        except ValidationError as e:
-            self.handle_pydantic_error(e, form)
+        except ValueError:
             return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)

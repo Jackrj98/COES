@@ -41,9 +41,9 @@ class SupplyAdmin(BaseAdminMixin):
         "code",
         "category",
         "unit_of_measure",
-        "stock_available",
+        "stock_available_display",
         "stock_min",
-        "batch_count",
+        "batch_count_display",
     )
     search_fields = ("name", "code", "description")
     list_filter = ("category", "unit_of_measure", "is_active")
@@ -82,21 +82,24 @@ class SupplyAdmin(BaseAdminMixin):
     )
 
     def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        return queryset.annotate(
-            batch_count=Count("batches", distinct=True),
-            total_stock=Sum("batches__current_quantity"),
+        # Usamos select_related para evitar consultas extras al obtener catálogos
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("category", "unit_of_measure")
+            .annotate(
+                batch_count_annotated=Count("batches", distinct=True),
+                total_stock=Sum("batches__current_quantity"),
+            )
         )
 
     @admin.display(description=_("Available stock"), ordering="total_stock")
-    def stock_available(self, obj):
-        if hasattr(obj, "total_stock") and obj.total_stock is not None:
-            return obj.total_stock
-        return obj.stock_available
+    def stock_available_display(self, obj):
+        return obj.total_stock or 0
 
-    @admin.display(description=_("Batches count"), ordering="batch_count")
-    def batch_count(self, obj):
-        return obj.batch_count
+    @admin.display(description=_("Batches count"), ordering="batch_count_annotated")
+    def batch_count_display(self, obj):
+        return obj.batch_count_annotated or 0
 
     def save_model(self, request, obj, form, change):
         if not change:

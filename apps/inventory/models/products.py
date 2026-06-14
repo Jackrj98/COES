@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
@@ -22,41 +21,41 @@ class Supply(AuditModel):
         unique=True,
         help_text=_("Unique identifier code, numbers and underscores"),
     )
-    description = models.CharField(_("Description"), max_length=255)
-    image_url = models.ImageField(
-        _("Image URL"), upload_to=generate_upload_path, blank=True, null=True
-    )
+    barcode = models.CharField(_("Barcode"), max_length=100, blank=True, null=True, unique=True)
+    description = models.CharField(_("Description"), max_length=255, null=True, blank=True)
+    image_url = models.ImageField(_("Image"), upload_to=generate_upload_path, blank=True, null=True)
+
+    # Stock information
     stock_min = models.PositiveIntegerField(
         _("Stock min"), default=10, help_text=_("Notify me when stock reaches this level")
     )
+    stock_max = models.PositiveIntegerField(
+        _("Stock max"), default=100, help_text=_("Maximum stock")
+    )
 
+    # Relationships
     category = models.ForeignKey(
         "catalogs.CatalogItem",
         on_delete=models.PROTECT,
         related_name="supplies_by_category",
         verbose_name=_("Category"),
         limit_choices_to={"catalog__code": Catalog.CatalogCodes.SUPPLY_CATEGORY},
-        null=True,
-        blank=True,
     )
-
     unit_of_measure = models.ForeignKey(
         "catalogs.CatalogItem",
         on_delete=models.PROTECT,
         related_name="supplies_by_unit",
         verbose_name=_("Unit of Measure"),
         limit_choices_to={"catalog__code": Catalog.CatalogCodes.UNIT_OF_MEASURE},
-        null=True,
-        blank=True,
     )
 
     class Meta:
         db_table = "supply"
+        ordering = ["-created_at"]
         verbose_name = _("Supply")
         verbose_name_plural = _("Supplies")
-        ordering = ["-created_at"]
-        indexes = [models.Index(fields=["code"]), models.Index(fields=["name"])]
         permissions = (("view_supplies", "Can view supply list"),)
+        indexes = [models.Index(fields=["code"]), models.Index(fields=["name"])]
 
     def __str__(self):
         return f"{self.name} ({self.code})"
@@ -74,17 +73,23 @@ class Supply(AuditModel):
     def stock_available(self):
         return self.batches.aggregate(models.Sum("stock"))["stock__sum"] or 0
 
-    def get_image(self):
-        """Get the URL of the user's image."""
-        if self.image_url:
-            return f"{settings.MEDIA_URL}{self.image_url.url}"
-        return None
-
     @property
     def expiring_soon(self):
         today = timezone.now().date()
         threshold = today + timedelta(days=30)
         return self.batches.filter(expiry_date__gte=today, expiry_date__lte=threshold).count()
+
+    def get_image_url(self):
+        return self.image_url.url if self.image_url else None
+
+
+class BatchActiveManager(models.Manager):
+    """Returns only active objects."""
+
+    def get_queryset(self):
+        return (
+            super().get_queryset().filter(status=Batch.BatchStatus.ACTIVE, deleted_at__isnull=True)
+        )
 
 
 class Batch(AuditModel):
@@ -116,23 +121,39 @@ class Batch(AuditModel):
 
     # Fields
     batch_number = models.CharField(_("Batch Number"), max_length=100)
+    manufacture_date = models.DateField(_("Manufacture date"), null=True, blank=True)
     expiry_date = models.DateField(_("Expiry date"))
+
     initial_quantity = models.PositiveIntegerField(_("Initial quantity"), default=0)
     current_quantity = models.PositiveIntegerField(_("Current quantity"), default=0)
     unit_cost = models.DecimalField(_("Unit cost"), max_digits=12, decimal_places=2)
+
     status = models.PositiveIntegerField(
         _("Status"), choices=BatchStatus, default=BatchStatus.ACTIVE
     )
+    notes = models.TextField(_("Notes"), blank=True)
+
     # Relationships
     supply = models.ForeignKey(
         "Supply", on_delete=models.PROTECT, related_name="batches", verbose_name=_("Supply")
     )
+    supplier = models.ForeignKey(
+        "operations.Supplier",
+        on_delete=models.PROTECT,
+        related_name="batches",
+        verbose_name=_("Supplier"),
+        null=True,
+        blank=True,
+    )
+
+    active_objects = BatchActiveManager()
+    objects = models.Manager()
 
     class Meta:
         db_table = "batch"
         verbose_name = _("Batch")
-        verbose_name_plural = _("Batches")
         ordering = ["-expiry_date"]
+        verbose_name_plural = _("Batches")
         unique_together = (("supply", "batch_number"),)
 
     def __str__(self):

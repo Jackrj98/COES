@@ -1,7 +1,7 @@
 from datetime import date
 
 from dateutil.relativedelta import relativedelta
-from django.db.models import F, Sum
+from django.db.models import F, Q, Sum
 
 from apps.core.layers.dto import DatatableSearchBase
 from apps.inventory.models import Batch, InventoryMovement, Supply
@@ -13,20 +13,26 @@ class DatatableSearch(DatatableSearchBase):
         stock_filter = params.request.GET.get("stock")
         category_filter = params.request.GET.get("category")
 
-        qs = cls._build_base_query(params, Supply, "is_active")
-        qs = qs.annotate(total_stock=Sum("batches__current_quantity", distinct=True)).order_by(
-            "-total_stock"
+        active_batches_filter = Q(
+            batches__status=Batch.BatchStatus.ACTIVE, batches__deleted_at__isnull=True
         )
+
+        qs = cls._build_base_query(params, Supply, "is_active")
+        qs = qs.annotate(
+            total_stock=Sum(
+                "batches__current_quantity", filter=active_batches_filter, distinct=True
+            )
+        ).order_by("-total_stock")
 
         if stock_filter:
             if stock_filter == "critical":
-                qs = qs.filter(total_stock__lte=F("stock_min") * 0.2)
+                qs = qs.filter(Q(total_stock__lte=F("stock_min")) | Q(total_stock__isnull=True))
             elif stock_filter == "low":
                 qs = qs.filter(
-                    total_stock__gt=F("stock_min") * 0.2, total_stock__lte=F("stock_min")
+                    total_stock__gt=F("stock_min"), total_stock__lte=F("stock_min") * 1.5
                 )
             elif stock_filter == "normal":
-                qs = qs.filter(total_stock__gt=F("stock_min"))
+                qs = qs.filter(total_stock__gt=F("stock_min") * 1.5)
 
         if category_filter:
             qs = qs.filter(category__code=category_filter)

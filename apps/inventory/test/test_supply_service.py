@@ -1,6 +1,6 @@
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from pydantic import ValidationError
+from django.core.validators import ValidationError
 
 from apps.catalogs.models import Catalog, CatalogItem
 from apps.inventory.layers.applications import SupplyAppService
@@ -63,12 +63,17 @@ def service():
 
 @pytest.fixture
 def valid_payload(category, uom):
+    import uuid
+
+    unique_id = uuid.uuid4().hex[:6]
     return {
-        "name": "Suministro Test",
-        "code": "SUP001",
+        "name": f"Suministro {unique_id}",
+        "code": "SUP",
+        "barcode": f"BC-{unique_id}",
         "description": "Descripción de prueba",
         "is_active": True,
         "stock_min": 10,
+        "stock_max": 100,
         "category_id": category.id,
         "unit_of_measure_id": uom.id,
     }
@@ -86,14 +91,33 @@ class TestRegisterSupply:
         assert result.id is not None
         assert len(result.code) > 0
         assert result.code.isalnum()
-        assert result.name.lower() == "Suministro Test".lower()
+        assert "Suministro".lower() in result.name.lower()
         assert result.description == "Descripción de prueba"
 
     @pytest.mark.django_db
     def test_validation_error(self, service):
-        invalid_payload = {"name": "A"}
-        with pytest.raises(ValidationError):
+        invalid_payload = {
+            "name": "A",
+            "code": "BCF63D",
+            "barcode": "123456789",
+            "category_id": None,
+            "unit_of_measure_id": 1,
+            "description": "desc",
+        }
+
+        try:
             service.register_supply(invalid_payload)
+            pytest.fail("Debería haber lanzado una excepción")
+        except Exception as e:
+            assert isinstance(e, ValidationError), (
+                f"Se esperaba ValidationError, pero se obtuvo {type(e)}"
+            )
+
+            errors = getattr(e, "message_dict", {})
+            if not errors:
+                errors = e.messages
+
+            assert "category" in str(errors)
 
 
 class TestUpdateSupply:
@@ -146,4 +170,10 @@ class TestSaveUploadedFile:
         assert "inventory/supply/" in supply.image_url.name
 
 
-# --
+class TestRetrieveSupplyQueries:
+    @pytest.mark.django_db
+    def test_retrieve_by_term(self, service, valid_payload):
+        supply = service.register_supply(valid_payload)
+
+        results = service.retrieve_by_term(supply.code)
+        assert results.count() == 1

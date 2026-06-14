@@ -206,23 +206,22 @@ seed:
 	@printf "  3) catalogs\n"
 	@printf "  4) inventory\n"
 	@printf "  0) all\n"
-	@printf "${GREEN}Enter option: ${NC}"; \
-	read option; \
+	@printf "${GREEN}Enter option: ${NC}"
+	@read option; \
 	printf "${GREEN}Enter number of records: ${NC}"; \
 	read num; \
 	count=$${num:-$(NUMBER)}; \
 	case $$option in \
-		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
-		2) $(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV);; \
-		3) $(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV);; \
-		4) $(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV) ;; \
+		2) $(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV) ;; \
+		3) $(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV) ;; \
+		4) $(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV) ;; \
 		0) \
 			$(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV); \
 			$(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV); \
 			$(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV); \
-			$(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV); \
-			$(MANAGE) seed_inventory_movement --number=$$count --settings=$(SETTINGS).$(ENV);; \
-		*) printf "${RED}Invalid option${NC}\n";; \
+			$(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		*) printf "${RED}Invalid option${NC}\n" ;; \
 	esac
 
 # =============================================================================
