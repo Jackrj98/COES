@@ -108,7 +108,6 @@ class InventoryMovementAppService(BaseAppService):
             payload["movement_type"] = InventoryMovement.Type.OUTBOUND
             payload["status"] = InventoryMovement.MovementStatusChoices.COMPLETED
             dto = MovementDTO(**payload)
-            print("movement_type", dto)
 
             # Build the inventory movement
             builder = InventoryMovementBuilder()

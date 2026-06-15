@@ -1,12 +1,12 @@
 import logging
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Max
 from django.utils.translation import gettext_lazy as _
-from pydantic import ValidationError
 
 from apps.catalogs.layers.builders import CatalogBuilder
-from apps.catalogs.layers.dto import CatalogDatatableSearch, CatalogDTO
+from apps.catalogs.layers.dto import CatalogDatatableSearch
 from apps.catalogs.models import Catalog
 from apps.core.layers import BaseAppService
 
@@ -81,19 +81,18 @@ class CatalogAppService(BaseAppService):
         action = "updating" if instance else "creating"
 
         try:
-            dto = CatalogDTO(**payload)
-            self._validate_unique_code(dto.code, instance)
+            self._validate_unique_code(payload.get("code"), instance)
             catalog = (
-                builder.set_name(dto.name)
-                .set_code(dto.code)
-                .set_description(dto.description)
-                .set_priority(dto.priority)
-                .set_active(dto.is_active)
-                .save()
+                builder.set_name(payload.get("name"))
+                .set_code(payload.get("code"))
+                .set_description(payload.get("description"))
+                .set_priority(payload.get("priority"))
+                .set_active(payload.get("is_active"))
             )
             return catalog.build()
+
         except ValidationError as e:
-            logger.warning(f"Validation error {action} catalog: {e.json()}")
+            logger.warning(f"Validation error {action} catalog: {e.error_dict}")
             raise
         except Exception as e:
             logger.error(f"Error {action} catalog: {e}", exc_info=True)

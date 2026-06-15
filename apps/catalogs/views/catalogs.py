@@ -1,12 +1,10 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from pydantic import ValidationError
 
 from apps.catalogs.forms import CatalogBaseForm, CatalogFilterForm
 from apps.catalogs.layers.applications import CatalogAppService
@@ -25,7 +23,6 @@ DEFAULT_MODEL = Catalog
 DEFAULT_LIST_URL = reverse_lazy("catalogs:catalogs:list")
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogListView(CustomListView):
     model = DEFAULT_MODEL
     form_class = CatalogFilterForm
@@ -48,7 +45,6 @@ class CatalogListView(CustomListView):
         return self.success_url
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogDetailView(CustomDetailView):
     app_name = "catalogs"
     model = DEFAULT_MODEL
@@ -56,17 +52,11 @@ class CatalogDetailView(CustomDetailView):
     template_name = "catalogs/detail.html"
     permission_required = ["catalogs.view_catalog", "catalogs.view_catalogitem"]
 
-    def get_object(self, queryset=None):
-        """Cache the object to avoid duplicate queries."""
-        if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)  # noqa
-        return self._cached_object
-
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["is_admin"] = SecurityService.is_admin(self.request.user)
 
-        catalog = self.get_object()
+        catalog = self.object
         ctx["total_items"] = catalog.items.count()
         ctx["active_items"] = catalog.items.filter(is_active=True).count()
         ctx["filter_form"] = CatalogFilterForm()
@@ -96,20 +86,12 @@ class CatalogDetailView(CustomDetailView):
         return self.success_url
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     form_class = CatalogBaseForm
     success_url: str = DEFAULT_LIST_URL
     permission_required = "catalogs.add_catalog"
     template_name = "catalogs/create_or_update.html"
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        if "form" not in ctx:
-            ctx["form"] = self.get_form()
-
-        return ctx
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -122,8 +104,8 @@ class CatalogCreateView(CustomCreateView):
         service = CatalogAppService()
 
         try:
-            data = form.cleaned_data
-            service.register_catalog(payload={**data})
+            catalog_data = form.cleaned_data
+            service.register_catalog(payload=catalog_data)
             messages.success(
                 self.request,
                 self.success_message.format(model=self.model._meta.verbose_name),
@@ -131,9 +113,6 @@ class CatalogCreateView(CustomCreateView):
             )
             return redirect(self.success_url)
 
-        except ValidationError as e:
-            self.handle_pydantic_error(e, form)
-            return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
 
@@ -142,7 +121,6 @@ class CatalogCreateView(CustomCreateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = CatalogBaseForm

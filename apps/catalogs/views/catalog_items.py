@@ -1,15 +1,13 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from pydantic import ValidationError
 
 from apps.catalogs.forms import CatalogFilterForm, CatalogItemBaseForm
-from apps.catalogs.layers.applications import CatalogItemAppService
+from apps.catalogs.layers.applications import CatalogAppService, CatalogItemAppService
 from apps.catalogs.models import CatalogItem
 from apps.core.views.base import (
     CustomCreateView,
@@ -25,7 +23,6 @@ DEFAULT_MODEL = CatalogItem
 DEFAULT_LIST_URL = reverse_lazy("catalogs:items:list")
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogItemListView(CustomListView):
     model = DEFAULT_MODEL
     form_class = CatalogFilterForm
@@ -51,7 +48,6 @@ class CatalogItemListView(CustomListView):
         return reverse_lazy("catalogs:items:detail", kwargs=kwargs)
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogItemDetailView(CustomDetailView):
     app_name = "items"
     model = DEFAULT_MODEL
@@ -98,22 +94,14 @@ class CatalogItemDetailView(CustomDetailView):
         return reverse_lazy("catalogs:items:detail", kwargs=kwargs)
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogItemCreateView(CustomCreateView):
     model = DEFAULT_MODEL
     form_class = CatalogItemBaseForm
     permission_required = "catalogs.add_catalog"
     template_name = "catalogs/items/create_or_update.html"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["catalog_reference"] = self.kwargs.get("catalog_reference")
-        return kwargs
-
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        if "form" not in ctx:
-            ctx["form"] = self.get_form()
 
         kwargs = {"external_id": self.kwargs.get("catalog_reference")}
         breadcrumbs = ctx.get("breadcrumb", [])
@@ -127,71 +115,55 @@ class CatalogItemCreateView(CustomCreateView):
         ctx["cancel_url"] = url
         return ctx
 
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
+    def _get_catalog(self):
+        """Get catalog from URL reference."""
+        reference = self.kwargs.get("catalog_reference")
+        return CatalogAppService().retrieve_by_external(reference)
 
-        if form.is_valid():
-            return self.form_valid(form)
-        return self.form_invalid(form)
+    def get_initial(self):
+        initial = super().get_initial()
+        catalog = self._get_catalog()
+        initial["catalog"] = catalog
+        initial["priority"] = CatalogItemAppService().generate_next_priority(
+            catalog_code=catalog.code
+        )
+        return initial
 
-    def form_valid(self, form, **kwargs):
-        data = form.cleaned_data
-        service = CatalogItemAppService()
-
+    def form_valid(self, form):
         try:
-            service.register_item(
-                payload={**data}, catalog_reference=self.kwargs.get("catalog_reference")
+            CatalogItemAppService().register_item(
+                payload=form.cleaned_data, catalog_reference=self.kwargs.get("catalog_reference")
             )
+            model_name = self.model._meta.verbose_name
+
             messages.success(
-                self.request,
-                self.success_message.format(model=self.model._meta.verbose_name),
-                extra_tags="toast",
+                self.request, self.success_message.format(model=model_name), extra_tags="toast"
             )
             return redirect(self.get_success_url())
 
-        except ValidationError as e:
-            self.handle_pydantic_error(e, form)
+        except ValidationError:
             return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
 
-    def form_invalid(self, form):
-        messages.warning(self.request, self.failure_message)
-        return self.render_to_response(self.get_context_data(form=form))
-
     def get_success_url(self):
-        catalog_reference = self.kwargs.get("catalog_reference")
-        kwargs = {"external_id": catalog_reference}
-        return reverse_lazy("catalogs:catalogs:detail", kwargs=kwargs)
+        return reverse_lazy(
+            "catalogs:catalogs:detail", kwargs={"external_id": self.kwargs.get("catalog_reference")}
+        )
 
 
-@method_decorator(user_passes_test(SecurityService.require_access), name="dispatch")
 class CatalogItemUpdateView(CustomUpdateView):
     model = DEFAULT_MODEL
     form_class = CatalogItemBaseForm
     permission_required = "catalogs.change_catalog"
     template_name = "catalogs/items/create_or_update.html"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["catalog_reference"] = self.kwargs.get("catalog_reference")
-        return kwargs
-
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
 
-    def get_object(self, queryset=None):
-        if not hasattr(self, "_cached_object"):
-            self._cached_object = super().get_object(queryset)  # noqa
-        return self._cached_object
-
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        instance = self.get_object()
-        if "form" not in ctx:
-            ctx["form"] = self.get_form()
-
-        instance = self.get_object()
+        instance = self.object
         catalog_kwargs = {"external_id": instance.catalog.external_id}
 
         breadcrumbs = ctx.get("breadcrumb", [])
@@ -207,14 +179,16 @@ class CatalogItemUpdateView(CustomUpdateView):
         ctx["cancel_url"] = instance.get_absolute_url()
         return ctx
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.get_form()
+    def _get_catalog(self):
+        """Get catalog from URL reference."""
+        reference = self.kwargs.get("catalog_reference")
+        return CatalogAppService().retrieve_by_external(reference)
 
-        if form.is_valid():
-            return self.form_valid(form)
-
-        return self.form_invalid(form)
+    def get_initial(self):
+        initial = super().get_initial()
+        catalog = self._get_catalog()
+        initial["catalog"] = catalog
+        return initial
 
     def form_valid(self, form):
         service = CatalogItemAppService()
@@ -235,15 +209,8 @@ class CatalogItemUpdateView(CustomUpdateView):
             )
             return redirect(instance.get_absolute_url())
 
-        except ValidationError as e:
-            self.handle_pydantic_error(e, form)
-            return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
-
-    def form_invalid(self, form):
-        messages.warning(self.request, self.failure_message)
-        return self.render_to_response(self.get_context_data(form=form))
 
     def get_success_url(self):
         return redirect(self.object.get_absolute_url())

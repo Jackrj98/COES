@@ -15,6 +15,8 @@ class CatalogItemBuilder:
 
     def set_code(self, code: str) -> "CatalogItemBuilder":
         """Set item code."""
+        if not code or code.strip() == "":
+            raise ValueError("Item code cannot be empty")
         code = code.strip().upper()
         code = code.replace(" ", "_")
         code = "".join(c for c in code if c.isalnum() or c == "_")
@@ -53,4 +55,6 @@ class CatalogItemBuilder:
 
     def build(self) -> CatalogItem:
         """Build and return a catalog item instance."""
+        self.item.full_clean()
+        self.item.save()
         return self.item

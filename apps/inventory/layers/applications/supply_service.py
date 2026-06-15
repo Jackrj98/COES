@@ -142,9 +142,6 @@ class SupplyAppService(BaseAppService):
             return supply
 
         except ValidationError as e:
-            print(f"DEBUG - Atributos disponibles: {dir(e)}")
-            print(f"DEBUG - message_dict: {getattr(e, 'message_dict', 'NO DISPONIBLE')}")
-            print(f"DEBUG - error_dict: {getattr(e, 'error_dict', 'NO DISPONIBLE')}")
             logger.warning(f"Validation error: {e}")
             raise
         except Exception as e:

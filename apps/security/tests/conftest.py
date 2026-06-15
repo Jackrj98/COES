@@ -20,7 +20,6 @@ def setup_permissions_for_tests(django_db_setup, django_db_blocker):
     print("\n--- Sincronizando permisos manualmente para los tests ---")
 
     with django_db_blocker.unblock():
-        # ✅ Usar la constante ROLES en lugar de Permission.groups_permissions
         for role_key, role_data in ROLES.items():
             group_name = str(role_data.get("name"))
             if not group_name:
@@ -154,16 +153,6 @@ def specialist_client(client, user_factory, force_password=False):
 
     if hasattr(user, "_perm_cache"):
         del user._perm_cache
-
-    print(f"DEBUG: Grupos: {list(user.groups.all().values_list('name', flat=True))}")
-    print(f"DEBUG: Permisos: {user.get_all_permissions()}")
-
-    grupo = user.groups.first()
-    if grupo:
-        print(f"DEBUG: Nombre del grupo: {grupo.name}")
-        print(
-            f"DEBUG: Permisos en el grupo: {list(grupo.permissions.all().values_list('codename', flat=True))}"
-        )
 
     client.force_login(user)
     return client, user

@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock
 
 import pytest
-from pydantic import ValidationError
 
 from apps.catalogs.layers.applications.catalog_service import CatalogAppService
 from apps.catalogs.models import Catalog
@@ -123,8 +122,9 @@ class TestRegisterCatalog:
 
     @pytest.mark.django_db
     def test_raises_validation_error_on_invalid_payload(self, service):
-        invalid_payload = {"name": "Test"}  # Missing required fields
-        with pytest.raises(ValidationError):
+        invalid_payload = {"name": "Test"}  # Missing required fields (code, description, etc.)
+
+        with pytest.raises(ValueError, match="Catalog code cannot be empty"):
             service.register_catalog(invalid_payload)
 
 

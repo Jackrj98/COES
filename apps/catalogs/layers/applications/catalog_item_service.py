@@ -1,12 +1,12 @@
 import logging
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
-from pydantic import ValidationError
 
 from apps.catalogs.layers.builders import CatalogItemBuilder
-from apps.catalogs.layers.dto import CatalogDatatableSearch, CatalogItemDTO
+from apps.catalogs.layers.dto import CatalogDatatableSearch
 from apps.catalogs.models import Catalog, CatalogItem
 from apps.core.layers import BaseAppService
 
@@ -97,29 +97,6 @@ class CatalogItemAppService(BaseAppService):
             logger.exception(f"Failed to fetch catalogs: {e}")
             return params.result([]) if hasattr(params, "result") else []
 
-    def _validate_unique_code(self, code, catalog_id, instance=None):
-        """Validate that the code is unique within the catalog."""
-        queryset = self.model.active.filter(code=code, catalog_id=catalog_id)
-        if instance:
-            queryset = queryset.exclude(id=instance.id)
-
-        if queryset.exists():
-            raise ValidationError.from_exception_data(
-                "unique_code",
-                [
-                    {
-                        "type": "value_error",
-                        "loc": ("code",),
-                        "input": code,
-                        "ctx": {
-                            "error": _(
-                                "Catalog item with this code already exists in this catalog."
-                            ),
-                        },
-                    }
-                ],
-            )
-
     @transaction.atomic
     def save_item(self, payload, instance=None):
         """Create or update a catalog item.
@@ -136,22 +113,18 @@ class CatalogItemAppService(BaseAppService):
         action = "updating" if instance else "creating"
 
         try:
-            dto = CatalogItemDTO(**payload)
-            self._validate_unique_code(dto.code, dto.catalog_id, instance)
-
             catalog_item = (
-                builder.set_name(dto.name)
-                .set_code(dto.code)
-                .set_description(dto.description)
-                .set_priority(dto.priority)
-                .set_active(dto.is_active)
-                .set_extra(dto.extra)
-                .set_catalog(dto.catalog_id)
-                .save()
+                builder.set_name(payload.get("name"))
+                .set_code(payload.get("code"))
+                .set_description(payload.get("description"))
+                .set_priority(payload.get("priority"))
+                .set_active(payload.get("is_active"))
+                .set_extra(payload.get("extra"))
+                .set_catalog(payload.get("catalog_id"))
             )
             return catalog_item.build()
         except ValidationError as e:
-            logger.warning(f"Validation error {action} catalog item: {e.json()}")
+            logger.warning(f"Validation error {action} catalog item: {e.error_dict}")
             raise
         except Exception as e:
             logger.error(f"Error {action} catalog item: {e}", exc_info=True)
@@ -160,7 +133,6 @@ class CatalogItemAppService(BaseAppService):
     def register_item(self, payload, catalog_reference):
         """Register a new catalog item."""
         catalog = self.retrieve_catalog_by_external(catalog_reference)
-
         payload["catalog_id"] = catalog.id
         return self.save_item(payload, instance=None)
 
@@ -183,8 +155,7 @@ class CatalogItemAppService(BaseAppService):
         builder = CatalogItemBuilder(item=instance)
 
         try:
-            catalog_item = builder.set_active(is_active).save()
-            catalog_item.build()
+            catalog_item = builder.set_active(is_active).build()
             return catalog_item
         except Exception as e:
             logger.error(

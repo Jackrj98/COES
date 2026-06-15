@@ -58,15 +58,12 @@ const columns = [
         className: DataTableFactory.classes.center,
         render: (data) => {
             return `
-                 <div class="d-flex flex-column" style="max-width: 12vw; min-width: 0;">
-                    <span class="text-truncate bg-secondary bg-opacity-25 rounded-pill px-3 py-1 
-                        d-inline-block text-center w-100" 
-                            data-bs-toggle="tooltip" 
+                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill py-2" style="width: 10vw"
+                     data-bs-toggle="tooltip" 
                             data-bs-placement="top" 
                             title="${data || '-'}">
-                        <span class="fw-semibold text-secondary">${data || '-'}</span>
-                    </span>
-                </div>
+                    ${data}
+                </span>
             `;
         }
     },
@@ -77,15 +74,12 @@ const columns = [
         className: DataTableFactory.classes.center,
         render: (data) => {
             return `
-                 <div class="d-flex flex-column" style="max-width: 12vw; min-width: 0;">
-                    <span class="text-truncate bg-secondary bg-opacity-25 rounded-pill px-3 py-1 
-                        d-inline-block text-center w-100" 
-                            data-bs-toggle="tooltip" 
+                   <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill py-2" style="width: 6vw"
+                     data-bs-toggle="tooltip" 
                             data-bs-placement="top" 
                             title="${data || '-'}">
-                        <span class="fw-semibold text-secondary">${data || '-'}</span>
-                    </span>
-                </div>
+                    ${data}
+                </span>
             `;
         }
     },
@@ -98,12 +92,11 @@ const columns = [
             const status = data ? 1 : 0;
             const label = statusChoices[status];
             const color = statusColorChoices[status];
-            const icon = data ? 'bi-toggle-on' : 'bi-toggle-off';
 
             return `
-                <span class="bg-${color} bg-opacity-25 rounded-pill px-3 py-1 d-inline-block text-center w-100">
-                    <span class="fw-semibold text-${color}">${label}</span>
-                </span>
+                 <span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill py-2" style="width: 10vw">
+                    ${label}
+                 </span>
             `;
         }
     },

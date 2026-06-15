@@ -2,7 +2,7 @@ from crispy_forms.helper import FormHelper
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from apps.catalogs.layers.applications import CatalogAppService, CatalogItemAppService
+from apps.catalogs.layers.applications import CatalogAppService
 from apps.catalogs.models import Catalog, CatalogItem
 from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
 
@@ -54,8 +54,9 @@ class CatalogBaseForm(forms.ModelForm):
 class CatalogItemBaseForm(forms.ModelForm):
     class Meta:
         model = CatalogItem
-        fields = ["name", "code", "extra", "description", "is_active", "priority"]
+        fields = ["name", "code", "extra", "description", "is_active", "priority", "catalog"]
         widgets = {
+            "catalog": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
             "name": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Ej: Antibioticos"}
             ),
@@ -71,7 +72,6 @@ class CatalogItemBaseForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        catalog_reference = kwargs.pop("catalog_reference", None)
 
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -79,7 +79,3 @@ class CatalogItemBaseForm(forms.ModelForm):
         self.helper.error_text_inline = True
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
-
-        service = CatalogItemAppService()
-        catalog = CatalogAppService().retrieve_by_external(external_id=catalog_reference)
-        self.fields["priority"].initial = service.generate_next_priority(catalog_code=catalog.code)

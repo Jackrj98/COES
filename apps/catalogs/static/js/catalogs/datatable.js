@@ -59,15 +59,12 @@ const columns = [
         className: DataTableFactory.classes.center,
         render: (data) => {
             return `
-                 <div class="d-flex flex-column" style="max-width: 12vw; min-width: 0;">
-                    <span class="text-truncate bg-secondary bg-opacity-25 rounded-pill px-3 py-1 
-                        d-inline-block text-center w-100" 
-                            data-bs-toggle="tooltip" 
+                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill py-2" style="width: 10vw"
+                 data-bs-toggle="tooltip" 
                             data-bs-placement="top" 
                             title="${data || '-'}">
-                        <span class="fw-semibold text-secondary">${data || '-'}</span>
-                    </span>
-                </div>
+                    ${data}
+                </span>
             `;
         }
     },
@@ -78,18 +75,16 @@ const columns = [
         className: DataTableFactory.classes.center,
         render: (data) => {
             return `
-                <span class="bg-primary bg-opacity-25 rounded-pill px-3 py-1"
-                        style="min-width: 150px; cursor: default; width: 130px">
-                    <span class="fw-semibold text-primary">${data}</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill py-2" style="width: 5vw">
+                    ${data}
                 </span>
             `;
-
         }
     },
     {
         orderable: false,
         data: "is_active",
-        width: "14%",
+        width: "10%",
         className: DataTableFactory.classes.center,
         render: (data) => {
             const status = data ? 1 : 0;
@@ -98,8 +93,8 @@ const columns = [
             const icon = data ? 'bi-toggle-on' : 'bi-toggle-off';
 
             return `
-                <span class="bg-${color} bg-opacity-25 rounded-pill px-3 py-1 d-inline-block text-center w-100">
-                    <span class="fw-semibold text-${color}">${label}</span>
+               <span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill py-2" style="width: 10vw">
+                    ${label}
                 </span>
             `;
         }
@@ -110,7 +105,7 @@ const columns = [
         width: "14%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
-            const {full} = parseDateTime(data);
+            const {full, time} = parseDateTime(data);
             return `
                 <div class="d-flex flex-column align-items-end gap-2">
                     <small class="text-muted">${full}</small>
@@ -125,8 +120,6 @@ const columns = [
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
             const detailUrl = `${urlPaginator}${data}/`;
-            const editUrl = `${urlPaginator}${data}/update`;
-            const statusUrl = `${urlPaginator}${data}/update-status/`;
 
             return `
                 <div class="d-flex justify-content-center gap-1">                    
@@ -136,14 +129,6 @@ const columns = [
                             title="Ver detalles" 
                             onclick="window.location.href='${detailUrl}'">
                         <i class="bi bi-eye fs-6"></i>
-                    </button>
-                    
-                    <button type="button" class="btn btn-icon icon-left btn-outline-secondary bg-opacity-25 rounded-circle border-0" 
-                            data-bs-toggle="tooltip" 
-                            data-bs-placement="top" 
-                            title="Editar detalles" 
-                            onclick="window.location.href='${editUrl}'">
-                        <i class="bi bi-pencil-square fs-6"></i>
                     </button>
                 </div>
             `;

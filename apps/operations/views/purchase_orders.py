@@ -262,7 +262,6 @@ class PurchaseOrderUpdateView(PurchaseFormSetMixin, CustomUpdateView):
 
         if not data:
             for form in formset.forms:
-                print(form.instance.batch.expiry_date)
                 if form.instance.pk and form.instance.batch:
                     form.initial["batch_number"] = form.instance.batch.batch_number
                     form.initial["expiry_date"] = form.instance.batch.expiry_date.strftime(
