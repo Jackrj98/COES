@@ -51,17 +51,17 @@
                 {% if request.user|has_any_perm:"operations.view_purchaseorders,operations.view_exitorders,operations.view_suppliers" %}
                     <li class="sidebar-title">{% trans 'Operations'|capfirst %}</li>
                 {% endif %}
-                {% if perms.operations.view_purchaseorders %}
-                    <li class="sidebar-item {% active 'operations:inbound_order:list' %}">
-                        <a href="{% url 'operations:inbound_order:list' %}" class='sidebar-link'>
+                {% if perms.operations.view_inbound_orders %}
+                    <li class="sidebar-item {% active 'operations:inbound:list' %}">
+                        <a href="{% url 'operations:inbound:list' %}" class='sidebar-link'>
                             <i class="bi bi-box-arrow-in-right"></i> <span>{% trans 'Inbound Orders'|capfirst %}</span>
                         </a>
                     </li>
                 {% endif %}
-                {% if perms.operations.view_exitorders %}
-                    <li class="sidebar-item {% active 'operations:outbound_order:list' %}">
-                        <a href="{% url 'operations:outbound_order:list' %}" class='sidebar-link'>
-                            <i class="bi bi-box-arrow-left"></i> <span>{% trans 'Exit Orders'|capfirst %}</span>
+                {% if perms.operations.view_outbound_orders%}
+                    <li class="sidebar-item {% active 'operations:outbound:list' %}">
+                        <a href="{% url 'operations:outbound:list' %}" class='sidebar-link'>
+                            <i class="bi bi-box-arrow-left"></i> <span>{% trans 'Outbound Orders'|capfirst %}</span>
                         </a>
                     </li>
                 {% endif %}

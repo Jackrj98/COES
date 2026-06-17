@@ -96,8 +96,10 @@ class BatchAppService(BaseAppService):
                 .set_initial_quantity(payload.get("initial_quantity"))
                 .set_current_quantity(payload.get("current_quantity"))
                 .set_status(payload.get("status"))
+                .set_notes(payload.get("notes"))
                 .set_is_active(payload.get("is_active"))
                 .set_supply(payload.get("supply_id"))
+                .set_supplier(payload.get("supplier_id"))
                 .build()
             )
 

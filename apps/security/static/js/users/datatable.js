@@ -44,12 +44,12 @@ const userColumns = [
                 <div class="d-flex align-items-center gap-3">
                     <div class="bg-secondary bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
                          style="width: 40px; height: 40px;">
-                        <span class="font-bold fs-6 text-secondary">
+                        <span class="fw-bold fs-6">
                             ${fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                         </span>
                     </div>
                     <div>
-                        <div class="fw-semibold text-white">${fullName}</div>
+                        <div class="fw-semibold">${fullName}</div>
                         <a href="mailto:${data}" class="text-muted small text-truncate d-block" style="max-width: 280px;">
                             ${data}
                         </a>

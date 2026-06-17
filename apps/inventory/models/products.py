@@ -146,9 +146,6 @@ class Batch(AuditModel):
         blank=True,
     )
 
-    active_objects = BatchActiveManager()
-    objects = models.Manager()
-
     class Meta:
         db_table = "batch"
         verbose_name = _("Batch")

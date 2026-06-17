@@ -11,6 +11,7 @@ const FormsetManager = {
         const template = document.getElementById('empty-form-template');
         if (!template) return;
 
+        // Limpiar template: reemplazar __prefix__ y corregir IDs/Names
         let html = template.innerHTML.replace(/__prefix__/g, formCount)
             .replace(/id="([^"]*)"/g, (match, id) => `id="${id.replace(/__prefix__/g, formCount)}"`);
 
@@ -18,6 +19,7 @@ const FormsetManager = {
         totalForms.value = formCount + 1;
 
         const lastRow = container.lastElementChild;
+        // IMPORTANTE: Llamar al callback para inicializar Select2 en la nueva fila
         if (onRowAdded) onRowAdded(lastRow, formCount);
     },
 
@@ -48,94 +50,32 @@ const FormsetManager = {
 const InventoryLogic = {
     initRow: function (row, index) {
         const select = row.querySelector('select[name$="-supply"]');
-        if (select) this.initSelect2(select, index);
+        if (select) this.initSelect2(select);
     },
 
-    initSelect2: function (select, index) {
-        if ($(select).hasClass("select2-hidden-accessible")) {
-            return;
-        }
+    initSelect2: function (select) {
+        if ($(select).hasClass("select2-hidden-accessible")) return;
+
         $(select).select2({
             theme: 'bootstrap-5',
             width: '100%',
-            ajax: {
-                url: supplySearchUrl,
-                dataType: 'json',
-                delay: 300,
-                data: (params) => {
-                    const selectedIds = Array.from(document.querySelectorAll('select[name$="-supply"]'))
-                        .filter(s => s !== select && s.value)
-                        .map(s => s.value);
-                    return {
-                        q: params.term,
-                        type: 0
-                    };
-                },
-                processResults: (data) => ({
-                    results: data.results.map(i => ({...i, id: i.id, text: i.text}))
-                })
-            }
-        }).on('select2:select', (e) => this.handleSelection(select, e.params.data));
-    },
-
-    handleSelection: function (selectElement, data) {
-        const row = selectElement.closest('.form-row');
-        const stock = parseFloat(data.stock || 0);
-
-        row.querySelector('.current-stock').textContent = stock;
-        const newStockSpan = row.querySelector('.new-stock');
-        const qtyInput = row.querySelector('input[name$="-quantity_requested"]');
-
-        qtyInput.oninput = null;
-        qtyInput.addEventListener('input', function () {
-            let val = Math.min(parseFloat(this.value) || 0, stock);
-            if (this.value != val) this.value = val;
-
-            const remaining = stock - val;
-            newStockSpan.textContent = remaining;
-            newStockSpan.style.color = remaining === 0 ? 'green' : 'orange';
-        }, {once: false});
-    },
-
-    hydrateRows: async function () {
-        const rows = document.querySelectorAll('.form-row:not([style*="display: none"])');
-        for (const row of rows) {
-            const select = row.querySelector('select[name$="-supply"]');
-            if (select && select.value) {
-                const codeToSearch = select.value; // Este es el código (ej: 'DES-8153')
-                try {
-                    // Usamos el mismo parámetro 'q' que usa tu buscador AJAX
-                    const response = await fetch(`${supplySearchUrl}?q=${encodeURIComponent(codeToSearch)}&type=1`);
-                    const data = await response.json();
-
-                    const match = data.results.find(i => i.code === codeToSearch || i.id == codeToSearch);
-
-                    if (match) {
-                        this.handleSelection(select, match);
-
-                        const qtyInput = row.querySelector('input[name$="-quantity_requested"]');
-                        if (qtyInput && qtyInput.value > 0) {
-                            qtyInput.dispatchEvent(new Event('input'));
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error al hidratar la fila:", error);
-                }
-            }
-        }
+            placeholder: "Seleccione un insumo",
+            allowClear: true
+        });
     }
 };
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const container = document.getElementById('form-container');
     const totalForms = document.querySelector("input[name$='-TOTAL_FORMS']");
 
     if (container && totalForms) {
-        FormsetManager.init(container, totalForms, InventoryLogic.initRow.bind(InventoryLogic));
+        FormsetManager.init(container, totalForms, (row, idx) => {
+            InventoryLogic.initRow(row, idx);
+        });
 
-        container.querySelectorAll('.form-row').forEach((row, idx) => InventoryLogic.initRow(row, idx));
-
-        InventoryLogic.hydrateRows();
+        container.querySelectorAll('.form-row').forEach((row, idx) => {
+            InventoryLogic.initRow(row, idx);
+        });
     }
 });

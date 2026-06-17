@@ -54,6 +54,13 @@ class InventoryMovement(AuditModel):
         blank=True,
         related_name="movements",
     )
+    inventory_order = models.ForeignKey(
+        "operations.InventoryOrder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movements",
+    )
 
     class Meta:
         db_table = "inventory_movement"

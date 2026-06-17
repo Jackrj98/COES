@@ -108,8 +108,7 @@ const columns = [
         orderable: false,
         data: "external_id", width: "7%", className: DataTableFactory.classes.center,
         render: (data, type, row) => {
-            const {purchase_order__order_number: inOrder, exit_order__order_number: ouOrder} = row;
-            const order = inOrder || ouOrder;
+            const order = row.inventory_order__order_number || "-";
             return  order ? `<small class="font-monospace text-muted">${order}</small>` : '<span class="text-muted">—</span>'
         }
     },

@@ -22,31 +22,9 @@ $(document).ready(function () {
 const columns = [
     {
         orderable: false,
-        data: "external_id",
-        width: "3%",
-        className: DataTableFactory.classes.center,
-        render: (data, type, row, meta) => {
-            return meta.settings._iDisplayStart + meta.row + 1;
-        }
-    },
-    {
-        orderable: false,
         data: "order_number",
-        width: "10%",
-        className: DataTableFactory.classes.justify,
-        render: (data, type, row) => {
-            const detailUrl = `${urlPaginator}${row.external_id}/`;
-            return `
-                <a href="${detailUrl}" 
-                   class="text-decoration-none fw-semibold" 
-                   data-bs-toggle="tooltip" 
-                   data-bs-placement="top" 
-                   title="Ver detalles">
-                    <span class="d-inline-block text-truncate" style="max-width: 100%;">
-                        ${data}
-                    </span>
-            `
-        }
+        width: "22%",
+        className: DataTableFactory.classes.justify
     },
     {
         orderable: false,
@@ -57,37 +35,15 @@ const columns = [
     },
     {
         orderable: false,
-        data: "status",
-        width: "12%",
-        className: DataTableFactory.classes.center,
-        render: (data) => {
-            const {color, label} = statusChoices[data];
-            return `
-                <span class="text-truncate bg-${color} bg-opacity-10 rounded-pill px-3 
-                            d-inline-block text-center w-100"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          data-bs-original-title="${label}">
-                        <span class="fw-semibold text-${color}">${label}</span>
-                </span>`;
-        }
+        data: "requested_by",
+        width: "2%",
+        className: DataTableFactory.classes.center
     },
     {
         orderable: false,
-        data: "line_items",
-        width: "8%",
-        className: DataTableFactory.classes.center,
-        render: (data) => {
-            return `
-                <span class="text-truncate bg-primary bg-opacity-10 rounded-pill px-3 
-                            d-inline-block text-center w-100"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          data-bs-original-title="${data} ítems">
-                        <span class="fw-semibold text-primary">${data} ítems</span>
-                </span>
-            `;
-        }
+        data: "items",
+        width: "4%",
+        className: DataTableFactory.classes.center
     },
     {
         orderable: false,
@@ -103,19 +59,37 @@ const columns = [
         }
     },
     {
+        orderable: false,
+        data: "status",
+        width: "14%",
+        className: DataTableFactory.classes.center,
+        render: (data) => {
+            const status = data ? 1 : 0;
+            const label = statusChoices[status];
+            const color = statusColorChoices[status];
+            const icon = data ? 'bi-toggle-on' : 'bi-toggle-off';
+
+            return `
+                <span class="text-truncate bg-${color} bg-opacity-25 rounded-pill px-3 
+                            d-inline-block text-center w-100"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-original-title="${label}">
+                        <span class="fw-semibold text-${color}">${label}</span>
+                    </span>
+            `;
+        }
+    },
+    {
         orderable: true,
         data: "created_at",
         width: "14%",
-        className: DataTableFactory.classes.justify,
+        className: DataTableFactory.classes.center,
         render: (data, type, row) => {
-            const createdBy = row.created_by || '';
-            const updatedBy = row.updated_by || '';
-            const userName = updatedBy || createdBy;
-            const {full, time} = parseDateTime(data);
+            const {full} = parseDateTime(data);
             return `
                 <div class="d-flex flex-column align-items-end gap-2">
-                    <small class="text-muted">${full} - ${time}</small>
-                    <small class="text-muted">${userName}</small>
+                    <small class="text-muted">${full}</small>
                 </div>
             `;
         }

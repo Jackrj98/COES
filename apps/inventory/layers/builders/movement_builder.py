@@ -7,6 +7,11 @@ class InventoryMovementBuilder:
     def __init__(self, movement=None):
         self.movement = movement or InventoryMovement()
 
+    def set_inventory_order(self, order_id) -> "InventoryMovementBuilder":
+        if order_id:
+            self.movement.inventory_order_id = order_id
+        return self
+
     def set_batch(self, batch_id) -> "InventoryMovementBuilder":
         if batch_id:
             self.movement.batch_id = batch_id

@@ -90,6 +90,12 @@ class BatchBuilder:
                     self.batch.status = batch_status.ACTIVE
         return self
 
+    def set_notes(self, notes: str) -> "BatchBuilder":
+        """Set batch notes."""
+        if notes:
+            self.batch.notes = notes.strip()[:500]
+        return self
+
     def set_supply(self, supply_id: int) -> "BatchBuilder":
         """Set supply foreign key."""
         if not supply_id:
@@ -97,6 +103,11 @@ class BatchBuilder:
 
         if supply_id:
             self.batch.supply_id = supply_id
+        return self
+
+    def set_supplier(self, supplier_id: int) -> "BatchBuilder":
+        if supplier_id:
+            self.batch.supplier_id = supplier_id
         return self
 
     def build(self) -> Batch:

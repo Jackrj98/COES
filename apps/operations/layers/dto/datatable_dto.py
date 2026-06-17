@@ -1,5 +1,11 @@
 from apps.core.layers.dto import DatatableSearchBase
-from apps.operations.models import ExitOrder, PurchaseOrder, Supplier
+from apps.operations.models import (
+    ExitOrder,
+    InboundOrder,
+    OutboundOrder,
+    PurchaseOrder,
+    Supplier,
+)
 
 
 class DatatableSearch(DatatableSearchBase):
@@ -55,6 +61,42 @@ class DatatableSearch(DatatableSearchBase):
         if search:
             search = search.strip()
             search_fields = ["order_number"]
+            qs = cls._apply_search(qs, search, search_fields)
+
+        return cls._prepare_response(params, qs)
+
+    @classmethod
+    def retrieve_orders(cls, params):
+        search = params.request.GET.get("search")
+
+        qs = cls._build_base_query(params, InboundOrder, "status")
+        qs = qs.prefetch_related("details", "details__supply", "details__batch")
+
+        if search:
+            search = search.strip()
+            search_fields = [
+                "order_number",
+                "supplier__last_name",
+                "supplier__document_number",
+                "created_by",
+            ]
+            qs = cls._apply_search(qs, search, search_fields)
+
+        return cls._prepare_response(params, qs)
+
+    @classmethod
+    def retrieve_outbound_orders(cls, params):
+        search = params.request.GET.get("search")
+
+        qs = cls._build_base_query(params, OutboundOrder, "status")
+        qs = qs.prefetch_related("details", "details__supply", "details__batch")
+
+        if search:
+            search = search.strip()
+            search_fields = [
+                "order_number",
+                "created_by",
+            ]
             qs = cls._apply_search(qs, search, search_fields)
 
         return cls._prepare_response(params, qs)

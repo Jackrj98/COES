@@ -1,0 +1,43 @@
+{% extends 'components/_form.html' %}
+{% load crispy_forms_filters crispy_forms_tags %}
+
+{% block content %}
+    <section>
+        <div class="row d-flex justify-content-center g-0">
+            <div class="col-xl-12 col-md-12 mb-4">
+                <form class="form form-vertical" method="post">
+                    <div class="card">
+                        <div class="card-body">
+                            {% csrf_token %}
+                            {% crispy form %}
+                        </div>
+                        <datalist id="inbound-list">
+                            {% for motive in inbound_list %}
+                                <option value="{{ motive.name }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    {% include 'operations/inbound/formset_v2.html' %}
+
+                    {# ACTIONS #}
+                    <hr class="w-100 my-2 py-2 px-2">
+                    <div class="col-12 d-flex justify-content-end">
+                        <a class="btn btn-outline-secondary me-3" href="{{ cancel_url }}">
+                            {% trans 'Cancel'|title %}
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            {% trans 'Submit'|title %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
+
+{% block extra_javascript %}
+    <script type="application/javascript">
+        const supplySearchUrl = "{{ supply_search_url }}";
+    </script>
+    <script src="{% static 'js/operations/inbound/formset.js' %}"></script>
+{% endblock extra_javascript %}

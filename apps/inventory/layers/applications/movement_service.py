@@ -1,12 +1,11 @@
 import logging
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.utils.translation import gettext_lazy as _
-from pydantic import ValidationError
 
 from apps.core.layers import BaseAppService
 from apps.inventory.layers.builders import InventoryMovementBuilder
-from apps.inventory.layers.dto import DatatableSearch, MovementDTO
+from apps.inventory.layers.dto import DatatableSearch
 from apps.inventory.models import InventoryMovement
 
 logger = logging.getLogger(__name__)
@@ -61,12 +60,15 @@ class InventoryMovementAppService(BaseAppService):
             "batch__supply__code",
             "purchase_order__order_number",
             "exit_order__order_number",
+            "inventory_order__order_number",
+            "inventory_order",
             "created_by",
         ]
         try:
             DatatableSearch.retrieve_inventory_movements(params)
             queryset = params.items
             qs = list(queryset.values(*fields))
+            print(qs)
             return params.result(qs)
         except Exception as e:
             logger.exception(f"Failed to fetch inventory movements: {e}")
@@ -75,18 +77,18 @@ class InventoryMovementAppService(BaseAppService):
     @transaction.atomic
     def register_movement(self, payload: dict) -> InventoryMovement:
         try:
-            dto = MovementDTO(**payload)
             # Build the inventory movement
             builder = InventoryMovementBuilder()
             movement = (
-                builder.set_batch(dto.batch_id)
-                .set_type(dto.movement_type)
-                .set_concept(dto.concept)
-                .set_quantity(dto.quantity)
-                .set_observation(dto.observation)
-                .set_stock_data(dto.previous_stock, dto.after_stock)
-                .set_unit_cost(dto.unit_cost_at_movement)
-                .set_status(dto.status)
+                builder.set_inventory_order(payload.get("order_id"))
+                .set_batch(payload.get("batch_id"))
+                .set_type(payload.get("movement_type"))
+                .set_concept(payload.get("concept"))
+                .set_quantity(payload.get("quantity"))
+                .set_observation(payload.get("observation"))
+                .set_stock_data(payload.get("previous_stock"), payload.get("after_stock"))
+                .set_unit_cost(payload.get("unit_cost_at_movement"))
+                .set_status(payload.get("status"))
                 .save()
                 .build()
             )
@@ -94,106 +96,8 @@ class InventoryMovementAppService(BaseAppService):
             return movement
 
         except ValidationError as e:
-            logger.warning(f"Validation error: {e.json()}")
+            logger.warning(f"Validation error: {e.error_dict}")
             raise
         except Exception as e:
             logger.error(f"Error saving inventory movement: {e}", exc_info=True)
-
-            raise
-
-    @transaction.atomic
-    def register_outbound(self, payload: dict) -> InventoryMovement:
-        """Register an outbound inventory movement."""
-        try:
-            payload["movement_type"] = InventoryMovement.Type.OUTBOUND
-            payload["status"] = InventoryMovement.MovementStatusChoices.COMPLETED
-            dto = MovementDTO(**payload)
-
-            # Build the inventory movement
-            builder = InventoryMovementBuilder()
-            movement = (
-                builder.set_batch(dto.batch_id)
-                .set_type(dto.movement_type)
-                .set_concept(dto.concept)
-                .set_quantity(dto.quantity)
-                .set_observation(dto.observation)
-                .set_stock_data(dto.previous_stock, dto.after_stock)
-                .set_unit_cost(dto.unit_cost_at_movement)
-                .set_status(dto.status)
-                .build()
-            )
-
-            movement.save()
-
-            logger.info(f"Outbound movement registered: {movement.id} - {movement.quantity} units")
-            return movement
-
-        except ValidationError as e:
-            logger.warning(f"Validation error: {e.json() if hasattr(e, 'json') else str(e)}")
-            raise
-        except Exception as e:
-            logger.error(f"Error saving inventory movement: {e}", exc_info=True)
-            raise
-
-    @transaction.atomic
-    def cancel_movement(self, movement_id: int, reason: str):
-        """Undo a transaction by creating an offsetting entry."""
-        try:
-            # 1. Recovery original movement
-            original = self.model.objects.get(id=movement_id)
-            original.status = InventoryMovement.Status.CANCELLED
-            original.save()
-
-            builder = InventoryMovementBuilder()
-            reversal = (
-                builder.set_batch(original.batch)
-                .set_type(InventoryMovement.Type.ADJUSTMENT)
-                .set_status(InventoryMovement.MovementStatusChoices.COMPLETED)
-                .set_concept(f"_('Reversal of movement') #{original.id}")
-                .set_quantity(original.quantity)
-                .set_observation(f"_('Voided'): {reason}")
-                .set_stock_data(previous=original.after_stock, after=original.previous_stock)
-                .set_unit_cost(original.unit_cost_at_movement)
-                .save()
-                .build()
-            )
-
-            return reversal
-
-        except ValidationError as e:
-            logger.warning(f"Validation error: {e.json()}")
-            raise
-        except Exception as e:
-            logger.error(f"Error saving inventory movement: {e}", exc_info=True)
-            raise
-
-    def register_outbounds(self, payload: dict, batch):
-        builder = InventoryMovementBuilder()
-
-        try:
-            dto = MovementDTO(**payload)
-            if batch.stock < dto.quantity:
-                raise ValueError(_(f"Stock for batch {batch.number} is insufficient."))
-
-            current_stock = max(0, int(batch.stock - dto.quantity))
-
-            reversal = (
-                builder.set_batch(dto.batch_id)
-                .set_type(self.model.TYPE.OUTBOUND)
-                .set_status(self.model.Status.PENDING)
-                .set_concept(dto.concept)
-                .set_quantity(dto.quantity)
-                .set_observation(dto.observation)
-                .set_stock_data(dto.previous_stock, current_stock)
-                .set_unit_cost(dto.unit_cost_at_movement)
-                .set_movement_date(dto.movement_date)
-                .save()
-                .build()
-            )
-            return reversal
-        except ValidationError as e:
-            logger.warning(f"Validation error: {e.json()}")
-            raise
-        except Exception as e:
-            logger.error(f"Error saving movement: {e}", exc_info=True)
             raise

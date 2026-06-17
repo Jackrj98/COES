@@ -10,6 +10,7 @@ $(document).ready(function () {
         columns: columns,
         order: [],
         filters: [
+            {selector: "#id_date_from", field: "created_at", type: "date-range"},
             {selector: "#id_status", field: "status"},
             {selector: "#id_search", field: "search"},
         ],
@@ -50,10 +51,20 @@ const columns = [
     },
     {
         orderable: false,
-        data: "motive",
-        width: "12%",
-        className: DataTableFactory.classes.center,
-        render: (data) => `<span class="fw-mono">${data || '—'}</span>`
+        data: "supplier__business_name",
+        width: "25%",
+        className: DataTableFactory.classes.justify,
+        render: (data, type, row) => {
+            const lastName = row.supplier__last_name || '';
+            const firstName = row.supplier__first_name || '';
+            const fullName = `${lastName}, ${firstName}`;
+            return `
+                <span class="text-truncate" style="max-width: 100%;">
+                    ${data}
+                </span>
+                <small class="text-muted d-block">${fullName}</small>
+            `;
+        }
     },
     {
         orderable: false,
@@ -74,6 +85,20 @@ const columns = [
     },
     {
         orderable: false,
+        data: "scheduled_date",
+        width: "12%",
+        className: DataTableFactory.classes.center,
+        render: (data) => {
+            const {full, time} = parseDateTime(data);
+            return `
+                <div class="d-flex flex-column align-items-end gap-2">
+                    <small class="text-muted">${full}</small>
+                </div>
+            `;
+        }
+    },
+    {
+        orderable: false,
         data: "line_items",
         width: "8%",
         className: DataTableFactory.classes.center,
@@ -87,19 +112,6 @@ const columns = [
                         <span class="fw-semibold text-primary">${data} ítems</span>
                 </span>
             `;
-        }
-    },
-    {
-        orderable: false,
-        data: "total",
-        width: "12%",
-        className: DataTableFactory.classes.center,
-        render: (data) => {
-            const value = parseFloat(data);
-            if (!isNaN(value)) {
-                return `<span class="fw-mono">$${value.toFixed(2)}</span>`;
-            }
-            return `<span class="fw-mono">-</span>`;
         }
     },
     {
@@ -122,7 +134,7 @@ const columns = [
     },
     {
         data: "external_id",
-        width: "4%",
+        width: "7%",
         orderable: false,
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
