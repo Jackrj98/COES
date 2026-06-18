@@ -14,6 +14,7 @@ from apps.core.layers import BaseAppService
 from apps.security.layers.builders import PersonBuilder, UserBuilder
 from apps.security.layers.dto import DatatableSearch
 from apps.security.models import User
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +27,39 @@ class UserAppService(BaseAppService):
 
     @staticmethod
     def retrieve_groups():
-        """Retrieve all available groups."""
+        """Retrieve all available groups with caching."""
+        cache_key = "all_groups_list"
+        cached_groups = cache.get(cache_key)
+
+        if cached_groups is not None:
+            return cached_groups
+
         try:
+            # Verificar si la tabla existe
+            from django.db import connection
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                               SELECT EXISTS (
+                                   SELECT FROM information_schema.tables
+                                   WHERE table_name='auth_group'
+                               );
+                               """)
+                table_exists = cursor.fetchone()[0]
+
+            if not table_exists:
+                logger.warning("auth_group table does not exist. Run migrations.")
+                return []
+
             groups = Group.objects.all()
-            return [(group.name, _(group.name)) for group in groups]
-        except Group.DoesNotExist:
-            return []
-        except Exception as e:
-            logger.exception(f"Unexpected error retrieving groups: {e}")
+            result = [(group.name, _(group.name)) for group in groups]
+
+            # Cache por 1 hora
+            cache.set(cache_key, result, 3600)
+            return result
+
+        except (Group.DoesNotExist, Exception) as e:
+            logger.exception(f"Error retrieving groups: {e}")
             return []
 
     @staticmethod

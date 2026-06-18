@@ -40,20 +40,6 @@ class InventoryMovement(AuditModel):
 
     # Relationships
     batch = models.ForeignKey("inventory.Batch", on_delete=models.PROTECT, related_name="movements")
-    purchase_order = models.ForeignKey(
-        "operations.PurchaseOrder",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="movements",
-    )
-    exit_order = models.ForeignKey(
-        "operations.ExitOrder",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="movements",
-    )
     inventory_order = models.ForeignKey(
         "operations.InventoryOrder",
         on_delete=models.SET_NULL,
@@ -70,8 +56,7 @@ class InventoryMovement(AuditModel):
         indexes = [
             models.Index(fields=["batch", "-created_at"]),
             models.Index(fields=["movement_type", "status"]),
-            models.Index(fields=["purchase_order"]),
-            models.Index(fields=["exit_order"]),
+            models.Index(fields=["inventory_order"]),
         ]
         permissions = (("view_inventorymovements", "Can view movements list"),)
 

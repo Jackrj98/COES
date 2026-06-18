@@ -3,6 +3,7 @@ from crispy_forms.layout import Column, Layout, Row
 from django import forms
 from django.forms import inlineformset_factory
 
+from apps.inventory.models import Supply
 from apps.operations.models import InventoryOrder, OrderDetail, OutboundOrder
 
 
@@ -12,7 +13,7 @@ class OutboundOrderForm(forms.ModelForm):
         fields = ["order_type", "status", "motive", "observations"]
         widgets = {
             "motive": forms.TextInput(
-                attrs={"class": "form-control datalist-input", "list": "inbound-list"}
+                attrs={"class": "form-control datalist-input", "list": "outbound-list"}
             ),
             "order_type": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
             "status": forms.HiddenInput(attrs={"class": "form-control", "readonly": True}),
@@ -58,6 +59,13 @@ class OutboundOrderForm(forms.ModelForm):
 
 
 class OutboundOrderDetailBaseForm(forms.ModelForm):
+    supply = forms.ModelChoiceField(
+        queryset=Supply.objects.all(),
+        to_field_name="code",
+        widget=forms.Select(attrs={"class": "form-control"}),
+        error_messages={"invalid_choice": "El insumo seleccionado no existe."},
+    )
+
     class Meta:
         model = OrderDetail
         fields = [
@@ -66,7 +74,7 @@ class OutboundOrderDetailBaseForm(forms.ModelForm):
             "observations",
         ]
         widgets = {
-            "supply": forms.Select(attrs={"class": "form-control"}),
+            # "supply": forms.Select(attrs={"class": "form-control"}),
             "quantity_requested": forms.NumberInput(attrs={"class": "form-control text-center"}),
             "observations": forms.TextInput(attrs={"class": "form-control"}),
         }

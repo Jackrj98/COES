@@ -68,7 +68,6 @@ class InventoryMovementAppService(BaseAppService):
             DatatableSearch.retrieve_inventory_movements(params)
             queryset = params.items
             qs = list(queryset.values(*fields))
-            print(qs)
             return params.result(qs)
         except Exception as e:
             logger.exception(f"Failed to fetch inventory movements: {e}")

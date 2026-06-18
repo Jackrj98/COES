@@ -45,13 +45,7 @@ class OrderDetailBuilder:
 
         for idx, line in enumerate(self.lines):
             if line.pk:
-                print(f"⚠️ LÍNEA {idx} TIENE ID: {line.pk}")
-                print(f"   Supply: {line.supply_id}")
-                print(f"   Quantity: {line.quantity_requested}")
-                # Limpiar el ID para que la BD genere uno nuevo
                 line.pk = None
-            else:
-                print(f"✅ Línea {idx} sin ID (correcto)")
 
         with transaction.atomic():
             from crum import get_current_user
@@ -61,7 +55,7 @@ class OrderDetailBuilder:
 
             if user and user.pk:
                 user_identifier = getattr(user, "email", None) or str(user)
-            print(user_identifier)
+
             for line in self.lines:
                 line.inventory_order = self.order
                 if not line.created_by:

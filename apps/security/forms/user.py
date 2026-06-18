@@ -72,7 +72,7 @@ class UserCreateForm(forms.ModelForm):
     group = forms.ChoiceField(
         label=_("Group"),
         required=True,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups()),
+        choices=[],
         widget=forms.Select(attrs={"class": "form-select"}),
     )
 
@@ -90,6 +90,10 @@ class UserCreateForm(forms.ModelForm):
         self.helper.error_text_inline = True
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
+
+        default_choices = BaseFilterForm.DEFAULT_CHOICE
+        group_choices = UserAppService().retrieve_groups()
+        self.fields["group"].choices = default_choices + list(group_choices)
 
 
 class UserUpdateForm(forms.ModelForm):

@@ -14,11 +14,8 @@ from apps.core.views.base import (
 )
 from apps.operations.forms import OutboundOrderDetailFormSet, OutboundOrderForm
 from apps.operations.layers.applications import (
-    InventoryOrchestrator,
-    OrderAppService,
     OutboundOrderService,
 )
-from apps.operations.layers.dto import ExitOrderDTO
 from apps.operations.models import OrderDetail, OutboundOrder
 
 logger = logging.getLogger(__name__)
@@ -38,10 +35,11 @@ class OutboundOrderListView(CustomListView):
         ctx["object"] = self.model
         ctx["description"] = _("Management of outbound orders")
         if self.model.IsActiveChoices:
-            ctx["status_choices"] = self.model.StatusType.choices
+            ctx["status_choices"] = self.model.StatusType.get_ui_map()
 
         if self.model.IsActiveColorChoices:
             ctx["status_color_choices"] = self.model.StatusType.choices
+
         return ctx
 
     def retrieve_data(self, params):
@@ -104,8 +102,7 @@ class OutboundOrderCreateView(CustomCreateView):
         ctx = super().get_context_data(**kwargs)
         ctx["formset"] = self.get_formset()
         ctx["supply_search_url"] = reverse_lazy("inventory:supplies:search")
-        datalist = CatalogItemAppService().retrieve_catalog_items("CONCEPT_OUT")
-        ctx["motive_list"] = datalist
+        ctx["outbound_list"] = CatalogItemAppService().retrieve_catalog_items("CONCEPT_OUT")
         return ctx
 
     def post(self, request, *args, **kwargs):
@@ -126,8 +123,7 @@ class OutboundOrderCreateView(CustomCreateView):
 
     @transaction.atomic
     def form_valid(self, form, **kwargs):
-        order_service = OrderAppService()
-        inventory_service = InventoryOrchestrator()
+        order_service = OutboundOrderService()
         formset = kwargs.pop("formset", None)
         try:
             details_data = []
@@ -139,20 +135,12 @@ class OutboundOrderCreateView(CustomCreateView):
                     {
                         "supply_id": item["supply"].id,
                         "quantity_requested": item["quantity_requested"],
-                        "unit_cost": item.get("unit_cost", 0.00),
                         "observation": item.get("observation", ""),
                     }
                 )
-
-            order_dto = ExitOrderDTO(
-                requested_by=self.request.user.email,
-                observations=form.cleaned_data.get("observations", ""),
-                motive=form.cleaned_data.get("motive", ""),
-                status=self.model.Status.COMPLETED,
-                details=details_data,
+            order_service.save_outbound_order(
+                self.model(), form.cleaned_data, details_data, self.request.user
             )
-            order = order_service.create_exit_order(payload=order_dto)
-            inventory_service.register_exit(order=order, details_payload=order_dto.details)
 
             # Show success message
             model_name = self.model._meta.verbose_name

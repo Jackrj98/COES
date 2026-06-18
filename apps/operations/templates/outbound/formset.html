@@ -1,64 +1,92 @@
-{{ formset.management_form }}
-<table class="table table-hover" id="movement-table">
-    <thead>
-    <tr>
-        <th class="w-50">{% trans 'supply'|capfirst %}</th>
-        <th class="w-10">{% trans 'Quantity'|capfirst %}</th>
-        <th class="w-30">{% trans 'Current Stock'|capfirst %}</th>
-        <th class="text-center" style="width: 5%;">{% trans 'Delete'|capfirst %}</th>
-    </tr>
-    </thead>
-    <tbody id="form-container">
-    {% for formset in formset %}
-        <tr class="form-row">
-            <td>{{ formset.supply }}</td>
-            <td>{{ formset.quantity_requested }}</td>
-            <td>
-                <div class="stock-display" style="font-weight: bold;">
-                    <span class="current-stock">-</span>
-                    <i class="bi bi-arrow-right"></i>
-                    <span class="new-stock" style="color: orange;">-</span>
+
+
+{% load crispy_forms_tags crispy_forms_filters i18n %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-header border-bottom-0 pt-4">
+        <h4 class="card-title mb-0">{% trans 'Order details'|capfirst %}</h4>
+    </div>
+
+    <div class="card-body">
+        {{ formset.management_form }}
+        <div class="row g-2 mb-2 text-uppercase small text-muted fw-bold pt-3">
+            <div class="col-md-5 ps-2">{% trans 'Supply' %}</div>
+            <div class="col-md-2">{% trans 'Quantity' %}</div>
+            <div class="col-md-2">{% trans 'Current Stock' %}</div>
+            <div class="col-md-3">{% trans 'Observations' %}</div>
+        </div>
+
+        <div id="form-container">
+            {% for form in formset %}
+                <div class="form-row mb-3 pb-2 border-bottom">
+                    {{ form.id }}
+                    <div class="row align-items-center g-2">
+                        <div class="col-md-5">{{ form.supply|as_crispy_field }}</div>
+                        <div class="col-md-2">{{ form.quantity_requested|as_crispy_field }}</div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center pb-2">
+                            <div class="stock-display" style="font-weight: bold;">
+                                <span class="current-stock">-</span>
+                                <i class="bi bi-arrow-right"></i>
+                                <span class="new-stock" style="color: orange;">-</span>
+                            </div>
+                            <input type="hidden" class="stock-value"
+                                   name="{{ formset.prefix }}-{{ forloop.counter0 }}-stock-hidden">
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="flex-grow-1">
+                                    {{ form.observations|as_crispy_field }}
+                                </div>
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-sm remove-row">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                    <div style="display:none;">{{ form.DELETE }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <input type="hidden" class="stock-value"
-                       name="{{ formset.prefix }}-stock-hidden">
-            </td>
-            <td class="text-center">
-                <button type="button" class="btn btn-sm remove-row">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                <div style="display:none;">{{ formset.DELETE }}</div>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+            {% endfor %}
+        </div>
 
-<button type="button" id="add-form" class="btn btn-outline-primary">
-    <i class="bi bi-plus-lg"></i>
-    {% trans 'Add Supply'|capfirst %}
-</button>
-
-<table style="display:none;">
-    <tbody id="empty-form-template">
-    <tr class="form-row">
-        <td>{{ formset.empty_form.supply }}</td>
-        <td>{{ formset.empty_form.quantity_requested }}</td>
-        <td>
-            <div class="stock-display" style="font-weight: bold;">
-                <span class="current-stock">-</span>
-                <i class="bi bi-arrow-right"></i>
-                <span class="new-stock" style="color: orange;">-</span>
-            </div>
-            <input type="hidden" class="stock-value" name="{{ form.prefix }}-stock-hidden"
-                   value="0">
-        </td>
-        <td class="text-center">
-            <button type="button" class="btn btn-sm remove-row">
-                <i class="bi bi-x-lg "></i>
+        <div class="card-footer border-top-0 bg-transparent">
+            <button type="button" id="add-form-out" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i> {% trans 'Add item' %}
             </button>
-            <div style="display:none;">{{ form.DELETE }}</div>
-        </td>
-    </tr>
-    </tbody>
-</table>
+        </div>
+    </div>
+</div>
 
+<div id="empty-form-template" class="d-none">
+    <div class="form-row mb-3 pb-2 border-bottom">
+        {{ formset.empty_form.id }}
+        <div class="row align-items-start g-2">
+            <div class="col-md-5">{{ formset.empty_form.supply|as_crispy_field }}</div>
+            <div class="col-md-2">{{ formset.empty_form.quantity_requested|as_crispy_field }}</div>
+             <div class="col-md-2 d-flex align-items-center justify-content-center pb-2">
+                            <div class="stock-display" style="font-weight: bold;">
+                                <span class="current-stock">-</span>
+                                <i class="bi bi-arrow-right"></i>
+                                <span class="new-stock" style="color: orange;">-</span>
+                            </div>
+                            <input type="hidden" class="stock-value"
+                                   name="{{ formset.empty_form.prefix }}-{{ forloop.counter0 }}-stock-hidden">
+                        </div>
+            <div class="col-md-3">
+                <div class="d-flex align-items-end gap-2">
+                    <div class="flex-grow-1">
+                        {{ formset.empty_form.observations|as_crispy_field }}
+                    </div>
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-sm remove-row">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <div style="display:none;">{{ formset.empty_form.DELETE }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

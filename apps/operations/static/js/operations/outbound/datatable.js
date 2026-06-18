@@ -12,6 +12,7 @@ $(document).ready(function () {
         filters: [
             {selector: "#id_status", field: "status"},
             {selector: "#id_search", field: "search"},
+            {selector: "#id_date_from", field: "created_at", type: "date-range"},
         ],
         paginationClass: "pagination-primary"
     });

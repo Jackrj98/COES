@@ -122,7 +122,7 @@ class InventoryOrder(AuditModel):
 
     def clean(self):
         super().clean()
-        print(self.get_status_display())
+
         if self.pk:
             instance = self.__class__.objects.get(pk=self.pk)
             if instance.status == InventoryOrder.StatusType.COMPLETED:

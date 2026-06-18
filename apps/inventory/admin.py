@@ -263,10 +263,7 @@ class InventoryMovementAdmin(BaseAdminMixin):
         (
             _("Source Documents"),
             {
-                "fields": (
-                    "purchase_order",
-                    "exit_order",
-                ),
+                "fields": ("inventory_order",),
                 "classes": ("collapse",),
             },
         ),
@@ -288,7 +285,7 @@ class InventoryMovementAdmin(BaseAdminMixin):
         return (
             super()
             .get_queryset(request)
-            .select_related("batch", "batch__supply", "purchase_order", "exit_order")
+            .select_related("batch", "batch__supply", "inventory_order")
         )
 
     @admin.display(description=_("Movement"), ordering="movement_type")

@@ -1,6 +1,6 @@
 const FormsetManager = {
     init: function (container, totalForms, onRowAdded) {
-        document.getElementById('add-form')?.addEventListener('click', () => this.addRow(container, totalForms, onRowAdded));
+        document.getElementById('add-form-out')?.addEventListener('click', () => this.addRow(container, totalForms, onRowAdded));
         container.addEventListener('click', (e) => {
             if (e.target.closest('.remove-row')) this.removeRow(e.target.closest('.remove-row'), container, totalForms);
         });
