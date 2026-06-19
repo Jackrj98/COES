@@ -132,5 +132,6 @@ networks:
 
 volumes:
   postgres_data:
+  postgres_prod_data:
   static_volume:
   media_volume:
