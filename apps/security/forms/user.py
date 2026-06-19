@@ -91,11 +91,12 @@ class UserCreateForm(forms.ModelForm):
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
 
-        default_choices = BaseFilterForm.DEFAULT_CHOICE
         self.fields["group"].choices = get_group_choices()
+
 
 def get_group_choices():
     return BaseFilterForm.DEFAULT_CHOICE + UserAppService.retrieve_groups()
+
 
 class UserUpdateForm(forms.ModelForm):
     group = forms.ChoiceField(

@@ -21,11 +21,11 @@ services:
     image: postgres:16-alpine
     container_name: coes_db
     restart: unless-stopped
+    env_file: .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    env_file: .env.production
     volumes:
       - ${DB_VOLUME_PATH:-postgres_data}:/var/lib/postgresql/data
     ports:
@@ -43,7 +43,7 @@ services:
     container_name: coes_redis
     restart: unless-stopped
     ports:
-      - "6380:6379" # HOST EXTERN:INTERN
+      - "6380:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -57,17 +57,15 @@ services:
       context: .
       dockerfile: build/docker/Dockerfile
     container_name: coes_web
-    command: make run-prod ENV=production
-    environment:
-      DOCKER: "1"
-      ENV: "production"
-      PORT: ${PORT:-8000}
+    command: make run-prod
     restart: unless-stopped
+    env_file: .env
+    environment:
+      - DOCKER=1
     volumes:
       - .:/app/coes
       - ./staticfiles:/app/coes/staticfiles
       - ./media:/app/coes/media
-    env_file: .env.production
     depends_on:
       db:
         condition: service_healthy
@@ -84,12 +82,10 @@ services:
       dockerfile: build/docker/Dockerfile
     container_name: coes_celery
     restart: unless-stopped
-    command: make celery ENV=production
+    command: make celery
+    env_file: .env
     environment:
-      DOCKER: "1"
-      ENV: ${ENV:-production}
-    env_file:
-      - .env.production
+      - DOCKER=1
     volumes:
       - .:/app/coes
       - ./media:/app/coes/media
@@ -106,13 +102,11 @@ services:
       context: .
       dockerfile: build/docker/Dockerfile
     container_name: coes_celery_beat
-    command: make celery-beat ENV=production
+    command: make celery-beat
     restart: unless-stopped
+    env_file: .env
     environment:
-      DOCKER: "1"
-      ENV: production
-    env_file:
-      - .env.production
+      - DOCKER=1
     volumes:
       - .:/app/coes
       - ./media:/app/coes/media

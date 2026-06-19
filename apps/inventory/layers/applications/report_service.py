@@ -305,7 +305,7 @@ class InventoryReportService:
             "product_name": movement.batch.supply.name
             if movement.batch and movement.batch.supply
             else None,
-            "order_number": (movement.inventory_order.order_number, "-"),
+            "order_number": movement.inventory_order.order_number if movement.inventory_order else None,
         }
 
     def _calculate_summary(self, queryset):
