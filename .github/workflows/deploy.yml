@@ -3,7 +3,7 @@ name: Deploy to Digital Ocean
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set lowercase owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -30,8 +33,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner | lower }}/coes-web:latest
-            ghcr.io/${{ github.repository_owner | lower }}/coes-web:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/coes-web:latest
+            ghcr.io/${{ env.OWNER_LC }}/coes-web:${{ github.sha }}   
 
       - name: Deploy to Droplet via SSH
         uses: appleboy/ssh-action@v1.0.3
