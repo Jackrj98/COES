@@ -46,6 +46,7 @@ jobs:
             cd ~/COES
             cat <<EOF > .env
             # Application settings
+            ENV=production
             DOMAIN=${{ secrets.DOMAIN }}
             ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
             SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
