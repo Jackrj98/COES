@@ -2,7 +2,6 @@ import logging
 import random
 import string
 
-from django.contrib.auth.models import Group
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
