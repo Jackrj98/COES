@@ -248,7 +248,7 @@ translate-generate:
 	$(MANAGE) makemessages -l es --ignore="coes-env/*"
 
 translate-compile:
-	$(MANAGE) compilemessages
+	$(MANAGE) compilemessages -v 0
 
 
 # =============================================================================

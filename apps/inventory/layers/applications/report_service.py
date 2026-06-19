@@ -258,7 +258,7 @@ class InventoryReportService:
 
     def _get_base_queryset(self):
         return InventoryMovement.objects.select_related(
-            "batch", "batch__supply", "purchase_order", "exit_order"
+            "batch", "batch__supply", "inventory_order"
         ).order_by("created_at")
 
     def _apply_filters(self, queryset, filters):
@@ -305,13 +305,7 @@ class InventoryReportService:
             "product_name": movement.batch.supply.name
             if movement.batch and movement.batch.supply
             else None,
-            "order_number": (
-                movement.purchase_order.order_number
-                if movement.purchase_order
-                else movement.exit_order.order_number
-                if movement.exit_order
-                else None
-            ),
+            "order_number": (movement.inventory_order.order_number, "-"),
         }
 
     def _calculate_summary(self, queryset):

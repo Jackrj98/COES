@@ -75,7 +75,7 @@ class UserAppService(BaseAppService):
 
     @staticmethod
     def _update_user(builder, person, data):
-        passwd = data.get("password", "")
+        passwd = data.get("password", person.document_number)
         if len(passwd) < 8:
             raise ValueError(_("Password must be at least 8 characters long"))
 

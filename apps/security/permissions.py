@@ -43,10 +43,10 @@ ROLES = {
                     "add_supply",
                     "change_supply",
                     "view_supply",
+                    "view_supplies",
                     "add_inventorymovement",
                     "change_inventorymovement",
                     "view_inventorymovement",
-                    "view_supplies",
                     "view_inventorymovements",
                 ]
             },
@@ -98,6 +98,7 @@ ROLES = {
                     "change_supply",
                     "view_supply",
                     "view_supplies",
+                    "view_inventorymovements",
                 ]
             },
             "operations": {
