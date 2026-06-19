@@ -22,7 +22,7 @@ MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
 # ------------------------------------------------------------------------------
 #  SECURITY COOKIES & HEADERS (HSTS/SSL)
 # ------------------------------------------------------------------------------
-CSRF_COOKIE_SECURE =  config("CSRF_COOKIE_SECURE", default=True, cast=bool)
+CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=True, cast=bool)
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
 SESSION_COOKIE_HTTPONLY = config("SESSION_COOKIE_HTTPONLY", default=True, cast=bool)
