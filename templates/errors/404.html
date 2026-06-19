@@ -14,7 +14,7 @@
                     <img class="img-error" src="{% static 'assets/compiled/svg/error-404.svg' %}" alt="Not Found">
                     <h1 class="error-title">{% trans 'NOT FOUND' %}</h1>
                     <p class='fs-5 text-gray-600'>{% trans 'The page you are looking not found.' %}.</p>
-                    <a href="{% url 'home' %}" class="btn btn-lg btn-outline-primary mt-3">{% trans 'Go Home' %}</a>
+                    <a href="{% url 'core:home' %}" class="btn btn-lg btn-outline-primary mt-3">{% trans 'Go Home' %}</a>
                 </div>
             </div>
         </div>
@@ -23,6 +23,6 @@
     <!-- Alerts and custom scripts -->
     <script src="{% static 'assets/extensions/sweetalert2/sweetalert2.min.js' %}"></script>
     <script src="{% static 'assets/extensions/jquery/jquery.min.js' %}"></script>
-    {% include 'partials/messages.html' %}
+    {% include 'partials/_messages.html' %}
     </body>
 {% endblock %}

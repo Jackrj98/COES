@@ -24,67 +24,13 @@ class UserAppService(BaseAppService):
     def __init__(self):
         super().__init__(User)
 
-    def retrieve_groups(self):
-        """Retrieve all available groups."""
-        try:
-            from django.db import connection
-
-            with connection.cursor() as cursor:
-                table_name = "auth_group"
-
-                if connection.vendor == "postgresql":
-                    cursor.execute(
-                        """
-                                   SELECT EXISTS (
-                                       SELECT FROM information_schema.tables
-                                       WHERE table_name = %s
-                                   );
-                                   """,
-                        [table_name],
-                    )
-                elif connection.vendor == "sqlite":
-                    cursor.execute(
-                        """
-                                   SELECT name FROM sqlite_master
-                                   WHERE type='table' AND name=?
-                                   """,
-                        [table_name],
-                    )
-                elif connection.vendor == "mysql":
-                    cursor.execute(
-                        """
-                                   SELECT TABLE_NAME FROM information_schema.tables
-                                   WHERE table_name = %s
-                                   """,
-                        [table_name],
-                    )
-                else:
-                    # Fallback: intentar ejecutar una consulta simple
-                    cursor.execute("SELECT 1 FROM auth_group LIMIT 1")
-                    table_exists = True
-                    return self._fetch_groups()
-
-                result = cursor.fetchone()
-                table_exists = bool(result and result[0])
-
-            if not table_exists:
-                logger.warning("auth_group table does not exist. Run migrations.")
-                return []
-
-            return self._fetch_groups()
-
-        except Exception as e:
-            logger.exception(f"Error retrieving groups: {e}")
-            return []
-
     @staticmethod
-    def _fetch_groups():
-        """Helper method to fetch groups."""
+    def retrieve_groups():
         try:
-            groups = Group.objects.all()
-            return [(group.name, _(group.name)) for group in groups]
-        except Exception as e:
-            logger.exception(f"Error fetching groups: {e}")
+            from django.contrib.auth.models import Group
+
+            return [(g.name, g.name) for g in Group.objects.all()]
+        except Exception:
             return []
 
     @staticmethod
