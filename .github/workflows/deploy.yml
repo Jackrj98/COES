@@ -30,8 +30,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/coes-web:latest
-            ghcr.io/${{ github.repository_owner }}/coes-web:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner | lower }}/coes-web:latest
+            ghcr.io/${{ github.repository_owner | lower }}/coes-web:${{ github.sha }}
 
       - name: Deploy to Droplet via SSH
         uses: appleboy/ssh-action@v1.0.3
