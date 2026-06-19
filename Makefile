@@ -262,7 +262,7 @@ docker-prod-build-no-cache:
 
 docker-prod-up:
 	@printf "${GREEN}Starting production containers...${NC}\n"
-	docker compose -f docker-compose.yml up
+	docker compose -f docker-compose.yml up -d
 	@printf "${GREEN}Containers started. Checking status...${NC}\n"
 	docker compose -f docker-compose.prod.yml ps
 
