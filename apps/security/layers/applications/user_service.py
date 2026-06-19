@@ -14,7 +14,6 @@ from apps.core.layers import BaseAppService
 from apps.security.layers.builders import PersonBuilder, UserBuilder
 from apps.security.layers.dto import DatatableSearch
 from apps.security.models import User
-from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -25,41 +24,67 @@ class UserAppService(BaseAppService):
     def __init__(self):
         super().__init__(User)
 
-    @staticmethod
-    def retrieve_groups():
-        """Retrieve all available groups with caching."""
-        cache_key = "all_groups_list"
-        cached_groups = cache.get(cache_key)
-
-        if cached_groups is not None:
-            return cached_groups
-
+    def retrieve_groups(self):
+        """Retrieve all available groups."""
         try:
-            # Verificar si la tabla existe
             from django.db import connection
 
             with connection.cursor() as cursor:
-                cursor.execute("""
-                               SELECT EXISTS (
-                                   SELECT FROM information_schema.tables
-                                   WHERE table_name='auth_group'
-                               );
-                               """)
-                table_exists = cursor.fetchone()[0]
+                table_name = "auth_group"
+
+                if connection.vendor == "postgresql":
+                    cursor.execute(
+                        """
+                                   SELECT EXISTS (
+                                       SELECT FROM information_schema.tables
+                                       WHERE table_name = %s
+                                   );
+                                   """,
+                        [table_name],
+                    )
+                elif connection.vendor == "sqlite":
+                    cursor.execute(
+                        """
+                                   SELECT name FROM sqlite_master
+                                   WHERE type='table' AND name=?
+                                   """,
+                        [table_name],
+                    )
+                elif connection.vendor == "mysql":
+                    cursor.execute(
+                        """
+                                   SELECT TABLE_NAME FROM information_schema.tables
+                                   WHERE table_name = %s
+                                   """,
+                        [table_name],
+                    )
+                else:
+                    # Fallback: intentar ejecutar una consulta simple
+                    cursor.execute("SELECT 1 FROM auth_group LIMIT 1")
+                    table_exists = True
+                    return self._fetch_groups()
+
+                result = cursor.fetchone()
+                table_exists = bool(result and result[0])
 
             if not table_exists:
                 logger.warning("auth_group table does not exist. Run migrations.")
                 return []
 
-            groups = Group.objects.all()
-            result = [(group.name, _(group.name)) for group in groups]
+            return self._fetch_groups()
 
-            # Cache por 1 hora
-            cache.set(cache_key, result, 3600)
-            return result
-
-        except (Group.DoesNotExist, Exception) as e:
+        except Exception as e:
             logger.exception(f"Error retrieving groups: {e}")
+            return []
+
+    @staticmethod
+    def _fetch_groups():
+        """Helper method to fetch groups."""
+        try:
+            groups = Group.objects.all()
+            return [(group.name, _(group.name)) for group in groups]
+        except Exception as e:
+            logger.exception(f"Error fetching groups: {e}")
             return []
 
     @staticmethod

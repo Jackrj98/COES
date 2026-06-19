@@ -23,7 +23,7 @@ amqp==5.3.1
 kombu==5.6.2
 billiard==4.2.1
 vine==5.1.0
-
+Faker==40.18.0
 # Utilities & Security
 django-auditlog==2.3.0
 django-crum==0.7.9

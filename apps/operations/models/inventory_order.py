@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -84,7 +86,7 @@ class InventoryOrder(AuditModel):
     )
     scheduled_date = models.DateField(
         _("Schedule date"),
-        default=now().date(),
+        default=date.today,
         help_text=_("The date the items are expected to arrive."),
     )
     received_date = models.DateField(
