@@ -58,8 +58,6 @@ class InventoryMovementAppService(BaseAppService):
             "batch__batch_number",
             "batch__supply__name",
             "batch__supply__code",
-            "purchase_order__order_number",
-            "exit_order__order_number",
             "inventory_order__order_number",
             "inventory_order",
             "created_by",

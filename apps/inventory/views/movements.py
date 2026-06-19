@@ -37,7 +37,7 @@ class InventoryMovementListView(CustomListView):
     form_class = InventoryMovementFilterForm
     success_url: str = DEFAULT_LIST_URL
     template_name = "movements/datatable2.html"
-    permission_required = "inventory.view_inventorymovement"
+    permission_required = "inventory.view_inventorymovements"
     filter_service = MovementFilterService()
     report_service = InventoryReportService()
 
