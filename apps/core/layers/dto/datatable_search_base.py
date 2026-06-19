@@ -10,7 +10,7 @@ class DatatableSearchBase:
         """Build a base query with common filters (status, date range)."""
         queryset = Q()
         request = params.request.GET
-        status = request.get(status_field)
+        status = request.get("status")
         created_at = request.get("created_at")
         created_at_from = request.get("created_at_from")
         created_at_to = request.get("created_at_to")

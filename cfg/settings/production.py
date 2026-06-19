@@ -22,10 +22,10 @@ MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
 # ------------------------------------------------------------------------------
 #  SECURITY COOKIES & HEADERS (HSTS/SSL)
 # ------------------------------------------------------------------------------
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE =  config("CSRF_COOKIE_SECURE", default=True, cast=bool)
+CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=True, cast=bool)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
+SESSION_COOKIE_HTTPONLY = config("SESSION_COOKIE_HTTPONLY", default=True, cast=bool)
 CSRF_COOKIE_SAMESITE = "Strict"
 
 SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
@@ -39,8 +39,10 @@ X_FRAME_OPTIONS = "DENY"
 # ------------------------------------------------------------------------------
 # REDIS & CELERY CONFIG
 # ------------------------------------------------------------------------------
-CELERY_BROKER_URL = config("CELERY_BROKER")
-CELERY_RESULT_BACKEND = config("CELERY_BACKEND")
+REDIS_HOST = config("REDIS_HOST", default="redis")
+REDIS_PORT = config("REDIS_PORT", default=6379, cast=int)
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_EVENT_SERIALIZER = "json"
 CELERY_TRANSPORT_OPTIONS = {"visibility_timeout": 3600}
 

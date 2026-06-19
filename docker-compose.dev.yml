@@ -1,4 +1,21 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: coes_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432" # HOST EXTERN:INTERN
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mailhog:
     image: mailhog/mailhog
@@ -7,8 +24,6 @@ services:
     ports:
       - "8026:8025"   # UI web
       - "1026:1025"   # SMTP
-
-
   web:
     build:
       context: .
@@ -16,8 +31,9 @@ services:
     command: make run-dev
     volumes:
       - .:/app/coes
+      - ./media:/app/coes/media
     environment:
-      ENVIRONMENT: develop
+      ENV: develop
       DOCKER: "1"
     depends_on:
       db:
@@ -36,12 +52,15 @@ services:
     command: make celery
     environment:
       DOCKER: "1"
-      ENVIRONMENT: develop
+      ENV: develop
     env_file:
       - .env
     volumes:
       - .:/app/coes
+      - ./media:/app/coes/media
     depends_on:
+      web:
+        condition: service_started
       db:
         condition: service_healthy
       redis:
@@ -56,12 +75,15 @@ services:
     restart: unless-stopped
     environment:
       DOCKER: "1"
-      ENVIRONMENT: develop
+      ENV: develop
     env_file:
       - .env
     volumes:
       - .:/app/coes
+      - ./media:/app/coes/media
     depends_on:
+      web:
+        condition: service_started
       db:
         condition: service_healthy
       redis:
@@ -77,10 +99,14 @@ services:
       - "5555:5555"
     environment:
       DOCKER: "1"
-      ENVIRONMENT: develop
+      ENV: develop
     env_file:
       - .env
+    volumes:
+      - .:/app/coes
     depends_on:
+      web:
+        condition: service_started
       redis:
         condition: service_healthy
       celery:

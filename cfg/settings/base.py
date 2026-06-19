@@ -31,6 +31,7 @@ LOCALE_PATHS = [BASE_DIR.parent / "locale"]
 # ------------------------------------------------------------------------------
 APPEND_SLASH = True
 DEFAULT_CHARSET = "utf-8"
+DOMAIN = config("DOMAIN", default="0.0.0.0") + ":" + config("PORT", default="8000")
 
 # ------------------------------------------------------------------------------
 # APPLICATIONS
@@ -58,7 +59,7 @@ LOCAL_APPS = [
     "apps.catalogs",
     "apps.core",
     "apps.inventory",
-    "apps.purchasing",
+    "apps.operations",
     "apps.security",
 ]
 

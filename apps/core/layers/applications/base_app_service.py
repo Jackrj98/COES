@@ -6,7 +6,7 @@ class BaseAppService:
     def __init__(self, model=None):
         self.model = model
 
-    def retrieve_by_external(self, external_id) -> 'model':  # noqa: F821
+    def retrieve_by_external(self, external_id) -> "model":  # noqa: F821
         """Fetches the first active object with the given external ID.
 
         Args:
@@ -15,14 +15,14 @@ class BaseAppService:
         Returns:
             Model: The first matching active object, or None if no match is found.
         """
-        return self.model.objects.filter(external_id=external_id, deleted_at__isnull=True).first()
+        return self.model.active.filter(external_id=external_id).first()
 
     @staticmethod
     def normalize_data(data, remove_spaces=False, to_lowercase=True):
         if not isinstance(data, str):
             return data
 
-        normalized = data.strip().strip("'")
+        normalized = data.strip().strip("'").upper()
         if to_lowercase:
             normalized = normalized.lower()
         if remove_spaces:

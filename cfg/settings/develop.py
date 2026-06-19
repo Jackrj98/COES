@@ -42,8 +42,6 @@ CELERY_TIMEZONE = TIME_ZONE
 # ------------------------------------------------------------------------------
 # EMAIL CONFIG
 # ------------------------------------------------------------------------------
-print(config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"))
-
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = config("TS_EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("TS_EMAIL_PORT", default=1025, cast=int)

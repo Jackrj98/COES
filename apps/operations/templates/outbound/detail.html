@@ -1,0 +1,157 @@
+{% extends 'components/_datatable.html' %}
+{% load custom_tags %}
+
+{% block actions %}{% endblock actions %}
+
+{% block content %}
+    <section>
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-content">
+                        <div class="card-header bg-transparent border-bottom border-secondary d-flex align-items-center gap-3">
+                            <h4 class="card-title mb-0">{{ object.order_number|capfirst }}</h4>
+                            <div class="ms-auto">
+                            <span class="badge bg-{{ object.color }} bg-opacity-25 px-3 py-1 rounded-pill text-{{ object.color }}">
+                                <i class="bi bi-record-fill me-1"></i> {{ object.get_status_display }}
+                            </span>
+                                <span class="badge bg-secondary bg-opacity-10 px-3 py-1 rounded-pill">
+                                {{ items }} {% trans "lines" %}
+                            </span>
+                            </div>
+                        </div>
+                        <div class="card-body mt-0">
+                            <hr class="mt-0">
+                            <dl class="row mb-0 my-2 g-2">
+                                <div class="col-12 col-md-4 mb-2">
+                                    <dt class="small text-muted fw-normal mb-0">{{ object|field_label:"order_number" }}</dt>
+                                    <dd class="fw-medium">
+                                        <span class="badge bg-secondary bg-opacity-25 px-2 py-1 rounded-2 text-secondary"
+                                              data-bs-toggle="tooltip" data-bs-placement="top"
+                                              data-bs-custom-class="custom-tooltip"
+                                              data-bs-title={{ object.order_number }}>
+                                            {{ object.order_number|upper|default:"-" }}
+                                        </span>
+                                    </dd>
+                                </div>
+
+                                <div class="col-4 col-md-4 mb-2">
+                                    <dt class="small text-muted fw-normal mb-0">{{ object|field_label:"motive" }}</dt>
+                                    <dd class="fw-medium">{{ object.motive|default:"-" }}</dd>
+                                </div>
+
+                                <div class="col-4 col-md-4 mb-2">
+                                    <dt class="small text-muted fw-normal mb-0">{% trans 'items total'|capfirst %}</dt>
+                                    <dd class="fw-medium">
+                                        <span class="badge bg-primary bg-opacity-25 px-2 py-1 rounded-2 text-secondary text-truncate">
+                                            {{ items|default:"-" }}
+                                        </span>
+                                    </dd>
+                                </div>
+
+                                <div class="col-4 col-md-4 mb-2">
+                                    <dt class="small text-muted fw-normal mb-0">{% trans 'requested by'|capfirst %}</dt>
+                                    <dd class="fw-medium">{{ object.created_by|default:"-" }}</dd>
+                                </div>
+
+                                <div class="col-12 mb-2">
+                                    <dt class="small text-muted fw-normal mb-0">{{ object|field_label:"observations" }}</dt>
+                                    <dd class="fw-medium">{{ object.observations|default:"-" }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <h6 class="mb-0">
+                                <i class="bi bi-file-text me-2"></i>{% trans "Audit information" %}
+                            </h6>
+                        </div>
+                        <dl class="row mb-0 my-2 g-3">
+                            <div class="col-6 col-md-3 mb-2">
+                                <dt class="small text-muted fw-normal mb-0">{% label object 'created_at' %}</dt>
+                                <dd class="fw-medium">{{ object.created_at|date:"d M Y, H:i"|default:"-" }}</dd>
+                            </div>
+
+                            <div class="col-6 col-md-3 mb-2">
+                                <dt class="small text-muted fw-normal mb-0">{% label object 'created_by' %}</dt>
+                                <dd class="fw-medium">{{ object.created_by|default:"-" }}</dd>
+                            </div>
+
+                            <div class="col-6 col-md-3 mb-2">
+                                <dt class="small text-muted fw-normal mb-0">{% label object 'updated_at' %}</dt>
+                                <dd class="fw-medium">{{ object.updated_at|date:"d M Y, H:i"|default:"-" }}</dd>
+                            </div>
+
+                            <div class="col-6 col-md-3 mb-2">
+                                <dt class="small text-muted fw-normal mb-0">{% label object 'updated_by' %}</dt>
+                                <dd class="fw-medium">{{ object.updated_by|default:"-" }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <div class="col-12 col-md-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="card-title mb-0">{% trans "Supply lines"|upper %}</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr class="text-secondary" style="font-size: 0.85rem; text-transform: uppercase;">
+                            <th class="ps-4 py-3">{% trans 'Supply'|capfirst %}</th>
+                            <th class="py-3">{% trans 'Assigned batch'|capfirst %}</th>
+                            <th class="text-center py-3">{% trans 'Qty requested'|capfirst %}</th>
+                            <th class="text-center py-3">{% trans 'Unit cost'|capfirst %}</th>
+                            <th class="text-end py-3">{% trans 'Line total'|capfirst %}</th>
+                            <th class="text-center pe-4 py-3">{% trans 'Reception'|capfirst %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in details %}
+                            <tr class="border-secondary">
+                                <td class="ps-4 py-3 fw-medium">
+                                    {{ item.supply.name }} ({{ item.supply.unit_of_measure.extra }})
+                                </td>
+                                <td class="py-3 text-secondary">{{ item.batch.batch_number }}</td>
+                                <td class="text-center py-3">{{ item.quantity_fulfilled }}</td>
+                                <td class="text-center py-3 font-monospace">${{ item.unit_cost|floatformat:2 }}</td>
+                                <td class="text-end py-3 fw-bold">${{ item.line_total|floatformat:2 }}</td>
+                                <td class="text-center pe-4 py-3">
+                                    {% if item.is_complete %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2">{% trans 'Complete' %}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2">{% trans 'Partial' %} {{ item.percentage }}%</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer border-top border-secondary py-3 px-4">
+                <div class="row align-items-center">
+                    <div class="col-auto text-secondary">{% trans 'Lines'|capfirst %}:
+                        <strong>{{ details|length }}</strong>
+                    </div>
+                    <div class="col-auto text-secondary">{% trans 'Qty requested'|capfirst %}:
+                        <strong>{{ object.total_requested }}</strong></div>
+                    <div class="col-auto text-secondary">{% trans 'Qty received'|capfirst %}:
+                        <strong>{{ object.total_fulfilled }}</strong></div>
+                    <div class="col text-end">
+                        {% trans 'Order total'|capfirst %}: <span
+                            class="h4 text-success mb-0 fw-bold ms-2">${{ object.total|intcomma }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

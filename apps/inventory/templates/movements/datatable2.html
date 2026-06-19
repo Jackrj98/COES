@@ -1,0 +1,160 @@
+{% extends 'components/_datatable.html' %}
+{% load custom_tags crispy_forms_filters %}
+
+{% block actions %}
+    {% with menu_a=actions.menu_actions %}
+        <div class="dropdown">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                {{ menu_a.title|capfirst }}
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" id="exportExcelBtn" class="dropdown-item">
+                    <i class="bi bi-file-excel me-2"></i> {% trans "Export to Excel" %}
+                </button>
+
+                <button type="button" id="exportCsvBtn" class="dropdown-item">
+                    <i class="bi bi-file-text me-2"></i> {% trans "Export to CSV" %}
+                </button>
+            </div>
+        </div>
+    {% endwith %}
+{% endblock actions %}
+
+{% block metrics %}
+    <div class="row g-3">
+        {% for item in metrics_list %}
+            <div class="col-12 col-sm-6 col-md-6 col-xl-3">
+                <div class="card h-70 w-80 border-0 shadow-sm">
+                    <div class="card-body p-4 d-flex align-items-center gap-3">
+                        <div class="flex-shrink-0">
+                    <span class="btn btn-icon bg-{{ item.color }} bg-opacity-10 rounded-3 p-3">
+                        <i class="bi {{ item.icon }} fs-3 text-{{ item.color }}"></i>
+                    </span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1 small fw-medium">{{ item.title }}</h6>
+                            <h3 class="mb-0 fw-bold text-{{ item.color }}">{{ item.value|intcomma }}</h3>
+                            <small class="text-muted">{{ item.sub }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock metrics %}
+
+{% block filters %}
+    {% if filter_form %}
+        <form method="GET" id="filter" class="mb-4">
+            <div class="row align-items-end g-3">
+                <div class="col-12 col-sm-6 col-md-8 col-lg-4">
+                    {{ filter_form.search|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6 col-md-8 col-lg-3">
+                    {{ filter_form.date_from|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6 col-md-8 col-lg-3">
+                    {{ filter_form.movement_type|as_crispy_field }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-4 col-lg-2">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="flex-grow-1">
+                            {{ filter_form.status|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            <button type="button"
+                                    id="clear-filters"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 38px; height: 38px; padding: 0;">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+{% endblock filters %}
+
+{% block columns %}
+    <th scope="col" class="text-uppercase">{% trans 'date'|upper %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:"movement_type"|upper }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'supply / batch'|upper %}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'concept'|upper }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'inflow'|upper %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'outflow'|upper %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'balance'|upper %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'reference'|upper %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'status'|upper %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'user'|upper %}</th>
+{% endblock columns %}
+
+{% block rows %} {% endblock rows %}
+{% block tfoot %}
+    <tr>
+        <th colspan="4" class="text-end">TOTAL:</th>
+        <th id="total-increment">0</th>
+        <th id="total-decrement">0</th>
+        <th id="net-movement">0</th>
+        <th colspan="3"></th>
+    </tr>
+{% endblock tfoot %}
+
+{% block dt_javascript %}
+    <script type="text/javascript">
+        const mapStatus = {{ ui_map|safe }};
+        const baseHref = "{% get_base_href %}"
+        const urlPaginator = "{{ list_url }}";
+        const mapTypeChoices = {{ type_ui_map|safe }};
+    </script>
+    <script src="{% static 'js/inventory_movements/datatable_v2.js' %}"></script>
+
+    <script>
+        function exportWithFilters(exportType) {
+            const table = $('#datatable-list').DataTable();
+            const params = table.ajax.params();
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = window.location.href;
+            form.target = '_blank';
+
+            // CSRF token
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            form.appendChild(csrfInput);
+
+            // Acción de exportación
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = exportType;
+            actionInput.value = '1';
+            form.appendChild(actionInput);
+
+            // Agregar filtros (excluir parámetros internos de DataTable)
+            const excludeParams = ['draw', 'length', 'start', '_'];
+            for (const [key, value] of Object.entries(params)) {
+                if (!excludeParams.includes(key) && value !== null && value !== undefined && value !== '') {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = typeof value === 'object' ? JSON.stringify(value) : value;
+                    form.appendChild(input);
+                }
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+        // Event listeners
+        document.getElementById('exportExcelBtn')?.addEventListener('click', () => exportWithFilters('export_excel'));
+        document.getElementById('exportCsvBtn')?.addEventListener('click', () => exportWithFilters('export_csv'));
+    </script>
+{% endblock dt_javascript %}
+

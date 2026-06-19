@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
     libpq-dev \
+    gettext \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,6 +20,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR $APP_HOME
 
 # Copy the requirements file into the container
+COPY requirements/base.txt requirements/base.txt
 COPY requirements/prod.txt requirements/prod.txt
 
 RUN pip install --upgrade pip \
@@ -39,6 +41,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 # Install PostgreSQL runtime dependencies
 RUN apt-get update && apt-get install -y \
     libpq-dev make\
+     gettext \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

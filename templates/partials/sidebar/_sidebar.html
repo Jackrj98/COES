@@ -1,4 +1,5 @@
-{% load navigation_tags %}
+{% load navigation_tags i18n %}
+
 <div id="sidebar">
     <div class="sidebar-wrapper active">
         <div class="sidebar-header position-relative">
@@ -16,29 +17,89 @@
         <div class="sidebar-menu">
             <ul class="menu">
                 <li class="sidebar-title">Menu</li>
-
                 <li class="sidebar-item {% active 'core:home' %}">
                     <a href="{% url 'core:home' %}" class='sidebar-link'>
-                        <i class="bi bi-grid-fill"></i>
-                        <span>Dashboard</span>
+                        <i class="bi bi-grid"></i> <span>Dashboard</span>
                     </a>
                 </li>
 
-                <li class="sidebar-title">{% trans 'administration'|capfirst %}</li>
-                <li class="sidebar-item  {% active 'security:users:list' %}">
-                    <a href="{% url 'security:users:list' %}" class='sidebar-link'>
-                        <i class="bi bi-people-fill"></i>
-                        <span>{% trans 'users'|capfirst %}</span>
-                    </a>
-                </li>
-
-                {% if request.user.is_superuser %}
-                    <li class="sidebar-item">
-                        <a href="{% url 'admin:index' %}" class='sidebar-link' target="_blank">
-                            <i class="bi bi-shield-lock-fill"></i>
-                            <span>{% trans 'admin site'|capfirst %}</span>
+                {% if request.user|has_any_perm:"inventory.view_supplies,inventory.view_inventorymovements,catalogs.view_catalogs" %}
+                    <li class="sidebar-title">{% trans 'Inventory'|capfirst %}</li>
+                {% endif %}
+                {% if perms.inventory.view_supplies %}
+                    <li class="sidebar-item {% active 'inventory:supplies:list' %}">
+                        <a href="{% url 'inventory:supplies:list' %}" class='sidebar-link'>
+                            <i class="bi bi-hexagon"></i> <span>{% trans 'Supplies'|capfirst %}</span>
                         </a>
                     </li>
+                {% endif %}
+                {% if perms.inventory.view_inventorymovements %}
+                    <li class="sidebar-item {% active 'inventory:movements:list' %}">
+                        <a href="{% url 'inventory:movements:list' %}" class='sidebar-link'>
+                            <i class="bi bi-card-checklist"></i> <span>{% trans 'Kardex'|capfirst %}</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if perms.catalogs.view_catalogs %}
+                    <li class="sidebar-item {% active 'catalogs:catalogs:list' %}">
+                        <a href="{% url 'catalogs:catalogs:list' %}" class='sidebar-link'>
+                            <i class="bi bi-box"></i> <span>{% trans 'Catalogs'|capfirst %}</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if request.user|has_any_perm:"operations.view_purchaseorders,operations.view_exitorders,operations.view_suppliers" %}
+                    <li class="sidebar-title">{% trans 'Operations'|capfirst %}</li>
+                {% endif %}
+                {% if perms.operations.view_inbound_orders %}
+                    <li class="sidebar-item {% active 'operations:inbound:list' %}">
+                        <a href="{% url 'operations:inbound:list' %}" class='sidebar-link'>
+                            <i class="bi bi-box-arrow-in-right"></i> <span>{% trans 'Inbound Orders'|capfirst %}</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if perms.operations.view_outbound_orders%}
+                    <li class="sidebar-item {% active 'operations:outbound:list' %}">
+                        <a href="{% url 'operations:outbound:list' %}" class='sidebar-link'>
+                            <i class="bi bi-box-arrow-left"></i> <span>{% trans 'Outbound Orders'|capfirst %}</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if perms.operations.view_suppliers %}
+                    <li class="sidebar-item {% active 'operations:suppliers:list' %}">
+                        <a href="{% url 'operations:suppliers:list' %}" class='sidebar-link'>
+                            <i class="bi bi-truck"></i> <span>{% trans 'Suppliers'|capfirst %}</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="sidebar-title">{% trans 'Reports'|capfirst %}</li>
+                {% if request.user|has_group:"administrator,specialist" %}
+                    <li class="sidebar-item">
+                        <a href="#" class='sidebar-link'>
+                            <i class="bi bi-graph-up"></i> <span>{% trans 'Stock Reports'|capfirst %}</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class='sidebar-link'>
+                            <i class="bi bi-clipboard-data"></i> <span>{% trans 'Operational Reports'|capfirst %}</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if perms.security.view_users %}
+                    <li class="sidebar-title">{% trans 'Administration'|capfirst %}</li>
+                    <li class="sidebar-item {% active 'security:users:list' %}">
+                        <a href="{% url 'security:users:list' %}" class='sidebar-link'>
+                            <i class="bi bi-people"></i> <span>{% trans 'Users'|capfirst %}</span>
+                        </a>
+                    </li>
+                    {% if request.user.is_superuser %}
+                        <li class="sidebar-item">
+                            <a href="{% url 'admin:index' %}" class='sidebar-link' target="_blank">
+                                <i class="bi bi-shield-lock"></i> <span>{% trans 'Admin Site'|capfirst %}</span>
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endif %}
             </ul>
         </div>

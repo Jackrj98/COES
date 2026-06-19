@@ -1,12 +1,14 @@
 # =============================================================================
 # Global Variables
 # =============================================================================
+NUMBER 		   ?= 10
 ROOT_DIR       := $(shell pwd)
 SETTINGS       := cfg.settings
 PORT           ?= 8000
 ENV            ?= develop
 GUNICORN_CONF  := build/gunicorn/conf.py
 PYTHON_VERSION := $(shell python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+
 
 # Environment Control (Docker vs Local Virtualenv)
 ifdef DOCKER
@@ -87,14 +89,19 @@ install-prod: venv
 # Initial Configuration (Setup)
 # =============================================================================
 setup:
+
+	@echo "Attempting to install system dependency for Python $(ENV)..."
 	@mkdir -p static staticfiles
+	@mkdir -p /var/log/gunicorn /var/log/nginx 2>/dev/null || true
 	@printf "${GREEN}Directories ready${NC}\n"
 
 # =============================================================================
 # Database and Migrations
 # =============================================================================
+
 migrate:
 	@printf "${YELLOW}Applying migrations ($(ENV))...${NC}\n"
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	$(MANAGE) makemigrations --settings=$(SETTINGS).$(ENV) --noinput
 	$(MANAGE) migrate --settings=$(SETTINGS).$(ENV) --noinput
 
@@ -111,7 +118,7 @@ superuser-dev:
 # =============================================================================
 # Application Execution (Run)
 # =============================================================================
-run-dev: setup migrate superuser-dev
+run-dev: setup migrate superuser-dev translate-compile
 	@printf "${YELLOW}Using settings: $(SETTINGS).$(ENV)${NC}\n"
 	@if [ -n "$$PYCHARM_DEBUG" ]; then \
 		printf "${GREEN}Connecting to PyCharm debugger on port $$PYCHARM_PORT...${NC}\n"; \
@@ -120,10 +127,11 @@ run-dev: setup migrate superuser-dev
 	@printf "${GREEN}Starting Django on port $(PORT)...${NC}\n"
 	$(MANAGE) runserver 0.0.0.0:$(PORT) --settings=$(SETTINGS).$(ENV)
 
-run-prod: setup migrate
+run-prod: setup migrate superuser-dev translate-compile
 	@printf "${YELLOW}Collecting static files...${NC}\n"
 	$(MANAGE) collectstatic --settings=$(SETTINGS).production --noinput
-	@printf "${GREEN}Starting Gunicorn...${NC}\n"
+	@printf "${YELLOW}Starting Gunicorn...${NC}\n"
+	@mkdir -p /var/log/gunicorn 2>/dev/null || true
 	@DJANGO_SETTINGS_MODULE=$(SETTINGS).production \
 	$(PYTHON) -m gunicorn -c $(GUNICORN_CONF) cfg.wsgi:application
 
@@ -131,12 +139,15 @@ run-prod: setup migrate
 # Celery Services
 # =============================================================================
 celery:
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) $(CELERY) -A cfg worker -l info
 
 celery-beat:
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) $(CELERY) -A cfg beat -l info
 
 celery-flower:
+	$(MANAGE) wait_for_db --settings=$(SETTINGS).$(ENV)
 	@printf "${GREEN}Starting Flower on port 5555...${NC}\n"
 	DJANGO_SETTINGS_MODULE=$(SETTINGS).$(ENV) \
 	$(CELERY) -A cfg flower --port=5555 -l info
@@ -188,24 +199,34 @@ docker-logs:
 # =============================================================================
 
 test:
-	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest
+	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest --spec
 
-
-NUMBER ?= 10
+test-report:
+	DJANGO_SETTINGS_MODULE=cfg.settings.testing pytest --html=report.html --self-contained-html
 
 seed:
 	@printf "${YELLOW}Select seed to run:${NC}\n"
 	@printf "  1) users\n"
+	@printf "  2) suppliers\n"
+	@printf "  3) catalogs\n"
+	@printf "  4) inventory\n"
 	@printf "  0) all\n"
-	@printf "${GREEN}Enter option: ${NC}"; \
-	read option; \
+	@printf "${GREEN}Enter option: ${NC}"
+	@read option; \
 	printf "${GREEN}Enter number of records: ${NC}"; \
 	read num; \
 	count=$${num:-$(NUMBER)}; \
 	case $$option in \
-		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
-		0) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV);; \
-		*) printf "${RED}Invalid option${NC}\n";; \
+		1) $(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV) ;; \
+		2) $(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV) ;; \
+		3) $(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV) ;; \
+		4) $(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV) ;; \
+		0) \
+			$(MANAGE) seed_catalogs --settings=$(SETTINGS).$(ENV); \
+			$(MANAGE) seed_users --number=$$count --settings=$(SETTINGS).$(ENV); \
+			$(MANAGE) seed_suppliers --number=$$count --settings=$(SETTINGS).$(ENV); \
+			$(MANAGE) seed_inventory --number=$$count --settings=$(SETTINGS).$(ENV);; \
+		*) printf "${RED}Invalid option${NC}\n" ;; \
 	esac
 
 # =============================================================================
@@ -229,4 +250,27 @@ translate-generate:
 translate-compile:
 	$(MANAGE) compilemessages
 
+
+# =============================================================================
+# Docker Orchestration (Production)
+# =============================================================================
+docker-prod-build:
+	docker compose -f docker-compose.yml build
+
+docker-prod-build-no-cache:
+	docker compose -f docker-compose.yml build --no-cache
+
+docker-prod-up:
+	@printf "${GREEN}Starting production containers...${NC}\n"
+	docker compose -f docker-compose.yml up
+	@printf "${GREEN}Containers started. Checking status...${NC}\n"
+	docker compose -f docker-compose.prod.yml ps
+
+docker-prod-down:
+	@printf "${YELLOW}Stopping production containers...${NC}\n"
+		docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+
+docker-prod-restart:
+	@printf "${YELLOW}Restarting production containers...${NC}\n"
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml restart
 

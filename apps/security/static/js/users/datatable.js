@@ -25,7 +25,7 @@ const userColumns = [
     {
         orderable: false,
         data: "external_id",
-        width: "4%",
+        width: "3%",
         className: DataTableFactory.classes.center,
         render: (data, type, row, meta) => {
             return meta.settings._iDisplayStart + meta.row + 1;
@@ -39,27 +39,29 @@ const userColumns = [
         render: (data, type, row) => {
             const {person__last_name: lastName, person__first_name: firstName, email_verified: emailVerified} = row;
             const fullName = lastName ? `${firstName} ${lastName}`.trim() : "-";
-            const iconClass = emailVerified ? "bi bi-envelope-check" : "bi bi-envelope-exclamation";
-            const iconColor = emailVerified ? "text-primary" : "text-secondary";
 
             return `
-                <div class="d-flex flex-column" style="max-width: 22vw; min-width: 0;">
-                    <h6 class="fw-semibold mb-0 text-truncate">${capitalize(fullName)}</h6>
-                    <a class="text-muted text-truncate text-sm d-block" 
-                       href="mailto:${data}" 
-                       title="${data}"
-                       style="max-width: 100%;">
-                        <i class="${iconClass} ${iconColor} me-1"></i>${data}
-                    </a>
-                </div>
-            `;
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-secondary bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 40px; height: 40px;">
+                        <span class="fw-bold fs-6">
+                            ${fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </span>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">${fullName}</div>
+                        <a href="mailto:${data}" class="text-muted small text-truncate d-block" style="max-width: 280px;">
+                            ${data}
+                        </a>
+                    </div>
+                </div>`;
         }
     },
     {
         orderable: false,
         data: "person__document_number",
         width: "12%",
-        className: DataTableFactory.classes.center,
+        className: DataTableFactory.classes.justify,
         render: (data, type, row) => {
             return data ? data : "-";
         }
@@ -68,7 +70,7 @@ const userColumns = [
         orderable: false,
         data: "person__phone",
         width: "12%",
-        className: DataTableFactory.classes.center,
+        className: DataTableFactory.classes.justify,
         render: (data, type, row) => {
             return data ? data : "-";
         }
@@ -76,52 +78,38 @@ const userColumns = [
     {
         orderable: false,
         data: "group_name",
-        width: "16%",
+        width: "14%",
         className: DataTableFactory.classes.center,
         render: function (data, type, row) {
             if (!data) return '';
-
             const translations = {
                 'specialist': {label: 'Especialista', color: 'secondary'},
-                'administrator': {label: 'Administrador', color: 'secondary'},
+                'administrator': {label: 'Administrador', color: 'primary'},
             };
-
             const groups = data.split(', ').map(g => translations[g] || {label: g, color: 'secondary'});
-
             return groups.map(g => `
-                <span class="badge bg-transparent border border-${g.color}
-                      text-truncate py-2 px-2 rounded-3 text-sm"
-                      style="max-width: 16vw; min-width: 0; width: 120px;"
-                      data-bs-toggle="tooltip" 
-                      title="${g.label}">
+                <span class="badge bg-${g.color} bg-opacity-10 text-${g.color} rounded-pill py-2" style="width: 10em">
                     ${g.label}
-                </span>
-            `).join('');
+                </span>`).join('');
         }
     },
+
     {
         orderable: false,
-        data: "status",
-        width: "12%",
-        className: DataTableFactory.classes.center,
-        render: (data, type, row) => {
-            const {label, color} = mapStatus[data];
+        data: "status", width: "13%", className: DataTableFactory.classes.center,
+        render: (data) => {
+            if (!data) return '<span class="text-muted">—</span>';
+            const {color, label} = mapStatus[data] || {color: 'secondary', label: 'N/A'};
             return `
-                <span class="badge bg-transparent border border-${color} border-1 text-${color} 
-                    text-truncate py-2 px-2 rounded-3" 
-                      style="width: 120px;"
-                      data-bs-toggle="tooltip" 
-                      data-bs-placement="top" 
-                      title="${label}">
+                <span class="badge bg-${color} bg-opacity-10 text-${color} rounded-pill py-2" style="width: 10em">
                     ${label}
-                </span>
-            `;
+                </span>`;
         }
     },
     {
         orderable: true,
         data: "created_at",
-        width: "18%",
+        width: "14%",
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
             const {full} = parseDateTime(data);
@@ -134,59 +122,34 @@ const userColumns = [
     },
     {
         data: "external_id",
-        width: "4%",
+        width: "10%",
         orderable: false,
         className: DataTableFactory.classes.center,
         render: (data, type, row) => {
-            const statusMeta = {
-                true: {icon: "bi bi-toggle-on"},
-                false: {icon: "bi bi-toggle-off"},
-            };
-
-            const actions = Object.entries(tableActions);
-            const menuItems = actions.map(([key, action]) => {
-                const dangerClass = action.danger ? 'text-danger' : '';
-                const isStatusAction = key === 'status';
-                const icon = isStatusAction ? statusMeta[row.is_active].icon : action.icon;
-
-                let actionUrl = action.url;
-                const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-                if (uuidPattern.test(actionUrl)) {
-                    actionUrl = actionUrl.replace(uuidPattern, data);
-                }
-                if (isStatusAction) {
-                    const status = row.is_active ? 0 : 1;
-                    return `
-                        <li>
-                            <a class="dropdown-item status-toggle-btn ${dangerClass}" 
-                               href="javascript:void(0)" 
-                               data-id="${data}"
-                               data-url="${actionUrl}">
-                                <i class="${icon} me-2"></i>${action.label}
-                            </a>
-                        </li>
-                    `;
-                }
-
-                return `
-                    <li>
-                        <a class="dropdown-item ${key}-btn ${dangerClass}" 
-                           href="${actionUrl}" 
-                           data-id="${data}">
-                            <i class="${icon} me-2"></i>${action.label}
-                        </a>
-                    </li>
-                `;
-            }).join('');
-
+            const detailUrl = `${urlPaginator}${data}/`;
+            const editUrl = `${urlPaginator}${data}/update`;
+            const statusUrl = `${urlPaginator}${data}/update-status/`;
             return `
-                <div class="dropdown">
-                    <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots-vertical"></i>
+                <div class="d-flex justify-content-center gap-1 flex-nowrap">
+                    <button type="button" class="btn btn-icon btn-outline-secondary bg-opacity-25 rounded-circle border-0"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover"
+                            title="Ver detalles"
+                            onclick="window.location.href='${detailUrl}'">
+                        <i class="bi bi-eye fs-6"></i>
                     </button>
-                    <ul class="dropdown-menu">
-                        ${menuItems}
-                    </ul>
+                    <button type="button" class="btn btn-icon btn-outline-secondary bg-opacity-25 rounded-circle border-0"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover"
+                            title="Editar detalles"
+                            onclick="window.location.href='${editUrl}'">
+                        <i class="bi bi-pencil-square fs-6"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-icon btn-outline-secondary bg-opacity-25 rounded-circle border-0 status-toggle-btn"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-trigger="hover"
+                            title="${row.is_active ? 'Desactivar' : 'Activar'}"
+                            data-url="${statusUrl}">
+                        <i class="bi ${row.is_active ? 'bi-toggle-on' : 'bi-toggle-off'} fs-6"></i>
+                    </button>
                 </div>
             `;
         }
@@ -205,6 +168,10 @@ document.addEventListener('click', function (e) {
     })
         .then(r => r.json())
         .then(data => {
+            if (!data.success) {
+                return window.location.reload();
+            }
+
             Swal.fire({
                 title: data.title,
                 html: `<p class="text-muted mb-1">${data.description}</p>
@@ -237,6 +204,9 @@ document.addEventListener('click', function (e) {
                             timer: 3000,
                             timerProgressBar: true,
                             confirmButtonColor: '#4e73df',
+                            backdrop: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
                         }).then(() => window.location.reload());
                     })
                     .catch((error) => {

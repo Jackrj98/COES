@@ -20,7 +20,6 @@ exclude = '''
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-# Crucial: Añadir coes-env aquí para que Ruff no analice las librerías
 exclude = [
     ".git",
     "__pycache__",
@@ -33,20 +32,17 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-# E/W: pycodestyle, F: Pyflakes, I: isort, D: pydocstyle, UP: pyupgrade
 select = ["E", "W", "F", "I", "D", "UP"]
-
 ignore = [
     "D100", "D104", "D401",
-    "E203",                  # Conflicto con Black (espacios antes de ':')
-    "D101", "D102", "D103", # Ignorar docstrings faltantes en clases/métodos (opcional)
+    "E203",
+    "D101", "D102", "D103",
     "D105", "D106", "D107",
     "D200", "D205",
-    "E501",                  # Dejar que Black maneje el largo de línea
+    "E501",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# F403/F405 son comunes en los __init__.py o archivos de settings con import *
 "**/settings/*.py" = ["F403", "F405"]
 "**/__init__.py" = ["F401"]
 
@@ -60,10 +56,49 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 [tool.mypy]
 python_version = "3.12"
 ignore_missing_imports = true
-disallow_untyped_defs = false # Cambiado a false temporalmente si tienes código sin tipos
+disallow_untyped_defs = false
 check_untyped_defs = true
 strict_optional = true
 warn_unused_ignores = true
 show_error_codes = true
-# Mypy también necesita ignorar explícitamente el entorno
 exclude = ["build", "dist", ".venv", "coes-env", "migrations"]
+
+
+testpaths = ["apps"]
+python_files = ["test_*.py", "*_tests.py", "tests.py"]
+python_classes = ["Test*", "*Test"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--durations=5",
+    "--showlocals",
+    "--no-warnings",
+    "--strict-markers"
+]
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests"
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "cfg.settings.testing"
+python_files = ["test_*.py", "*_tests.py", "tests.py"]
+python_classes = ["Test*", "*Test"]
+python_functions = ["test_*"]
+testpaths = ["apps"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--durations=5",
+    "--showlocals",
+    "--disable-warnings",
+    "--strict-markers",
+    "--reuse-db"
+]
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests"
+]

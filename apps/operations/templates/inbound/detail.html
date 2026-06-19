@@ -1,0 +1,187 @@
+{% extends 'components/_datatable.html' %}
+{% load custom_tags i18n humanize static %}
+
+{% block actions %}
+    {% if not object.is_complete %}
+        <div class="dropdown">
+            <button type="button"
+                    class="btn bg-secondary bg-opacity-25 dropdown-toggle font-semibold order-1 border-light rounded-3 hov-bg-opacity-10"
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {% trans actions.title %}
+            </button>
+            <div class="dropdown-menu dropdown-menu-end border-1 shadow">
+                {% for action in actions.actions %}
+                    {% if action.title %}
+                        {% if action.action == 'mark_completed' or action.action == 'cancel' or action.action == 'mark_sent' %}
+                            <form action="{{ action.url }}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="dropdown-item {% if action.action == 'cancel' %}text-danger{% endif %}">
+                                    {% if action.icon %}<i class="{{ action.icon }} me-2"></i>{% endif %}
+                                    {{ action.title }}
+                                </button>
+                            </form>
+                        {% else %}
+                            {% if object.status != object.Status.COMPLETED and action.action == 'update' %}
+                                <a class="dropdown-item" href="{{ action.url }}">
+                                    {% if action.icon %}<i class="{{ action.icon }} me-2"></i>{% endif %}
+                                    {{ action.title }}
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock actions %}
+
+{% block content %}
+    <section>
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="card shadow-sm  border-0">
+                    <div class="card-header bg-transparent border-bottom border-secondary d-flex align-items-center gap-3">
+                        <h4 class="card-title mb-0">{{ object.order_number|capfirst }}</h4>
+                        <div class="ms-auto">
+                            <span class="badge bg-{{ object.color }} bg-opacity-25 px-3 py-1 rounded-pill text-{{ object.color }}">
+                                <i class="bi bi-record-fill me-1"></i> {{ object.get_status_display }}
+                            </span>
+                            <span class="badge bg-secondary bg-opacity-10 px-3 py-1 rounded-pill">
+                                {{ items }} {% trans "lines" %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="mb-4 mt-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-secondary">{% trans "General reception" %}</small>
+                                <small class="text-white">{{ object.percentage_fulfilled|default:0 }}%</small>
+                            </div>
+                            <div class="progress bg-secondary bg-opacity-25" style="height: 8px;">
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                     style="width: {{ object.percentage_fulfilled|default:0 }}%"></div>
+                            </div>
+                        </div>
+
+                        <dl class="row mb-0 g-3">
+                            <div class="col-md-4">
+                                <dt class="small text-secondary fw-normal">{% trans "Motive" %}</dt>
+                                <dd class="fw-medium">{{ object.motive|default:"-" }}</dd>
+                            </div>
+                            <div class="col-md-4">
+                                <dt class="small text-secondary fw-normal">{{ object|field_label:"scheduled_date" }}</dt>
+                                <dd class="fw-medium">{{ object.scheduled_date|date:"d M Y"|default:"-" }}</dd>
+                            </div>
+                            <div class="col-md-4">
+                                <dt class="small text-secondary fw-normal">{{ object|field_label:"received_date" }}</dt>
+                                <dd class="fw-medium">{{ object.received_date|date:"d M Y"|default:"-" }}</dd>
+                            </div>
+
+                            <div class="col-md-4">
+                                <dt class="small text-secondary fw-normal">{% trans "Supplier" %}</dt>
+                                <dd class="fw-medium">
+                                    {{ object.supplier.full_name|default:"-" }}
+                                    ({{ object.supplier.business_name|default:"-" }})
+                                </dd>
+                            </div>
+
+                            <div class="col-md-4">
+                                <dt class="small text-secondary fw-normal">{% trans "Contact" %}</dt>
+                                <dd class="fw-medium">{{ object.supplier.phone|default:"-" }}</dd>
+                            </div>
+
+                            <div class="col-md-4">
+                                <dt class="small text-secondary fw-normal">{% trans "Tax ID" %}</dt>
+                                <dd class="fw-medium">{{ object.supplier.document_number|default:"-" }}</dd>
+                            </div>
+
+                            <div class="col-md-12">
+                                <dt class="small text-secondary fw-normal">{% trans "Observations" %}</dt>
+                                <dd class="fw-medium">{{ object.observations|default:"-" }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-top border-secondary pt-3">
+                        <h6 class="text-uppercase small text-secondary fw-bold mb-3">{% trans "Audit" %}</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <dt class="small text-secondary">{% trans "Created at" %}</dt>
+                                <dd class="text-white">{{ object.created_at|date:"d M Y - H:i"|default:"-" }}</dd>
+                            </div>
+                            <div class="col-md-4">
+                                <dt class="small text-secondary">{% trans "Updated at" %}</dt>
+                                <dd class="text-white">{{ object.updated_at|date:"d M Y - H:i"|default:"-" }}</dd>
+                            </div>
+                            <div class="col-md-4">
+                                <dt class="small text-secondary">{% trans "Created by" %}</dt>
+                                <dd class="text-white">{{ object.created_by|default:"-" }}</dd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <h5 class="card-title mb-0">{% trans "Supply lines"|upper %}</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                        <tr class="text-secondary" style="font-size: 0.85rem; text-transform: uppercase;">
+                            <th class="ps-4 py-3">{% trans 'Supply'|capfirst %}</th>
+                            <th class="py-3">{% trans 'Assigned batch'|capfirst %}</th>
+                            <th class="text-center py-3">{% trans 'Qty requested'|capfirst %}</th>
+                            <th class="text-center py-3">{% trans 'Qty received'|capfirst %}</th>
+                            <th class="text-center py-3">{% trans 'Unit cost'|capfirst %}</th>
+                            <th class="text-end py-3">{% trans 'Line total'|capfirst %}</th>
+                            <th class="text-center pe-4 py-3">{% trans 'Reception'|capfirst %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in details %}
+                            <tr class="border-secondary">
+                                <td class="ps-4 py-3 fw-medium">
+                                    {{ item.supply.name }} ({{ item.supply.unit_of_measure.extra }})
+                                </td>
+                                <td class="py-3 text-secondary">{{ item.batch.batch_number }}</td>
+                                <td class="text-center py-3">{{ item.quantity_requested }}</td>
+                                <td class="text-center py-3">{{ item.quantity_fulfilled }}</td>
+                                <td class="text-center py-3 font-monospace">${{ item.unit_cost|floatformat:2 }}</td>
+                                <td class="text-end py-3 fw-bold">${{ item.line_total|floatformat:2 }}</td>
+                                <td class="text-center pe-4 py-3">
+                                    {% if item.is_complete %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2">{% trans 'Complete' %}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2">{% trans 'Partial' %} {{ item.percentage }}%</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer border-top border-secondary py-3 px-4">
+                <div class="row align-items-center">
+                    <div class="col-auto text-secondary">{% trans 'Lines'|capfirst %}:
+                        <strong>{{ details|length }}</strong>
+                    </div>
+                    <div class="col-auto text-secondary">{% trans 'Qty requested'|capfirst %}:
+                        <strong>{{ object.total_requested }}</strong></div>
+                    <div class="col-auto text-secondary">{% trans 'Qty received'|capfirst %}:
+                        <strong>{{ object.total_fulfilled }}</strong></div>
+                    <div class="col text-end">
+                        {% trans 'Order total'|capfirst %}: <span
+                            class="h4 text-success mb-0 fw-bold ms-2">${{ object.total|intcomma }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

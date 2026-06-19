@@ -1,0 +1,89 @@
+{% extends 'components/_datatable.html' %}
+{% load custom_tags crispy_forms_filters %}
+
+{% block actions %}
+    {% with menu_a=actions.menu_actions %}
+        <a class="btn btn-icon btn-primary" href="{{ menu_a.add.url }}">
+            <i class="bi bi-plus-lg "></i>
+            <span class="d-none d-md-inline fw-semibold">{% trans menu_a.add.title %}</span>
+        </a>
+    {% endwith %}
+{% endblock actions %}
+
+{% block metrics %}
+    <div class="row g-3">
+        {% for item in metrics_list %}
+            <div class="col-12 col-sm-6 col-md-6 col-xl-3">
+                <div class="card h-70 w-80 border-0 shadow-sm">
+                    <div class="card-body p-4 d-flex align-items-center gap-3">
+                        <div class="flex-shrink-0">
+                    <span class="btn btn-icon bg-{{ item.color }} bg-opacity-10 rounded-3 p-3">
+                        <i class="bi {{ item.icon }} fs-3 text-{{ item.color }}"></i>
+                    </span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1 small fw-medium">{{ item.title }}</h6>
+                            <h3 class="mb-0 fw-bold text-{{ item.color }}">{{ item.value|intcomma }}</h3>
+                            <small class="text-muted">{{ item.sub }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock metrics %}
+
+{% block filters %}
+    {% if filter_form %}
+        <form method="GET" id="filter" class="mb-4">
+            <div class="row align-items-end g-3">
+                <div class="col-12 col-sm-6 col-md-8 col-lg-5">
+                    {{ filter_form.search|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6 col-md-8 col-lg-3">
+                    {{ filter_form.category|as_crispy_field }}
+                </div>
+                <div class="col-12 col-sm-6 col-md-8 col-lg-2">
+                    {{ filter_form.stock|as_crispy_field }}
+                </div>
+                <div class="col-6 col-sm-6 col-md-4 col-lg-2">
+                    <div class="d-flex align-items-end gap-2">
+                        <div class="flex-grow-1">
+                            {{ filter_form.status|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            <button type="button"
+                                    id="clear-filters"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 38px; height: 38px; padding: 0;">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+{% endblock filters %}
+
+{% block columns %}
+    <th scope="col" class="text-uppercase">#</th>
+    <th scope="col" class="text-uppercase">{{ object|object_verbose_name|upper }}</th>
+    <th scope="col" class="text-uppercase">{{ object|field_label:'category'|upper }}</th>
+    <th scope="col" class="text-uppercase">{% trans 'unit'|upper %}</th>
+    <th scope="col" class="text-uppercase">STOCK</th>
+    <th scope="col" class="text-uppercase">MIN.</th>
+    <th scope="col" class="text-uppercase">MAX.</th>
+    <th scope="col" class="text-uppercase">{% trans 'status'|upper %}</th>
+    <th scope="col" class="text-uppercase">{% trans 'actions'|upper %}</th>
+{% endblock columns %}
+
+{% block rows %} {% endblock rows %}
+
+{% block dt_javascript %}
+    <script>
+        const baseHref = "{% get_base_href %}"
+        const urlPaginator = "{{ list_url }}";
+    </script>
+    <script src="{% static 'js/supplies/datatable.js' %}"></script>
+{% endblock dt_javascript %}

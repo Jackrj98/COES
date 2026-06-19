@@ -1,0 +1,88 @@
+{% load crispy_forms_tags crispy_forms_filters i18n %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-header border-bottom-0 pt-4">
+        <h4 class="card-title mb-0">{% trans 'Order details'|capfirst %}</h4>
+    </div>
+
+    <div class="card-body">
+        {{ formset.management_form }}
+
+        <div class="row g-2 mb-2 text-uppercase small text-muted fw-bold pt-3">
+            <div class="col-md-3 ps-2">{% trans 'Supply' %}</div>
+            <div class="col-md-2">{% trans 'Batch' %}</div>
+            <div class="col-md-2">{% trans 'Expiry' %}</div>
+            <div class="col-md-1">{% trans 'Request' %}</div>
+            {% if formset.queryset.exists %}
+                <div class="col-md-1">{% trans 'Fulfilled' %}</div>
+            {% endif %}
+            <div class="col-md-1">{% trans 'Cost' %}</div>
+            <div class="col-md-2">{% trans 'Observations' %}</div>
+        </div>
+
+        <div id="form-container">
+            {% for form in formset %}
+                <div class="form-row mb-3 pb-2 border-bottom">
+                    {{ form.id }}
+                    <div class="row align-items-start g-2">
+                        <div class="col-md-3">{{ form.supply|as_crispy_field }}</div>
+                        <div class="col-md-2">{{ form.batch_number|as_crispy_field }}</div>
+                        <div class="col-md-2">{{ form.expiry_date|as_crispy_field }}</div>
+                        <div class="col-md-1">{{ form.quantity_requested|as_crispy_field }}</div>
+
+                        {% if form.instance.pk %}
+                            <div class="col-md-1">{{ form.quantity_fulfilled|as_crispy_field }}</div>
+                        {% endif %}
+
+                        <div class="col-md-1">{{ form.unit_cost|as_crispy_field }}</div>
+                        <div class="col-md-{% if form.instance.pk %}2{% else %}3{% endif %}">
+                            <div class="d-flex align-items-end gap-2">
+                                <div class="flex-grow-1">
+                                    {{ form.observations|as_crispy_field }}
+                                </div>
+                                <div class="mb-4">
+                                    <button type="button" class="btn btn-sm remove-row">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                    <div style="display:none;">{{ form.DELETE }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="card-footer border-top-0 bg-transparent">
+            <button type="button" id="add-form" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i> {% trans 'Add item' %}
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="empty-form-template" class="d-none">
+    <div class="form-row mb-3 pb-2 border-bottom">
+        {{ formset.empty_form.id }}
+        <div class="row align-items-start g-2">
+            <div class="col-md-3">{{ formset.empty_form.supply|as_crispy_field }}</div>
+            <div class="col-md-2">{{ formset.empty_form.batch_number|as_crispy_field }}</div>
+            <div class="col-md-2">{{ formset.empty_form.expiry_date|as_crispy_field }}</div>
+            <div class="col-md-1">{{ formset.empty_form.quantity_requested|as_crispy_field }}</div>
+            <div class="col-md-1">{{ formset.empty_form.unit_cost|as_crispy_field }}</div>
+            <div class="col-md-3">
+                <div class="d-flex align-items-end gap-2">
+                    <div class="flex-grow-1">
+                        {{ formset.empty_form.observations|as_crispy_field }}
+                    </div>
+                    <div class="mb-4">
+                        <button type="button" class="btn btn-sm remove-row">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <div style="display:none;">{{ formset.empty_form.DELETE }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

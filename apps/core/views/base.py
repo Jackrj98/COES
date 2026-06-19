@@ -21,8 +21,8 @@ class BaseView(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin, Breadc
     model = None
     success_url = None
     template_name = None
-    success_message = MessageEnum.SUCCESS
-    failure_message = MessageEnum.FAILURE
+    success_message: str = MessageEnum.SUCCESS.value
+    failure_message: str = MessageEnum.FAILURE.value
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -61,8 +61,12 @@ class CustomListView(BaseView, DatatableMixin, ListView):
         ctx["current_page"] = True
         ctx["actions"] = self.get_actions()
         ctx["filter_form"] = self.form_class()
-        ctx["status_choices"] = self.model.IsActiveChoices.choices
-        ctx["status_color_choices"] = self.model.IsActiveColorChoices.choices
+        if self.model.IsActiveChoices:
+            ctx["status_choices"] = self.model.IsActiveChoices.choices
+
+        if self.model.IsActiveColorChoices:
+            ctx["status_color_choices"] = self.model.IsActiveColorChoices.choices
+
         return ctx
 
     def get_actions(self):
@@ -86,48 +90,84 @@ class CustomDetailView(BaseView, DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
         ctx["status_choices"] = self.model.IsActiveChoices.choices
         ctx["status_color_choices"] = self.model.IsActiveColorChoices.choices
 
-        app_label = self.model._meta.app_label  # noqa
-        model_name = self.model._meta.model_name  # noqa
-        update_perm = f"{app_label}.change_{model_name}"
-
-        actions_list = []
-        edit_action = self.get_actions_map(
-            title=LabelEnum.ACTIONS.EDIT.value.format(model=model_name),
-            order=0,
-            action="update",
-            icon="bi bi-pencil-square",
-            url_name=f"{app_label}:{self.app_name}:update",
-            perm=update_perm,
-        )
-
-        if edit_action:
-            actions_list.append(edit_action)
-
+        # Build actions
+        actions_list = self._build_base_actions()
         ctx["actions"] = {
             "title": LabelEnum.ACTIONS.value,
             "actions": sorted(actions_list, key=lambda x: x["order"]),
         }
         return ctx
 
+    def _build_base_actions(self):
+        """Build the base list of actions with permission checking."""
+        app_label = self.model._meta.app_label  # noqa
+        model_name = self.model._meta.model_name  # noqa
+        actions_list = []
+
+        # Edit action
+        edit_action = self.get_actions_map(
+            title=LabelEnum.ACTIONS.EDIT.value.format(model=model_name),
+            order=1,
+            action="update",
+            icon="bi bi-pencil-square",
+            url_name=f"{app_label}:{self.app_name}:update",
+            perm=f"{app_label}.change_{model_name}",
+        )
+
+        if edit_action:
+            actions_list.append(edit_action)
+
+        return actions_list
+
     def get_actions_map(self, title, order, action, icon, url_name, **kwargs):
+        """Create an action dictionary if the user has permission."""
+        # Check if object exists before accessing it
+        if not hasattr(self, "object") or self.object is None:
+            return None
+
         permission = kwargs.get("perm", "")
         description = kwargs.get("description", "")
+
+        # Skip permission check if no permission required
+        if permission and not self.request.user.has_perm(permission):
+            return None
+
         url_kwargs = {self.slug_url_kwarg: getattr(self.object, self.slug_field)}
 
-        if self.request.user.has_perm(permission):
-            return {
-                "icon": icon,
-                "order": order,
-                "title": title,
-                "action": action,
-                "description": description,
-                "url": self.safe_reverse(url_name, url_kwargs),
-            }
-        return None
+        return {
+            "icon": icon,
+            "order": order,
+            "title": title,
+            "action": action,
+            "description": description,
+            "url": self.safe_reverse(url_name, url_kwargs),
+        }
+
+    def add_custom_action(self, context, action, permission=None):
+
+        # Check permission if required
+        if permission and not self.request.user.has_perm(permission):
+            return
+
+        custom_action = action
+        actions = context.get("actions", {})
+        actions_list = actions.get("actions", [])
+
+        # Insert maintaining order (avoid duplicates by title or action)
+        existing = any(
+            a.get("action") == custom_action["name"] or a.get("title") == custom_action["title"]
+            for a in actions_list
+        )
+
+        if not existing:
+            actions_list.append(custom_action)
+            # Re-sort after adding
+            actions_list.sort(key=lambda x: x["order"])
+            actions["actions"] = actions_list
+            context["actions"] = actions
 
     @staticmethod
     def safe_reverse(name, kwargs=None):
@@ -136,17 +176,6 @@ class CustomDetailView(BaseView, DetailView):
         except NoReverseMatch:
             logger.warning(f"URL reverse not found: {name}")
             return "#"
-
-    def build_breadcrumb(self, extra_breadcrumb=None):
-        verbose_name = _(self.model._meta.verbose_name)  # noqa
-        return super().build_breadcrumb(
-            extra_breadcrumb={
-                "name": LabelEnum.DETAILS.value,
-                "url": "#",
-                "active": True,
-                "title": LabelEnum.DETAILS.value
-            }
-        )
 
 
 class BaseActionView(BaseView):
@@ -157,6 +186,13 @@ class BaseActionView(BaseView):
         if hasattr(self, "success_message"):
             messages.success(self.request, self.success_message)  # noqa
         return response
+
+    def form_invalid(self, form):
+        messages.warning(
+            self.request,  # noqa
+            getattr(self, "failure_message"),
+        )
+        return super().form_invalid(form)  # noqa
 
     def get_action_title(self, action_label):
         """Centralize the generation of the title."""
@@ -187,11 +223,12 @@ class CustomCreateView(BaseActionView, FormView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["title"] = self.get_action_title(LabelEnum.ADD_MODEL.value)
+        if "form" not in ctx:
+            ctx["form"] = self.get_form()
         return ctx
 
     def build_breadcrumb(self, extra_breadcrumb=None):
         verbose_name = _(self.model._meta.verbose_name)  # noqa
-
         return super().build_breadcrumb(
             extra_breadcrumb={
                 "name": LabelEnum.ADD_MODEL.format(model=verbose_name),
@@ -212,6 +249,7 @@ class CustomUpdateView(BaseActionView, UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx["cancel_url"] = self.get_success_url()
         ctx["title"] = self.get_action_title(LabelEnum.EDIT_MODEL.value)
         ctx["detail_url"] = (getattr(self.object, "get_absolute_url", lambda: "#")(),)
 
@@ -227,6 +265,19 @@ class CustomUpdateView(BaseActionView, UpdateView):
                 "title": LabelEnum.EDIT.value,
             }
         )
+
+    def get_success_url(self):
+        referer = self.request.META.get("HTTP_REFERER", "")
+        if str(self.object.external_id) in referer:
+            return self.object.get_absolute_url()
+
+        return self.success_url
+
+
+class CustomStatusUpdateView(BaseActionView, UpdateView):
+    slug_field = "external_id"
+    slug_url_kwarg = "external_id"
+    success_message = MessageEnum.SUCCESS.value
 
 
 class BaseDeleteView(BaseView, DeleteView):

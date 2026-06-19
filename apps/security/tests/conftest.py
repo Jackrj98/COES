@@ -4,36 +4,48 @@ import pytest
 from django.contrib.auth.models import Group, Permission
 from django.db.models import Q
 
-from apps.core.utils.permissions import Permissions
-from apps.security.layers.applications.user_service import UserAppService
-from apps.security.models import User
+from apps.security.models import Person, User
+from apps.security.permissions import (
+    ROLES,
+)
 from apps.security.utils.utils import generate_ecuadorian_id
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_permissions_for_tests(django_db_setup, django_db_blocker):
-    """Sincroniza permisos manualmente.
+    """Sincroniza permisos manualmente usando la constante ROLES.
     'django_db_setup' asegura que la BD de test esté lista.
     'django_db_blocker' permite acceder a la BD en un fixture de sesión.
     """
     print("\n--- Sincronizando permisos manualmente para los tests ---")
 
-    with django_db_blocker.unblock():  # <-- ESTO es lo que permite el acceso en scope='session'
-        for group_data in Permissions.groups_permissions:
-            group_name = str(group_data.get("name"))
-            group, _ = Group.objects.get_or_create(name=group_name)
+    with django_db_blocker.unblock():
+        for role_key, role_data in ROLES.items():
+            group_name = str(role_data.get("name"))
+            if not group_name:
+                continue
 
-            permissions = group_data.get("permissions", {})
+            group, created = Group.objects.get_or_create(name=group_name)
+
+            # Construir query de permisos como en sync_roles_and_permissions
+            permissions_dict = role_data.get("permissions", {})
             permission_query = Q()
 
-            for app_name, app_permissions in permissions.items():
-                detail_permissions = app_permissions.get("details", [])
-                app_query = Q(content_type__app_label=app_name)
-                detail_query = Q(codename__in=detail_permissions)
-                permission_query |= app_query & detail_query
+            for app_label, section in permissions_dict.items():
+                detail_codenames = section.get("details", [])
+                model_names = section.get("models", [])
 
-            matched_permissions = Permission.objects.filter(permission_query)
+                app_q = Q(content_type__app_label=app_label)
+
+                if detail_codenames:
+                    permission_query |= app_q & Q(codename__in=detail_codenames)
+                if model_names:
+                    permission_query |= app_q & Q(content_type__model__in=model_names)
+
+            matched_permissions = Permission.objects.filter(permission_query).distinct()
             group.permissions.set(matched_permissions)
+
+            print(f"  - Grupo '{group_name}': {matched_permissions.count()} permisos asignados")
 
     print("--- Sincronización finalizada ---\n")
 
@@ -43,41 +55,41 @@ def user_factory():
     """Factory fixture to create users with custom attributes."""
 
     def _create_user(force_password=False, groups=None, is_superuser=False):
-        """Create a user with custom attributes.
-
-        Args:
-            force_password (bool): Whether the user must change the password on next login
-            groups (list): List of group names to assign to the user.
-            is_superuser (bool): Whether to grant superuser privileges
-
-        Returns:
-            User: Created user instance
-        """
-        service = UserAppService()
+        """Create a user with custom attributes."""
         uid = uuid.uuid4().hex[:8]
+        username = f"user_{uid}"
+        email = f"test_{uid}@example.com"
+        password = "Password123!"
 
-        # Build user payload with default test data
-        payload = {
-            "username": f"user_{uid}",
-            "email": f"test_{uid}@example.com",
-            "password": "Password123!",
-            "first_name": "Test",
-            "last_name": "User",
-            "document_number": generate_ecuadorian_id(),
-            "phone": "+593987654321",
-            "groups": groups or [],  # Ensure groups is always a list
-        }
+        person = Person.objects.create(
+            first_name="Test",
+            last_name="User",
+            document_number=generate_ecuadorian_id(),
+            phone="+593987654321",
+        )
 
-        # Register user through the application service
-        user = service.register_user(payload)
-        user.force_password = force_password
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            force_password=force_password,
+            is_active=True,
+            status=User.Status.ENABLED,
+            person=person,
+        )
 
-        # Set superuser flags if requested
+        if groups:
+            for group_name in groups:
+                group, _ = Group.objects.get_or_create(name=group_name)
+                user.groups.add(group)
+
         if is_superuser:
             user.is_superuser = True
             user.is_staff = True
+            user.save()
 
-        user.save()
+        user.refresh_from_db()
+
         return user
 
     return _create_user
@@ -141,15 +153,6 @@ def specialist_client(client, user_factory, force_password=False):
 
     if hasattr(user, "_perm_cache"):
         del user._perm_cache
-
-    print(f"DEBUG: Grupos: {user.groups.all()}")
-    print(f"DEBUG: Permisos: {user.get_all_permissions()}")
-
-    grupo = user.groups.first()
-    print(f"DEBUG: Nombre del grupo: {grupo.name}")
-    print(
-        f"DEBUG: Permisos en el grupo: {list(grupo.permissions.all().values_list('codename', flat=True))}"
-    )
 
     client.force_login(user)
     return client, user

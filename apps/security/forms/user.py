@@ -1,5 +1,6 @@
 from crispy_forms.helper import FormHelper
 from django import forms
+from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.forms import BaseFilterForm, BaseFormHelperMixin
@@ -11,13 +12,11 @@ class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
     status = forms.ChoiceField(
         label=_("Status"),
         required=False,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     group = forms.ChoiceField(
         label=_("Group"),
         required=False,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups()),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
 
@@ -27,12 +26,18 @@ class UserFilterForm(BaseFilterForm, BaseFormHelperMixin):
         if "search" in self.fields:
             self.fields["search"].label = search_text
             self.fields["search"].widget.attrs.update(
-                {"placeholder": search_text, "class": "form-control"}
+                {"placeholder": _("Search by names, username, email"), "class": "form-control"}
             )
 
         self.setup_form_helper(
             label_class="form-label text-sm text-muted", form_class="needs-validation"
         )
+        status_choices = BaseFilterForm.DEFAULT_CHOICE + list(User.Status.choices)  # type: ignore
+        groups_choices = (
+            BaseFilterForm.DEFAULT_CHOICE + lazy(UserAppService.retrieve_groups, list)()
+        )
+        self.fields["status"].choices = status_choices
+        self.fields["group"].choices = groups_choices
 
 
 class PersonBaseForm(forms.ModelForm):
@@ -67,7 +72,7 @@ class UserCreateForm(forms.ModelForm):
     group = forms.ChoiceField(
         label=_("Group"),
         required=True,
-        choices=BaseFilterForm.DEFAULT_CHOICE + list(UserAppService().retrieve_groups()),
+        choices=[],
         widget=forms.Select(attrs={"class": "form-select"}),
     )
 
@@ -85,6 +90,10 @@ class UserCreateForm(forms.ModelForm):
         self.helper.error_text_inline = True
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
+
+        default_choices = BaseFilterForm.DEFAULT_CHOICE
+        group_choices = UserAppService().retrieve_groups()
+        self.fields["group"].choices = default_choices + list(group_choices)
 
 
 class UserUpdateForm(forms.ModelForm):
@@ -148,3 +157,23 @@ class PasswordUpdateForm(forms.ModelForm):
         self.helper.label_class = "form-label"
         self.helper.form_class = "needs-validation"
         self.fields["current_password"].widget.attrs["autofocus"] = True
+
+    def clean(self):
+        user = self.instance
+        current = self.cleaned_data.get("current_password")
+        new_password = self.cleaned_data.get("new_password")
+        confirm_password = self.cleaned_data.get("confirm_password")
+
+        if user and not user.check_password(current):
+            self.add_error("current_password", _("Current password is incorrect"))
+
+        if new_password == current:
+            self.add_error(
+                "new_password", _("New password cannot be the same as the current password")
+            )
+
+        if new_password != confirm_password:
+            self.add_error("new_password", _("Passwords do not match"))
+            self.add_error("confirm_password", _("Passwords do not match"))
+
+        return self.cleaned_data
