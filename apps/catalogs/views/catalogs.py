@@ -105,13 +105,13 @@ class CatalogCreateView(CustomCreateView):
 
         try:
             catalog_data = form.cleaned_data
-            service.register_catalog(payload=catalog_data)
+            instance = service.register_catalog(payload=catalog_data)
             messages.success(
                 self.request,
                 self.success_message.format(model=self.model._meta.verbose_name),
                 extra_tags="toast",
             )
-            return redirect(self.success_url)
+            return redirect(instance.get_absolute_url())
 
         except Exception as e:
             return self.handle_error(str(e), e)

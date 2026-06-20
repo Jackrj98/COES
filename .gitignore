@@ -1,118 +1,170 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# DJANGO & PYTHON CORE
-# ──────────────────────────────────────────────────────────────────────────────
-*.log
-*.pot
-*.pyc
+# =============================================================================
+# GIT
+# =============================================================================
+.git
+.gitignore
+.gitattributes
+.github/
+.gitlab/
+.gitmessage
+.gitconfig
+
+# =============================================================================
+# PYTHON
+# =============================================================================
 __pycache__/
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-media/
-staticfiles/
-
-# ──────────────────────────────────────────────────────────────────────────────
-# ENTORNOS VIRTUALES (¡CRÍTICO PARA TU ERROR DE RUFF!)
-# ──────────────────────────────────────────────────────────────────────────────
-coes-env/
-.venv/
-venv/
-ENV/
-env/
-bin/
-lib/
-include/
-
-# ──────────────────────────────────────────────────────────────────────────────
-# SEGURIDAD Y VARIABLES DE ENTORNO
-# ──────────────────────────────────────────────────────────────────────────────
-.env
-.env.local
-.env.*.local
-*.env
-
-! .env.example
-# ──────────────────────────────────────────────────────────────────────────────
-# CACHÉ DE HERRAMIENTAS DE DESARROLLO
-# ──────────────────────────────────────────────────────────────────────────────
-.ruff_cache/
-.mypy_cache/
-.pytest_cache/
-.tox/
-.coverage
-htmlcov/
-.ipynb_checkpoints/
-.cache/
-
-# ──────────────────────────────────────────────────────────────────────────────
-# IDEs & EDITORES (PYCHARM / VS CODE)
-# ──────────────────────────────────────────────────────────────────────────────
-.idea/
-.vscode/
-*.swp
-*.swo
-.project
-.pydevproject
-.settings/
-
-# ──────────────────────────────────────────────────────────────────────────────
-# DISTRIBUCIÓN & BUILD
-# ──────────────────────────────────────────────────────────────────────────────
-dist/
-*.egg-info/
-.eggs/
-
-# ──────────────────────────────────────────────────────────────────────────────
-# SISTEMA OPERATIVO
-# ──────────────────────────────────────────────────────────────────────────────
-.DS_Store
-Thumbs.db
-
-# Python
 *.py[cod]
 *$py.class
 *.so
 .Python
-develop-eggs/
-downloads/
-eggs/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-.installed.cfg
-*.egg
-MANIFEST
-*.manifest
-*.spec
 pip-log.txt
 pip-delete-this-directory.txt
+.pypirc
+*.egg-info/
+*.egg
+.eggs/
+develop-eggs/
+downloads/
+*.whl
+*.dist-info/
+.pytest_cache/
 
+# =============================================================================
+# DJANGO
+# =============================================================================
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+*.pot
+staticfiles/
+media/
+migrations/*.py
+!migrations/__init__.py
 
-# Tests
-.nox/
+# =============================================================================
+# ENTORNO Y SECRETOS
+# =============================================================================
+.env
+.env.local
+.env.*.local
+*.env.*
+!.env.template
+
+.env.production
+.env.development
+.env.staging
+.env.test
+.env.uat
+.env.qa
+
+# Secretos
+secrets/
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.secret
+
+# =============================================================================
+# IDE Y EDITORES
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.suo
+*.user
+*.sln
+*.bak
+*.iml
+.vscode/settings.json
+
+# =============================================================================
+# TESTING
+# =============================================================================
+.coverage
+htmlcov/
+.tox/
+*.cover
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
-*.cover
-*.py,cover
 .hypothesis/
-cover/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Django
-*.mo
-*.sqlite3
-instance/
-.webassets-cache
+# =============================================================================
+# NODE (si usas Webpack, Tailwind, etc.)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
 
-# Celery
-celerybeat-schedule
-celerybeat.pid
+# =============================================================================
+# DOCKER - NO ignorar archivos de configuración
+# =============================================================================
+docker-volumes/
+postgres_data/
+.containers/
+*.pid
+docker-compose.override.yml
+docker-compose.local.yml
 
-# Migrations
-**/migrations/*.pyc
-**/migrations/00*
-**/migrations/__pycache__/
+# =============================================================================
+# DESARROLLO - NO ignorar Makefile ni archivos de build
+# =============================================================================
+.venv/
+venv/
+ENV/
+env/
+coes-env/
+env.bak/
+venv.bak/
+
+# =============================================================================
+# LOCUST
+# =============================================================================
+locust_*.csv
+*.html
+*_stats.csv
+*_stats_history.csv
+
+# =============================================================================
+# TRADUCCIONES - Ignorar solo archivos compilados
+# =============================================================================
+locale/**/*.mo
+locale/**/.DS_Store
+
+# =============================================================================
+# BACKUP Y TEMPORALES
+# =============================================================================
+*.backup
+*.old
+*.orig
+*.tmp
+*.temp
+.cache/
+*.sql
+*.dump
+dump.rdb
+logs/
+*.out
+*.err
+
+# =============================================================================
+# SISTEMA OPERATIVO
+# =============================================================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
