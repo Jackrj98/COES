@@ -72,7 +72,7 @@ services:
       context: .
       dockerfile: build/docker/Dockerfile
     container_name: coes_web
-    command: make run-prod
+    command: make run-prod ENV=production
     restart: unless-stopped
     env_file: .env
     environment:
@@ -100,7 +100,7 @@ services:
       dockerfile: build/docker/Dockerfile
     container_name: coes_celery
     restart: unless-stopped
-    command: make celery
+    command: make celery ENV=production
     env_file: .env
     environment:
       - DOCKER=1
@@ -125,7 +125,7 @@ services:
       context: .
       dockerfile: build/docker/Dockerfile
     container_name: coes_celery_beat
-    command: make celery-beat
+    command: make celery-beat ENV=production
     restart: unless-stopped
     env_file: .env
     environment:

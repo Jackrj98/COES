@@ -201,7 +201,7 @@ format:
 # Docker Development
 # =============================================================================
 dev-up:
-	@printf "${GREEN}🐳 Starting development containers...${NC}\n"
+	@printf "${GREEN} Starting development containers...${NC}\n"
 	docker compose -f docker-compose.dev.yml up
 	@printf "${GREEN}Development environment ready${NC}\n"
 	@printf "Web: http://localhost:$(PORT)\n"
@@ -234,7 +234,7 @@ dev-rebuild-no-cache:
 # Docker Production
 # =============================================================================
 prod-up:
-	@printf "${GREEN}🐳 Starting production containers...${NC}\n"
+	@printf "${GREEN} Starting production containers...${NC}\n"
 	docker compose -f docker-compose.yml up -d
 	@printf "${GREEN}Production environment ready${NC}\n"
 	docker compose -f docker-compose.yml ps
