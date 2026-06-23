@@ -195,7 +195,7 @@ class CatalogItemUpdateView(CustomUpdateView):
         data = form.cleaned_data
         try:
             instance = service.update_item(
-                instance=self.get_object(),
+                instance=self.object,
                 payload={**data},
                 catalog_reference=self.kwargs.get("catalog_reference"),
             )

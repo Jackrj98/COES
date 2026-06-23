@@ -87,15 +87,15 @@ class UserAppService(BaseAppService):
             .build()
         )
 
-    @transaction.atomic
     def save_user(self, user=None, payload=None):
         user_builder = UserBuilder(user)
         person_builder = PersonBuilder(getattr(user, "person", None))
 
         try:
-            person = self._update_person(person_builder, payload)
-            user = self._update_user(user_builder, person, payload)
-            return user
+            with transaction.atomic():
+                person = self._update_person(person_builder, payload)
+                user = self._update_user(user_builder, person, payload)
+                return user
         except ValidationError as e:
             logger.warning(f"Validation error: {e.errors()}")
             raise e

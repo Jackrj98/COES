@@ -97,7 +97,6 @@ class CatalogItemAppService(BaseAppService):
             logger.exception(f"Failed to fetch catalogs: {e}")
             return params.result([]) if hasattr(params, "result") else []
 
-    @transaction.atomic
     def save_item(self, payload, instance=None):
         """Create or update a catalog item.
 
@@ -113,16 +112,17 @@ class CatalogItemAppService(BaseAppService):
         action = "updating" if instance else "creating"
 
         try:
-            catalog_item = (
-                builder.set_name(payload.get("name"))
-                .set_code(payload.get("code"))
-                .set_description(payload.get("description"))
-                .set_priority(payload.get("priority"))
-                .set_active(payload.get("is_active"))
-                .set_extra(payload.get("extra"))
-                .set_catalog(payload.get("catalog_id"))
-            )
-            return catalog_item.build()
+            with transaction.atomic():
+                catalog_item = (
+                    builder.set_name(payload.get("name"))
+                    .set_code(payload.get("code"))
+                    .set_description(payload.get("description"))
+                    .set_priority(payload.get("priority"))
+                    .set_active(payload.get("is_active"))
+                    .set_extra(payload.get("extra"))
+                    .set_catalog(payload.get("catalog_id"))
+                )
+                return catalog_item.build()
         except ValidationError as e:
             logger.warning(f"Validation error {action} catalog item: {e.error_dict}")
             raise

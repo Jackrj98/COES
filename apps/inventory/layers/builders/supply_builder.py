@@ -78,6 +78,6 @@ class SupplyBuilder:
 
     def build(self) -> Supply:
         """Build and return a supply instance."""
-        self.supply.full_clean()
+        #self.supply.full_clean()
         self.supply.save()
         return self.supply

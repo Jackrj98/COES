@@ -162,7 +162,7 @@ class Batch(AuditModel):
 
     def clean(self):
         if (
-            Batch.objects.filter(supply=self.supply, batch_number=self.batch_number)
+            Batch.objects.filter(supply=self.supply, batch_number=self.batch_number).select_related("supply")
             .exclude(pk=self.pk)
             .exists()
         ):

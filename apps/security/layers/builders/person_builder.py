@@ -30,6 +30,6 @@ class PersonBuilder:
         return self
 
     def build(self) -> Person:
-        self.person.full_clean()
+       # self.person.full_clean()
         self.person.save()
         return self.person
