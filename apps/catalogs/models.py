@@ -113,7 +113,7 @@ class CatalogItem(AuditModel):
         return reverse("catalogs:items:detail", kwargs=kwargs)
 
     def clean(self):
-        queryset = self.__class__.objects.filter(catalog=self.catalog, code=self.code)
+        queryset = self.__class__.objects.filter(catalog=self.catalog, code=self.code).select_related("catalog")
 
         if self.pk:
             queryset = queryset.exclude(pk=self.pk)

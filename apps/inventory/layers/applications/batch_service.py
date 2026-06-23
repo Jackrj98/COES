@@ -83,7 +83,6 @@ class BatchAppService(BaseAppService):
             .order_by("expiry_date")
         )
 
-    @transaction.atomic
     def save_batch(self, payload, instance=None):
 
         builder = BatchBuilder(batch=instance) if instance else BatchBuilder()

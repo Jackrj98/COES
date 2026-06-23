@@ -2,6 +2,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -131,12 +132,13 @@ class BatchCreateView(CustomCreateView):
 
         try:
             # Prepare data for service layer
-            batch_data["supply_id"] = self.get_supply().id
-            new_batch = service.register_batch(payload=batch_data)
-            self._register_initial_movement(new_batch, batch_data["initial_quantity"])
+            with transaction.atomic():
+                batch_data["supply_id"] = self.get_supply().id
+                new_batch = service.register_batch(payload=batch_data)
+                self._register_initial_movement(new_batch, batch_data["initial_quantity"])
 
-            new_batch.current_quantity = batch_data["initial_quantity"]
-            new_batch.save(update_fields=["current_quantity"])
+                new_batch.current_quantity = batch_data["initial_quantity"]
+                new_batch.save(update_fields=["current_quantity"])
             # Show success message
             success_message = self.success_message.format(model=self.model._meta.verbose_name)
             messages.success(self.request, success_message, extra_tags="toast")
@@ -144,9 +146,6 @@ class BatchCreateView(CustomCreateView):
             # Redirect to the detail page
             return redirect(self.get_success_url())
 
-        except ValidationError as e:
-            self.handle_pydantic_error(e, form)
-            return self.form_invalid(form)
         except Exception as e:
             return self.handle_error(str(e), e)
 

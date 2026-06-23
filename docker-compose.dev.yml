@@ -1,113 +1,179 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: coes_db
+    container_name: coes_db_dev
     restart: unless-stopped
+    env_file: .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
     ports:
-      - "5436:5432" # HOST EXTERN:INTERN
+      - "5436:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - coes_dev_network
 
   mailhog:
     image: mailhog/mailhog
     container_name: coes_mailhog
     restart: unless-stopped
     ports:
-      - "8026:8025"   # UI web
-      - "1026:1025"   # SMTP
+      - "8026:8025"
+      - "1026:1025"
+    networks:
+      - coes_dev_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    container_name: coes_redis_dev
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - coes_dev_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   web:
     build:
       context: .
       dockerfile: build/docker/Dockerfile.dev
+    container_name: coes_web_dev
     command: make run-dev
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DOCKER=1
+      - ENV=develop
+      - DEBUG=True
     volumes:
       - .:/app/coes
       - ./media:/app/coes/media
-    environment:
-      ENV: develop
-      DOCKER: "1"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    ports:
+      - "${PORT:-8005}:${PORT:-8005}"
     stdin_open: true
     tty: true
+    networks:
+      - coes_dev_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   celery:
     build:
       context: .
       dockerfile: build/docker/Dockerfile.dev
-    container_name: coes_celery
+    container_name: coes_celery_dev
     restart: unless-stopped
     command: make celery
+    env_file: .env
     environment:
-      DOCKER: "1"
-      ENV: develop
-    env_file:
-      - .env
+      - DOCKER=1
+      - ENV=develop
+      - DEBUG=True
     volumes:
       - .:/app/coes
       - ./media:/app/coes/media
     depends_on:
-      web:
-        condition: service_started
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - coes_dev_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   celery-beat:
     build:
       context: .
       dockerfile: build/docker/Dockerfile.dev
-    container_name: coes_celery_beat
+    container_name: coes_celery_beat_dev
     command: make celery-beat
     restart: unless-stopped
+    env_file: .env
     environment:
-      DOCKER: "1"
-      ENV: develop
-    env_file:
-      - .env
+      - DOCKER=1
+      - ENV=develop
+      - DEBUG=True
     volumes:
       - .:/app/coes
       - ./media:/app/coes/media
     depends_on:
-      web:
-        condition: service_started
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - coes_dev_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   flower:
     build:
       context: .
       dockerfile: build/docker/Dockerfile.dev
-    container_name: coes_flower
+    container_name: coes_flower_dev
     command: make celery-flower
+    restart: unless-stopped
     ports:
       - "5555:5555"
+    env_file: .env
     environment:
-      DOCKER: "1"
-      ENV: develop
-    env_file:
-      - .env
+      - DOCKER=1
+      - ENV=develop
     volumes:
       - .:/app/coes
     depends_on:
-      web:
-        condition: service_started
       redis:
         condition: service_healthy
       celery:
         condition: service_started
+    networks:
+      - coes_dev_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  coes_dev_network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+    driver: local

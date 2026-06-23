@@ -1,20 +1,22 @@
-# Git
+# =============================================================================
+# GIT
+# =============================================================================
 .git
 .gitignore
 .gitattributes
 .github/
+.gitlab/
+.gitmessage
+.gitconfig
 
-# Python
+# =============================================================================
+# PYTHON
+# =============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
 pip-log.txt
 pip-delete-this-directory.txt
 .pypirc
@@ -23,21 +25,52 @@ pip-delete-this-directory.txt
 .eggs/
 develop-eggs/
 downloads/
+*.whl
+*.dist-info/
+.pytest_cache/
 
-# Django
+# =============================================================================
+# DJANGO
+# =============================================================================
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 *.pot
+staticfiles/
+media/
+migrations/*.py
+!migrations/__init__.py
 
-# Environment variables
+# =============================================================================
+# ENTORNO Y SECRETOS
+# =============================================================================
 .env
 .env.local
-.env.development
-.env.production
+.env.*.local
+*.env.*
+!.env.template
 
-# IDE
+.env.production
+.env.development
+.env.staging
+.env.test
+.env.uat
+.env.qa
+
+# Secretos
+secrets/
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.secret
+
+# =============================================================================
+# IDE Y EDITORES
+# =============================================================================
 .vscode/
 .idea/
 *.swp
@@ -48,18 +81,13 @@ db.sqlite3-journal
 *.user
 *.sln
 *.bak
+*.iml
+.vscode/settings.json
 
-# Documentation
-README.md
-*.md
-docs/
-*.rst
-CONTRIBUTING.md
-LICENSE
-
-# Testing
+# =============================================================================
+# TESTING
+# =============================================================================
 .coverage
-.pytest_cache/
 htmlcov/
 .tox/
 *.cover
@@ -68,69 +96,74 @@ htmlcov/
 nosetests.xml
 coverage.xml
 .hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Node (si usas Webpack, Tailwind, etc.)
+# =============================================================================
+# NODE (si usas Webpack, Tailwind, etc.)
+# =============================================================================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package.json
 package-lock.json
 yarn.lock
-webpack.config.js
 
-# Docker
-docker-compose.yml
-docker-compose.dev.yml
-docker-compose.prod.yml
-.dockerignore
-Dockerfile
-Dockerfile.dev
+# =============================================================================
+# DOCKER - NO ignorar archivos de configuración
+# =============================================================================
+docker-volumes/
+postgres_data/
+.containers/
+*.pid
+docker-compose.override.yml
+docker-compose.local.yml
 
-# Development tools
-Makefile
-.jshintrc
-.pre-commit-config.yaml
-.flake8
-pyproject.toml
-tox.ini
+# =============================================================================
+# DESARROLLO - NO ignorar Makefile ni archivos de build
+# =============================================================================
+.venv/
+venv/
+ENV/
+env/
+coes-env/
+env.bak/
+venv.bak/
 
+# =============================================================================
+# LOCUST
+# =============================================================================
+locust_*.csv
+*.html
+*_stats.csv
+*_stats_history.csv
 
-# Locale - NO ignorar archivos compilados
-# Solo ignorar archivos fuente
-locale/**/*.po
+# =============================================================================
+# TRADUCCIONES - Ignorar solo archivos compilados
+# =============================================================================
+locale/**/*.mo
 locale/**/.DS_Store
 
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# Backup files
+# =============================================================================
+# BACKUP Y TEMPORALES
+# =============================================================================
 *.backup
 *.old
 *.orig
-
-# Temporary files
 *.tmp
 *.temp
 .cache/
-
-# Sentry
-.sentry/
-
-# Database backups
 *.sql
 *.dump
-
-# Redis
 dump.rdb
-
-# Logs
 logs/
 *.out
 *.err
 
-# OS specific
+# =============================================================================
+# SISTEMA OPERATIVO
+# =============================================================================
 Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db

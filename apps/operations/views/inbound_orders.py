@@ -141,8 +141,9 @@ class FormSetMixin:
         return self.formset_class(
             data=data,
             prefix="movements",
-            queryset=OrderDetail.objects.none(),
+          #  queryset=OrderDetail.objects.none(),
             form_kwargs={"order_type": self.model.OrderType.INBOUND},
+           # extra=1
         )
 
     def get_context_data(self, **kwargs):
@@ -177,8 +178,8 @@ class InboundOrderCreateView(FormSetMixin, CustomCreateView):
     model = DEFAULT_MODEL
     form_class = InboundOrderForm
     success_url: str = DEFAULT_LIST_URL
-    permission_required = "operations.add_inboundorder"
     template_name = "inbound/create_or_update.html"
+    permission_required = "operations.add_inboundorder"
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()

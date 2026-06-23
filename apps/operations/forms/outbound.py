@@ -95,8 +95,9 @@ class OutboundOrderDetailBaseForm(forms.ModelForm):
 OutboundOrderDetailFormSet = inlineformset_factory(
     InventoryOrder,
     OrderDetail,
-    extra=1,
-    form=OutboundOrderDetailBaseForm,
-    can_delete=True,
+    extra=0,
+    min_num=1,
     max_num=30,
+    can_delete=True,
+    form=OutboundOrderDetailBaseForm,
 )

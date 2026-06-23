@@ -205,7 +205,26 @@ class SupplyUpdateView(CustomUpdateView):
     template_name = "supplies/create_or_update.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(deleted_at__isnull=True)
+        return (
+            super()
+            .get_queryset()
+            .filter(deleted_at__isnull=True)
+            .select_related("category", "unit_of_measure")
+            .only(
+                "id",
+                "external_id",
+                "name",
+                "code",
+                "barcode",
+                "description",
+                "image_url",
+                "stock_min",
+                "stock_max",
+                "is_active",
+                "category_id",
+                "unit_of_measure_id",
+            )
+        )
 
     def form_valid(self, form):
         service = SupplyAppService()
@@ -217,7 +236,7 @@ class SupplyUpdateView(CustomUpdateView):
 
             # Update supply instance
             instance = service.update_supply(
-                instance=self.get_object(), payload=supply_data, file=uploaded_file
+                instance=self.object, payload=supply_data, file=uploaded_file
             )
 
             # Show success message

@@ -112,6 +112,6 @@ class BatchBuilder:
 
     def build(self) -> Batch:
         """Build and return a batch instance."""
-        self.batch.full_clean()
+       # self.batch.full_clean()
         self.batch.save()
         return self.batch

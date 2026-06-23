@@ -119,22 +119,23 @@ class SupplyAppService(BaseAppService):
             return f"{code}-{uuid.uuid4().hex[:6].upper()}"
         return f"{uuid.uuid4().hex[:6].upper()}"
 
-    @transaction.atomic
     def save_supply(self, payload, file=None, instance=None):
         builder = SupplyBuilder(supply=instance) if instance else SupplyBuilder()
 
         try:
-            supply = (
-                builder.set_name(payload.get("name"))
-                .set_code(payload.get("code"))
-                .set_barcode(payload.get("barcode"))
-                .set_description(payload.get("description", ""))
-                .set_active(payload.get("is_active", True))
-                .set_stock_min(payload.get("stock_min", 10))
-                .set_stock_max(payload.get("stock_max", 100))
-                .set_category(payload.get("category_id"))
-                .set_unit_of_measure(payload.get("unit_of_measure_id"))
-            ).build()
+            with transaction.atomic():
+                builder = SupplyBuilder(supply=instance) if instance else SupplyBuilder()
+                supply = (
+                    builder.set_name(payload.get("name"))
+                    .set_code(payload.get("code"))
+                    .set_barcode(payload.get("barcode"))
+                    .set_description(payload.get("description", ""))
+                    .set_active(payload.get("is_active", True))
+                    .set_stock_min(payload.get("stock_min", 10))
+                    .set_stock_max(payload.get("stock_max", 100))
+                    .set_category(payload.get("category_id"))
+                    .set_unit_of_measure(payload.get("unit_of_measure_id"))
+                ).build()
 
             if file:
                 self._save_uploaded_file(file=file, instance=supply)
@@ -150,14 +151,11 @@ class SupplyAppService(BaseAppService):
 
     @staticmethod
     def _save_uploaded_file(file, instance=None, field_name="image_url"):
-        """Save uploaded file and delete old one if exists."""
         if not file or not instance:
             return None
 
-        # Get the old file field value
         old_file_field = getattr(instance, field_name)
 
-        # Delete old file if exists
         if old_file_field and old_file_field.name:
             try:
                 if default_storage.exists(old_file_field.name):
@@ -165,13 +163,10 @@ class SupplyAppService(BaseAppService):
                     logger.info(f"Deleted old file: {old_file_field.name}")
             except Exception as e:
                 logger.error(f"Error deleting old file: {e}")
-        # Assign and save new file
-        setattr(instance, field_name, file)
-        instance.save()
 
-        # Return the URL of the new file
-        new_file_field = getattr(instance, field_name)
-        return new_file_field.url if new_file_field else None
+        setattr(instance, field_name, file)
+        instance.save(update_fields=[field_name])
+        return getattr(instance, field_name).url if getattr(instance, field_name) else None
 
     def register_supply(self, payload, file=None):
         """Register a new supply item."""
