@@ -292,7 +292,7 @@ docker-prod-build-no-cache:
 
 docker-prod-up:
 	@printf "${GREEN} Starting production containers...${NC}\n"
-	docker compose -f docker-compose.yml up -d
+	docker compose -f docker-compose.yml up -d --remove-orphans
 	@printf "${GREEN}Production containers started${NC}\n"
 	docker compose -f docker-compose.yml ps
 
