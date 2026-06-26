@@ -4,15 +4,15 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Count, F, Q, Sum
 from django.db.models.functions import TruncDate
 from django.shortcuts import redirect
 from django.utils import timezone
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
-from django.db.models import Prefetch, Count, F, Q, Sum, Avg
-from apps.inventory.models import Supply, Batch, InventoryMovement
-from django.core.serializers.json import DjangoJSONEncoder
+
+from apps.inventory.models import Batch, InventoryMovement, Supply
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
@@ -125,8 +125,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     @staticmethod
     def _add_expiring_batch_alerts(supply, today, warning_alerts, critical_alerts):
-        """
-        Adds one alert per expiring/expired batch of this supply.
+        """Adds one alert per expiring/expired batch of this supply.
         Already-expired batches go to critical; soon-to-expire go to warning.
         """
         for batch in supply.batches.all():
