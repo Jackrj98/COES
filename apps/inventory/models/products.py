@@ -71,7 +71,7 @@ class Supply(AuditModel):
 
     @property
     def stock_available(self):
-        return self.batches.aggregate(models.Sum("stock"))["stock__sum"] or 0
+        return self.batches.aggregate(models.Sum("current_quantity"))["current_quantity__sum"] or 0
 
     @property
     def expiring_soon(self):
@@ -162,7 +162,8 @@ class Batch(AuditModel):
 
     def clean(self):
         if (
-            Batch.objects.filter(supply=self.supply, batch_number=self.batch_number).select_related("supply")
+            Batch.objects.filter(supply=self.supply, batch_number=self.batch_number)
+            .select_related("supply")
             .exclude(pk=self.pk)
             .exists()
         ):

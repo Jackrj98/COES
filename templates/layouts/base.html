@@ -33,287 +33,127 @@
                 {# INIT BLOCK CONTENT #}
                 <div class="page-content">
                     {% block content %}
-                        <section class="row">
-                            <div class="col-12 col-lg-9">
-                                <div class="row">
-                                    <div class="col-6 col-lg-3 col-md-6">
-                                        <div class="card">
-                                            <div class="card-body px-4 py-4-5">
-                                                <div class="row">
-                                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
-                                                        <div class="stats-icon purple mb-2">
-                                                            <i class="iconly-boldShow"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">
-                                                            Profile Views</h6>
-                                                        <h6 class="font-extrabold mb-0">
-                                                            112.000</h6>
-                                                    </div>
+                        {% block metrics %}
+                            <div class="row g-3 mb-3">
+                                {% for stat in inventory %}
+                                    <div class="col-6 col-md-6 col-lg-3">
+                                        <div class="card h-100">
+                                            <div class="card-body px-3 py-3 d-flex flex-column flex-md-row align-items-center gap-3">
+                                                <button type="button"
+                                                        class="btn btn-icon icon-left bg-{{ stat.color }} bg-opacity-25 flex-shrink-0 rounded-4">
+                                                    <i class="bi {{ stat.icon }} fs-3 text-{{ stat.color }}"></i>
+                                                </button>
+
+                                                <div class="text-center text-md-start">
+                                                    <h6 class="text-muted font-semibold mb-0">{{ stat.label }}</h6>
+                                                    <h6 class="font-extrabold mb-0 {% if stat.color != 'primary' %}text-{{ stat.color }}{% endif %}">
+                                                        {{ stat.value }}
+                                                    </h6>
+                                                    <small class="text-muted">{{ stat.small }}</small>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-6 col-lg-3 col-md-6">
-                                        <div class="card">
-                                            <div class="card-body px-4 py-4-5">
-                                                <div class="row">
-                                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
-                                                        <div class="stats-icon blue mb-2">
-                                                            <i class="iconly-boldProfile"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">
-                                                            Followers</h6>
-                                                        <h6 class="font-extrabold mb-0">
-                                                            183.000</h6>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-lg-3 col-md-6">
-                                        <div class="card">
-                                            <div class="card-body px-4 py-4-5">
-                                                <div class="row">
-                                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
-                                                        <div class="stats-icon green mb-2">
-                                                            <i class="iconly-boldAdd-User"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">
-                                                            Following</h6>
-                                                        <h6 class="font-extrabold mb-0">
-                                                            80.000</h6>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 col-lg-3 col-md-6">
-                                        <div class="card">
-                                            <div class="card-body px-4 py-4-5">
-                                                <div class="row">
-                                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
-                                                        <div class="stats-icon red mb-2">
-                                                            <i class="iconly-boldBookmark"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                                        <h6 class="text-muted font-semibold">
-                                                            Saved Post</h6>
-                                                        <h6 class="font-extrabold mb-0">112</h6>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
+                                {% endfor %}
+                            </div>
+                            <hr>
+                            <div class="row g-3 mb-3">
+                                <div class="col-12">
                                     <div class="col-12">
                                         <div class="card">
-                                            <div class="card-header">
-                                                <h4>Profile Visit</h4>
+                                            <div class="card-header d-flex align-items-center justify-content-between">
+                                                <h4 class="mb-0">{% trans "Movimientos del último mes" %}</h4>
+                                                <div class="d-flex gap-3 small text-muted">
+                                                <span>
+                                                    <span class="d-inline-block rounded-circle me-1"
+                                                          style="width:8px;height:8px;background:#435ebe"></span>
+                                                    {% trans "Entradas" %}
+                                                </span>
+                                                    <span>
+                                                    <span class="d-inline-block rounded-circle me-1"
+                                                          style="width:8px;height:8px;background:#dc3545"></span>
+                                                    {% trans "Salidas" %}
+                                                </span>
+                                                    <span>
+                                                    <span class="d-inline-block rounded-circle me-1"
+                                                          style="width:8px;height:8px;background:#f59e0b"></span>
+                                                    {% trans "Ajustes" %}
+                                                </span>
+                                                </div>
                                             </div>
                                             <div class="card-body">
-                                                <div id="chart-profile-visit"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 col-xl-4">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h4>Profile Visit</h4>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-7">
-                                                        <div class="d-flex align-items-center">
-                                                            <svg class="bi text-primary"
-                                                                 width="32" height="32"
-                                                                 fill="blue"
-                                                                 style="width:10px">
-                                                                <use
-                                                                        xlink:href="{% static 'assets/static/images/bootstrap-icons.svg#circle-fill' %}"/>
-                                                            </svg>
-                                                            <h5 class="mb-0 ms-3">Europe</h5>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-5">
-                                                        <h5 class="mb-0 text-end">862</h5>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div id="chart-europe"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-7">
-                                                        <div class="d-flex align-items-center">
-                                                            <svg class="bi text-success"
-                                                                 width="32" height="32"
-                                                                 fill="blue"
-                                                                 style="width:10px">
-                                                                <use
-                                                                        xlink:href="{% static 'assets/static/images/bootstrap-icons.svg#circle-fill' %}"/>
-                                                            </svg>
-                                                            <h5 class="mb-0 ms-3">America</h5>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-5">
-                                                        <h5 class="mb-0 text-end">375</h5>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div id="chart-america"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-7">
-                                                        <div class="d-flex align-items-center">
-                                                            <svg class="bi text-danger"
-                                                                 width="32" height="32"
-                                                                 fill="blue"
-                                                                 style="width:10px">
-                                                                <use
-                                                                        xlink:href="{% static 'assets/static/images/bootstrap-icons.svg#circle-fill' %}"/>
-                                                            </svg>
-                                                            <h5 class="mb-0 ms-3">Indonesia</h5>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-5">
-                                                        <h5 class="mb-0 text-end">1025</h5>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div id="chart-indonesia"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-xl-8">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h4>Latest Comments</h4>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive">
-                                                    <table class="table table-hover table-lg">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Name</th>
-                                                            <th>Comment</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr>
-                                                            <td class="col-3">
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="avatar avatar-md">
-                                                                        <img src="{% static 'assets/compiled/jpg/5.jpg' %}">
-                                                                    </div>
-                                                                    <p class="font-bold ms-3 mb-0">
-                                                                        Si Cantik</p>
-                                                                </div>
-                                                            </td>
-                                                            <td class="col-auto">
-                                                                <p class=" mb-0">Congratulations
-                                                                    on your
-                                                                    graduation!</p>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="col-3">
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="avatar avatar-md">
-                                                                        <img src="{% static 'assets/compiled/jpg/2.jpg' %}">
-                                                                    </div>
-                                                                    <p class="font-bold ms-3 mb-0">
-                                                                        Si Ganteng</p>
-                                                                </div>
-                                                            </td>
-                                                            <td class="col-auto">
-                                                                <p class=" mb-0">Wow amazing
-                                                                    design! Can you make
-                                                                    another tutorial for
-                                                                    this design?</p>
-                                                            </td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                <div id="chart-daily-movements"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="card">
-                                    <div class="card-body py-4 px-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-xl">
-                                                <img src="{% static 'assets/compiled/jpg/1.jpg' %}"
-                                                     alt="Face 1">
-                                            </div>
-                                            <div class="ms-3 name">
-                                                <h5 class="font-bold">John Duck</h5>
-                                                <h6 class="text-muted mb-0">@johnducky</h6>
-                                            </div>
+                            <hr>
+                            <div class="row g-3 mb-3">
+                                <h6 class="d-flex align-items-center">
+                                    {% trans "Alert panel" %}
+                                </h6>
+                                <!-- Críticas -->
+                                <div class="col-12 col-lg-6">
+                                    <div class="card border-0 h-100">
+                                        <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-3">
+                                            <span class="text-danger fw-semibold">
+                                                <i class="bi bi-exclamation-circle-fill me-1"></i> {% trans "Críticas" %}
+                                            </span>
+                                            <span class="badge bg-danger rounded-pill">{{ alerts.critical|length }}</span>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            {% for alert in alerts.critical %}
+                                                <a href="{{ alert.url }}"
+                                                   class="list-group-item list-group-item-action bg-transparent border-bottom d-flex align-items-center py-3">
+                                                        <span class="bg-danger rounded-circle flex-shrink-0 me-3"
+                                                              style="width: 8px; height: 8px;"></span>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-semibold">{{ alert.title }}</div>
+                                                        <div class="text-muted small">{{ alert.description }}</div>
+                                                    </div>
+                                                    <i class="bi bi-chevron-right text-muted"></i>
+                                                </a>
+                                            {% empty %}
+                                                <div class="list-group-item bg-transparent text-muted text-center py-4">
+                                                    {% trans "Sin alertas críticas" %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>Recent Messages</h4>
-                                    </div>
-                                    <div class="card-content pb-4">
-                                        <div class="recent-message d-flex px-4 py-3">
-                                            <div class="avatar avatar-lg">
-                                                <img src="{% static 'assets/compiled/jpg/4.jpg' %}">
-                                            </div>
-                                            <div class="name ms-4">
-                                                <h5 class="mb-1">Hank Schrader</h5>
-                                                <h6 class="text-muted mb-0">@johnducky</h6>
-                                            </div>
+
+                                <!-- Advertencia -->
+                                <div class="col-12 col-lg-6">
+                                    <div class="card border-0 h-100">
+                                        <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-3">
+                                            <span class="text-warning fw-semibold">
+                                                <i class="bi bi-exclamation-triangle-fill me-1"></i> {% trans "Advertencia" %}
+                                            </span>
+                                            <span class="badge bg-warning text-dark rounded-pill">{{ alerts.warning|length }}</span>
                                         </div>
-                                        <div class="recent-message d-flex px-4 py-3">
-                                            <div class="avatar avatar-lg">
-                                                <img src="{% static 'assets/compiled/jpg/5.jpg' %}">
-                                            </div>
-                                            <div class="name ms-4">
-                                                <h5 class="mb-1">Dean Winchester</h5>
-                                                <h6 class="text-muted mb-0">@imdean</h6>
-                                            </div>
+                                        <div class="list-group list-group-flush">
+                                            {% for alert in alerts.warning %}
+                                                <a href="{{ alert.url }}"
+                                                   class="list-group-item list-group-item-action bg-transparent border-bottom d-flex align-items-center py-3">
+                                                        <span class="bg-warning rounded-circle flex-shrink-0 me-3"
+                                                              style="width: 8px; height: 8px;"></span>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-semibold">{{ alert.title }}</div>
+                                                        <div class="text-muted small">{{ alert.description }}</div>
+                                                    </div>
+                                                    <i class="bi bi-chevron-right text-muted"></i>
+                                                </a>
+                                            {% empty %}
+                                                <div class="list-group-item bg-transparent text-muted text-center py-4">
+                                                    {% trans "Sin alertas de advertencia" %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
-                                        <div class="recent-message d-flex px-4 py-3">
-                                            <div class="avatar avatar-lg">
-                                                <img src="{% static 'assets/compiled/jpg/1.jpg' %}">
-                                            </div>
-                                            <div class="name ms-4">
-                                                <h5 class="mb-1">John Dodol</h5>
-                                                <h6 class="text-muted mb-0">@dodoljohn</h6>
-                                            </div>
-                                        </div>
-                                        <div class="px-4">
-                                            <button class='btn btn-block btn-xl btn-outline-primary font-bold mt-3'>
-                                                Start Conversation
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>Visitors Profile</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="chart-visitors-profile"></div>
                                     </div>
                                 </div>
                             </div>
-                        </section>
+                        {% endblock metrics %}
                     {% endblock content %}
                 </div>
                 {# END BLOCK CONTENT #}
@@ -330,17 +170,80 @@
     <script src="{% static 'assets/compiled/js/app.js' %}"></script>
     <script src="{% static 'assets/extensions/sweetalert2/sweetalert2.min.js' %}"></script>
     <script src="{% static 'assets/extensions/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'assets/static/js/pages/sweetalert2.js' %}"></script>
 
     <!-- Need: Apexcharts -->
     <script src="{% static 'assets/extensions/apexcharts/apexcharts.min.js' %}"></script>
-    <script src="{% static 'assets/static/js/pages/dashboard.js' %}"></script>
     <!-- Alerts and custom scripts -->
     {% include 'partials/_messages.html' %}
     {# END SCRIPTS #}
     <script src="{% static 'assets/static/js/utilities.js' %}"></script>
 
-    {% block javascript %}{% endblock javascript %}
+    {% block javascript %}
+        <script id="daily-movements-data" type="application/json">
+            {{ daily_movements_json|safe }}
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const chartElement = document.querySelector("#chart-daily-movements");
+                const dataElement = document.getElementById("daily-movements-data");
+
+                if (!chartElement || !dataElement) {
+                    console.warn("Dashboard: Contenedor del gráfico o datos no encontrados.");
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(dataElement.textContent);
+
+                    if (!data.series || !data.categories) {
+                        throw new Error("Formato de datos inválido.");
+                    }
+
+                    const options = {
+                        chart: {
+                            type: "bar",
+                            height: 320,
+                            stacked: true,
+                            toolbar: {show: false},
+                            animations: {enabled: true}
+                        },
+                        series: data.series,
+                        colors: ["#435ebe", "#dc3545", "#f59e0b"], // Inbound, Outbound, Adjustments
+                        dataLabels: {enabled: false},
+                        fill: {opacity: 1},
+                        plotOptions: {
+                            bar: {
+                                columnWidth: "55%",
+                                borderRadius: 3,
+                            },
+                        },
+                        xaxis: {
+                            categories: data.categories,
+                            labels: {
+                                rotate: -45,
+                                rotateAlways: false,
+                            },
+                        },
+                        legend: {
+                            show: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            shared: true,
+                            intersect: false,
+                        },
+                    };
+
+                    const chart = new ApexCharts(chartElement, options);
+                    chart.render();
+
+                } catch (e) {
+                    console.error("Error al inicializar el gráfico de movimientos:", e);
+                    chartElement.innerHTML = '<p class="text-center">No hay datos disponibles para mostrar.</p>';
+                }
+            });
+        </script>
+    {% endblock javascript %}
     </body>
 
 {% endblock body %}

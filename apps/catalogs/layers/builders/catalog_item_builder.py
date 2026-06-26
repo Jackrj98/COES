@@ -55,6 +55,6 @@ class CatalogItemBuilder:
 
     def build(self) -> CatalogItem:
         """Build and return a catalog item instance."""
-       # self.item.full_clean()
+        # self.item.full_clean()
         self.item.save()
         return self.item

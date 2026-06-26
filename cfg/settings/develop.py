@@ -1,6 +1,6 @@
 """Settings environment development."""
 
-from decouple import config, Csv
+from decouple import Csv, config
 
 from cfg.settings.base import *  # noqa: F403
 
