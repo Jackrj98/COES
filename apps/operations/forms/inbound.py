@@ -190,6 +190,7 @@ class InboundOrderDetailBaseForm(forms.ModelForm):
 
         return cleaned_data
 
+
 InboundOrderDetailFormSet = inlineformset_factory(
     InventoryOrder,
     OrderDetail,
@@ -199,7 +200,6 @@ InboundOrderDetailFormSet = inlineformset_factory(
     can_delete=True,
     form=InboundOrderDetailBaseForm,
 )
-
 
 
 class InboundOrderFilterForm(BaseFilterForm, BaseFormHelperMixin):
