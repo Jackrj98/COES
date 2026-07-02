@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-01 22:27-0500\n"
-"PO-Revision-Date: 2026-07-01 22:30-0500\n"
+"POT-Creation-Date: 2026-07-01 22:42-0500\n"
+"PO-Revision-Date: 2026-07-01 22:43-0500\n"
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -41,7 +41,7 @@ msgstr "Información Básica"
 
 #: apps/catalogs/admin.py:53 apps/catalogs/admin.py:138
 #: apps/core/forms/base.py:46 apps/inventory/forms/movements.py:98
-#: apps/inventory/forms/products.py:274 apps/inventory/models/movements.py:23
+#: apps/inventory/forms/products.py:286 apps/inventory/models/movements.py:23
 #: apps/inventory/models/products.py:132 apps/operations/forms/inbound.py:207
 #: apps/operations/forms/supplier.py:11
 #: apps/operations/models/inventory_order.py:72 apps/security/forms/user.py:13
@@ -65,7 +65,7 @@ msgstr "Elementos"
 msgid "Catalog"
 msgstr "Catálogo"
 
-#: apps/catalogs/forms.py:13 apps/inventory/forms/products.py:250
+#: apps/catalogs/forms.py:13 apps/inventory/forms/products.py:262
 msgid "Search by name or code"
 msgstr "Buscar por nombre o código"
 
@@ -511,7 +511,7 @@ msgstr "Insumos disponibles"
 msgid "Total in stock"
 msgstr "Total en stock"
 
-#: apps/core/views/views.py:249 apps/inventory/forms/products.py:242
+#: apps/core/views/views.py:249 apps/inventory/forms/products.py:254
 #: apps/inventory/templates/movements/detail.html:59
 #: apps/inventory/templates/supplies/detail.html:59
 msgid "Critical stock"
@@ -521,7 +521,7 @@ msgstr "Stock crítico"
 msgid "Attention required"
 msgstr "Se requiere atención"
 
-#: apps/core/views/views.py:256 apps/inventory/forms/products.py:240
+#: apps/core/views/views.py:256 apps/inventory/forms/products.py:252
 msgid "Low stock"
 msgstr "Stock bajo"
 
@@ -566,7 +566,7 @@ msgid "Movement count"
 msgstr "Recuento de movimientos"
 
 #: apps/inventory/admin.py:181 apps/inventory/admin.py:190
-#: apps/inventory/forms/products.py:285 apps/inventory/models/products.py:101
+#: apps/inventory/forms/products.py:297 apps/inventory/models/products.py:101
 msgid "Expired"
 msgstr "Vencido"
 
@@ -617,7 +617,7 @@ msgid "Type"
 msgstr "Tipo"
 
 #: apps/inventory/forms/movements.py:94 apps/inventory/forms/movements.py:100
-#: apps/inventory/forms/products.py:276 apps/inventory/forms/products.py:282
+#: apps/inventory/forms/products.py:288 apps/inventory/forms/products.py:294
 msgid "All"
 msgstr "Todos"
 
@@ -625,7 +625,7 @@ msgstr "Todos"
 msgid "Search by item, batch, or supply"
 msgstr "Buscar por artículo, lote o proveedor"
 
-#: apps/inventory/forms/products.py:16 apps/inventory/forms/products.py:232
+#: apps/inventory/forms/products.py:16 apps/inventory/forms/products.py:244
 #: apps/inventory/models/products.py:41
 msgid "Category"
 msgstr "Categoría"
@@ -642,48 +642,56 @@ msgstr "Unidad de medida"
 msgid "Select unit of measure"
 msgstr "Selecciona la unidad de medida"
 
-#: apps/inventory/forms/products.py:164
+#: apps/inventory/forms/products.py:99
+msgid "Barcode is required."
+msgstr "Es necesario introducir el código de barras."
+
+#: apps/inventory/forms/products.py:103
+msgid "Barcode must be at least 5 characters."
+msgstr "El código de barras debe tener al menos 5 caracteres."
+
+#: apps/inventory/forms/products.py:176
 msgid "Reason for adjustment"
 msgstr "Motivo del ajuste"
 
-#: apps/inventory/forms/products.py:219
+#: apps/inventory/forms/products.py:231
 msgid "Reason for adjustment is required when quantity changes."
 msgstr ""
 "Es necesario indicar el motivo del ajuste cuando se produce un cambio en la "
 "cantidad."
 
-#: apps/inventory/forms/products.py:237
+#: apps/inventory/forms/products.py:249
 msgid "Stock"
 msgstr "Stock"
 
-#: apps/inventory/forms/products.py:239
+#: apps/inventory/forms/products.py:251
 msgid "All stocks"
 msgstr "Todas las existencias"
 
-#: apps/inventory/forms/products.py:241
+#: apps/inventory/forms/products.py:253
 #: apps/inventory/templates/movements/detail.html:63
 #: apps/inventory/templates/supplies/detail.html:63
 msgid "Normal stock"
 msgstr "Stock habitual"
 
-#: apps/inventory/forms/products.py:266
+#: apps/inventory/forms/products.py:278
 msgid "All categories"
 msgstr "Todas las categorías"
 
-#: apps/inventory/forms/products.py:280
+#: apps/inventory/forms/products.py:292
 #: apps/inventory/templates/supplies/batches/datatable.html:66
 msgid "Expiration"
 msgstr "Caducidad"
 
-#: apps/inventory/forms/products.py:283
+#: apps/inventory/forms/products.py:295
 msgid "Current"
 msgstr "Vigente"
 
-#: apps/inventory/forms/products.py:284
+#: apps/inventory/forms/products.py:296
 msgid "Expiring"
 msgstr "Por vencer"
 
-#: apps/inventory/forms/products.py:293
+#: apps/inventory/forms/products.py:305
 msgid "Search by batch number"
 msgstr "Buscar por número de lote"
 
@@ -2239,7 +2247,7 @@ msgstr "Kardex"
 msgid "Operations"
 msgstr "Operaciones"
 
-#: templates/partials/sidebar/_sidebar.html:76
+#: templates/partials/sidebar/_sidebar.html:77
 msgid "Reports"
 msgstr "Informes"
 
