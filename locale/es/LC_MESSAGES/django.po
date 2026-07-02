@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-06 10:26-0500\n"
-"PO-Revision-Date: 2026-06-08 19:22-0500\n"
+"POT-Creation-Date: 2026-07-01 22:27-0500\n"
+"PO-Revision-Date: 2026-07-01 22:30-0500\n"
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -35,25 +35,23 @@ msgid "Other codes"
 msgstr "Otros códigos"
 
 #: apps/catalogs/admin.py:51 apps/catalogs/admin.py:130
-#: apps/operations/admin.py:120
+#: apps/operations/admin.py:26
 msgid "Basic Information"
 msgstr "Información Básica"
 
 #: apps/catalogs/admin.py:53 apps/catalogs/admin.py:138
 #: apps/core/forms/base.py:46 apps/inventory/forms/movements.py:98
-#: apps/inventory/forms/products.py:208 apps/inventory/models/movements.py:23
-#: apps/inventory/models/products.py:123 apps/operations/admin.py:23
-#: apps/operations/admin.py:38 apps/operations/admin.py:211
-#: apps/operations/admin.py:339 apps/operations/forms/orders.py:103
-#: apps/operations/forms/supplier.py:11 apps/operations/models/orders.py:68
-#: apps/operations/models/orders.py:114 apps/security/forms/user.py:12
-#: apps/security/models/users.py:113 apps/security/models/users.py:206
+#: apps/inventory/forms/products.py:274 apps/inventory/models/movements.py:23
+#: apps/inventory/models/products.py:132 apps/operations/forms/inbound.py:207
+#: apps/operations/forms/supplier.py:11
+#: apps/operations/models/inventory_order.py:72 apps/security/forms/user.py:13
+#: apps/security/models/users.py:113
 msgid "Status"
 msgstr "Estado"
 
 #: apps/catalogs/admin.py:59 apps/catalogs/admin.py:144
 #: apps/core/mixins/admin.py:26 apps/inventory/admin.py:70
-#: apps/inventory/admin.py:154 apps/inventory/admin.py:271
+#: apps/inventory/admin.py:157 apps/inventory/admin.py:271
 #: apps/security/admin.py:64
 msgid "Audit Information"
 msgstr "Información de Auditoría"
@@ -63,11 +61,11 @@ msgid "Items"
 msgstr "Elementos"
 
 #: apps/catalogs/admin.py:96 apps/catalogs/admin.py:132
-#: apps/catalogs/admin.py:174 apps/catalogs/models.py:97
+#: apps/catalogs/admin.py:174 apps/catalogs/models.py:98
 msgid "Catalog"
 msgstr "Catálogo"
 
-#: apps/catalogs/forms.py:13 apps/inventory/forms/products.py:184
+#: apps/catalogs/forms.py:13 apps/inventory/forms/products.py:250
 msgid "Search by name or code"
 msgstr "Buscar por nombre o código"
 
@@ -87,68 +85,39 @@ msgstr "El código de catálogo es obligatorio."
 msgid "Catalog reference is not allowed."
 msgstr "No se permite referencia circular al catálogo."
 
-#: apps/catalogs/layers/applications/catalog_item_service.py:116
+#: apps/catalogs/layers/applications/catalog_item_service.py:144
+#: apps/catalogs/layers/applications/catalog_item_service.py:153
+msgid "Catalog item instance is required."
+msgstr "La instancia del elemento de catálogo es obligatoria."
+
 #: apps/catalogs/layers/applications/catalog_service.py:66
 msgid "Catalog item with this code already exists in this catalog."
 msgstr "Ya existe un elemento con este código en el catálogo."
 
-#: apps/catalogs/layers/applications/catalog_item_service.py:172
-#: apps/catalogs/layers/applications/catalog_item_service.py:181
-msgid "Catalog item instance is required."
-msgstr "La instancia del elemento de catálogo es obligatoria."
-
-#: apps/catalogs/layers/applications/catalog_service.py:109
+#: apps/catalogs/layers/applications/catalog_service.py:108
 msgid "Catalog instance is required."
 msgstr "La instancia del catálogo es obligatoria."
 
-#: apps/catalogs/layers/dto/catalog_dto.py:14
-#: apps/catalogs/layers/dto/catalog_dto.py:59
-#: apps/inventory/models/products.py:23
-msgid "Unique identifier code, numbers and underscores"
-msgstr "Código identificador único, números y guiones bajos"
-
-#: apps/catalogs/layers/dto/catalog_dto.py:25
-msgid "Code can only contain letters, numbers and underscores"
-msgstr "El código solo puede contener letras, números y guiones bajos"
-
-#: apps/catalogs/layers/dto/catalog_dto.py:33
-#: apps/catalogs/layers/dto/catalog_dto.py:80
-msgid "Name cannot be empty or only whitespace"
-msgstr "El nombre no puede estar vacío ni contener solo espacios"
-
-#: apps/catalogs/layers/dto/catalog_dto.py:41
-msgid "Priority must be between 1 and 100000"
-msgstr "La prioridad debe estar entre 1 y 100000"
-
-#: apps/catalogs/layers/dto/catalog_dto.py:72
-msgid "Code can only contain uppercase letters, numbers and underscores"
-msgstr ""
-"El código solo puede contener letras mayúsculas, números y guiones bajos"
-
-#: apps/catalogs/layers/dto/catalog_dto.py:88
-msgid "Priority must be between 1 and 10000"
-msgstr "La prioridad debe estar entre 1 y 10000"
-
-#: apps/catalogs/models.py:23 apps/catalogs/models.py:61
-#: apps/inventory/models/products.py:18
+#: apps/catalogs/models.py:23 apps/catalogs/models.py:62
+#: apps/inventory/models/products.py:17
 msgid "Name"
 msgstr "Nombre"
 
-#: apps/catalogs/models.py:29 apps/catalogs/models.py:66
-#: apps/inventory/models/products.py:20
+#: apps/catalogs/models.py:29 apps/catalogs/models.py:67
+#: apps/inventory/models/products.py:19
 msgid "Code"
 msgstr "Código"
 
-#: apps/catalogs/models.py:33 apps/catalogs/models.py:69
+#: apps/catalogs/models.py:33 apps/catalogs/models.py:70
 msgid "Unique identifier code, only lower case, numbers and underscores"
 msgstr "Código identificador único, solo minúsculas, números y guiones bajos"
 
-#: apps/catalogs/models.py:36 apps/catalogs/models.py:72
+#: apps/catalogs/models.py:36 apps/catalogs/models.py:73
 #: apps/inventory/models/products.py:25
 msgid "Description"
 msgstr "Descripción"
 
-#: apps/catalogs/models.py:39 apps/catalogs/models.py:79
+#: apps/catalogs/models.py:39 apps/catalogs/models.py:80
 msgid "Priority"
 msgstr "Prioridad"
 
@@ -164,34 +133,35 @@ msgstr "catálogo"
 msgid "catalogs"
 msgstr "catálogos"
 
-#: apps/catalogs/models.py:84
+#: apps/catalogs/models.py:85
 msgid "Extra value"
 msgstr "Valor adicional"
 
-#: apps/catalogs/models.py:88
+#: apps/catalogs/models.py:89
 msgid "Auxiliary value, e.g. abbreviation 'ml' for 'Milliliter'"
 msgstr "Valor auxiliar, ej. abreviatura 'ml' para 'Mililitro'"
 
-#: apps/catalogs/models.py:102
+#: apps/catalogs/models.py:103
 msgid "catalog item"
 msgstr "elemento de catálogo"
 
-#: apps/catalogs/models.py:103
+#: apps/catalogs/models.py:104
 msgid "catalog items"
 msgstr "elementos de catálogo"
 
-#: apps/catalogs/models.py:122
+#: apps/catalogs/models.py:125
 msgid "A catalog item with this code already exists in this catalog."
 msgstr "Ya existe un item con este código en este catálogo."
 
 #: apps/catalogs/templates/catalogs/create_or_update.html:51
-#: apps/catalogs/templates/catalogs/items/create_or_update.html:53
-#: apps/inventory/templates/inventory_movements/create_or_update.html:40
-#: apps/inventory/templates/supplies/batches/create_or_update.html:60
-#: apps/inventory/templates/supplies/create_or_update.html:65
-#: apps/operations/templates/operations/create_or_update.html:39
-#: apps/operations/templates/operations/outbound/create_or_update.html:43
-#: apps/operations/templates/suppliers/create_or_update.html:39
+#: apps/catalogs/templates/catalogs/items/create_or_update.html:54
+#: apps/inventory/templates/movements/create_or_update.html:40
+#: apps/inventory/templates/supplies/batches/create.html:65
+#: apps/inventory/templates/supplies/batches/update.html:70
+#: apps/inventory/templates/supplies/create_or_update.html:70
+#: apps/operations/templates/inbound/create_or_update.html:27
+#: apps/operations/templates/outbound/create_or_update.html:27
+#: apps/operations/templates/suppliers/create_or_update.html:42
 #: apps/security/templates/users/create_or_update.html:36
 #: apps/security/templates/users/password/password_reset_confirm.html:99
 #: templates/components/_delete.html:72
@@ -199,13 +169,14 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #: apps/catalogs/templates/catalogs/create_or_update.html:54
-#: apps/catalogs/templates/catalogs/items/create_or_update.html:56
-#: apps/inventory/templates/inventory_movements/create_or_update.html:43
-#: apps/inventory/templates/supplies/batches/create_or_update.html:63
-#: apps/inventory/templates/supplies/create_or_update.html:68
-#: apps/operations/templates/operations/create_or_update.html:42
-#: apps/operations/templates/operations/outbound/create_or_update.html:46
-#: apps/operations/templates/suppliers/create_or_update.html:42
+#: apps/catalogs/templates/catalogs/items/create_or_update.html:57
+#: apps/inventory/templates/movements/create_or_update.html:43
+#: apps/inventory/templates/supplies/batches/create.html:68
+#: apps/inventory/templates/supplies/batches/update.html:73
+#: apps/inventory/templates/supplies/create_or_update.html:73
+#: apps/operations/templates/inbound/create_or_update.html:30
+#: apps/operations/templates/outbound/create_or_update.html:30
+#: apps/operations/templates/suppliers/create_or_update.html:45
 #: apps/security/templates/users/create_or_update.html:39
 #: apps/security/templates/users/password/password_reset_confirm.html:103
 #: templates/components/_delete.html:69 templates/components/_form.html:35
@@ -214,8 +185,8 @@ msgstr "Guardar"
 
 #: apps/catalogs/templates/catalogs/datatable.html:32
 #: apps/catalogs/templates/catalogs/items/datatable.html:33
-#: apps/operations/templates/operations/datatable.html:101
-#: apps/operations/templates/operations/outbound/datatable.html:43
+#: apps/operations/templates/inbound/datatable.html:42
+#: apps/operations/templates/outbound/datatable.html:43
 #: apps/operations/templates/suppliers/datatable.html:101
 #: apps/security/templates/users/datatable.html:38
 #: templates/components/_datatable.html:57
@@ -224,32 +195,35 @@ msgstr "Limpiar filtros"
 
 #: apps/catalogs/templates/catalogs/datatable.html:49
 #: apps/catalogs/templates/catalogs/items/datatable.html:53
-#: apps/inventory/templates/inventory_movements/detail.html:147
-#: apps/inventory/templates/supplies/detail.html:147
-#: apps/operations/templates/operations/datatable.html:118
-#: apps/operations/templates/suppliers/datatable.html:118
+#: apps/inventory/templates/movements/datatable2.html:90
+#: apps/inventory/templates/movements/detail.html:147
+#: apps/inventory/templates/supplies/datatable.html:77
+#: apps/inventory/templates/supplies/detail.html:162
+#: apps/operations/templates/suppliers/datatable.html:119
 msgid "status"
 msgstr "estado"
 
 #: apps/catalogs/templates/catalogs/datatable.html:50
 #: apps/catalogs/templates/catalogs/items/datatable.html:54
+#: apps/operations/templates/outbound/datatable.html:61
+#: apps/security/templates/users/datatable.html:56
 msgid "created"
 msgstr "creado"
 
 #: apps/catalogs/templates/catalogs/datatable.html:51
 #: apps/catalogs/templates/catalogs/items/datatable.html:55
-#: apps/inventory/templates/inventory_movements/datatable.html:89
+#: apps/inventory/templates/movements/datatable.html:89
 #: apps/inventory/templates/supplies/batches/datatable.html:71
-#: apps/inventory/templates/supplies/datatable.html:77
-#: apps/operations/templates/operations/datatable.html:119
-#: apps/operations/templates/operations/outbound/datatable.html:62
-#: apps/operations/templates/suppliers/datatable.html:119
+#: apps/inventory/templates/supplies/datatable.html:78
+#: apps/operations/templates/inbound/datatable.html:61
+#: apps/operations/templates/outbound/datatable.html:62
+#: apps/operations/templates/suppliers/datatable.html:120
 #: apps/security/templates/users/datatable.html:57
 msgid "actions"
 msgstr "acciones"
 
 #: apps/catalogs/templates/catalogs/detail.html:64
-#: apps/operations/templates/operations/outbound/detail.html:46
+#: apps/operations/templates/outbound/detail.html:44
 msgid "items total"
 msgstr "total items"
 
@@ -259,9 +233,8 @@ msgstr "items activos"
 
 #: apps/catalogs/templates/catalogs/detail.html:92
 #: apps/catalogs/templates/catalogs/items/detail.html:83
-#: apps/operations/templates/operations/detail.html:117
-#: apps/operations/templates/operations/outbound/detail.html:75
-#: apps/operations/templates/suppliers/detail.html:117
+#: apps/operations/templates/outbound/detail.html:67
+#: apps/operations/templates/suppliers/detail.html:137
 msgid "Audit information"
 msgstr "Información de auditoría"
 
@@ -313,7 +286,9 @@ msgid "Import {model}"
 msgstr "Importar {model}"
 
 #: apps/catalogs/utils/constants.py:14 apps/core/utils/constants.py:14
-#: apps/inventory/views/movements.py:57 apps/operations/views/exit_order.py:57
+#: apps/inventory/views/movements.py:55
+#: apps/operations/views/inbound_orders.py:60
+#: apps/operations/views/outbound_orders.py:54
 msgid "Actionable"
 msgstr "Accionable"
 
@@ -330,8 +305,7 @@ msgid "Change status"
 msgstr "Cambiar estado"
 
 #: apps/catalogs/utils/constants.py:19 apps/core/utils/constants.py:19
-#: apps/inventory/templates/inventory_movements/formset.html:8
-#: apps/operations/templates/operations/outbound/formset.html:8
+#: apps/inventory/templates/movements/formset.html:8
 msgid "Delete"
 msgstr "Eliminar"
 
@@ -389,30 +363,24 @@ msgstr "El {model} '{identifier}' solicitado no fue encontrado."
 msgid "A {model} with the specified attributes already exists."
 msgstr "Ya existe un/una {model} con los atributos especificados."
 
-#: apps/catalogs/utils/permissions.py:10 apps/core/utils/permissions.py:97
-msgid "specialist"
-msgstr "especialista"
-
-#: apps/catalogs/utils/permissions.py:53 apps/core/utils/permissions.py:8
-msgid "administrator"
-msgstr "administrador"
-
-#: apps/catalogs/views/catalog_items.py:40
+#: apps/catalogs/views/catalog_items.py:37
 msgid "Management of registered catalog items"
 msgstr "Gestión de artículos de catálogo registrados"
 
-#: apps/catalogs/views/catalog_items.py:81
-#: apps/catalogs/views/catalog_items.py:121
-#: apps/catalogs/views/catalog_items.py:203
-#: templates/partials/sidebar/_sidebar.html:28
+#: apps/catalogs/views/catalog_items.py:77
+#: apps/catalogs/views/catalog_items.py:109
+#: apps/catalogs/views/catalog_items.py:175
+#: templates/partials/sidebar/_sidebar.html:46
 msgid "Catalogs"
 msgstr "Catálogos"
 
-#: apps/catalogs/views/catalogs.py:39
+#: apps/catalogs/views/catalogs.py:36
 msgid "Management of registered catalogs"
 msgstr "Gestión de catálogos registrados"
 
-#: apps/catalogs/views/catalogs.py:83
+#: apps/catalogs/views/catalogs.py:73
+#: apps/operations/templates/inbound/formset.html:58
+#: apps/operations/templates/outbound/formset.html:56
 msgid "Add item"
 msgstr "Añadir elemento"
 
@@ -420,7 +388,7 @@ msgstr "Añadir elemento"
 msgid "Select"
 msgstr "Seleccionar"
 
-#: apps/core/forms/base.py:22 apps/security/forms/user.py:24
+#: apps/core/forms/base.py:22 apps/security/forms/user.py:25
 msgid "Search"
 msgstr "Buscar"
 
@@ -484,11 +452,11 @@ msgstr "Está activo"
 msgid "Check this box to enable the feature in the system."
 msgstr "Marque esta casilla para habilitar la función en el sistema."
 
-#: apps/core/models.py:43
+#: apps/core/models.py:43 apps/operations/templates/inbound/detail.html:111
 msgid "Created at"
 msgstr "Creado el"
 
-#: apps/core/models.py:44
+#: apps/core/models.py:44 apps/operations/templates/inbound/detail.html:115
 msgid "Updated at"
 msgstr "Actualizado el"
 
@@ -496,7 +464,7 @@ msgstr "Actualizado el"
 msgid "Deleted at"
 msgstr "Eliminado el"
 
-#: apps/core/models.py:46
+#: apps/core/models.py:46 apps/operations/templates/inbound/detail.html:119
 msgid "Created by"
 msgstr "Creado por"
 
@@ -504,7 +472,72 @@ msgstr "Creado por"
 msgid "Updated by"
 msgstr "Actualizado por"
 
-#: apps/core/views/views.py:28 apps/security/views/users.py:481
+#: apps/core/views/views.py:95
+#, python-format
+msgid "Stock: %(stock)s / min %(min)s — Critical"
+msgstr "Existencias: %(stock)s / min %(min)s — Crítico"
+
+#: apps/core/views/views.py:105
+msgid "Stock approaching minimum"
+msgstr "Las existencias se acercan al mínimo"
+
+#: apps/core/views/views.py:139
+#, python-format
+msgid "Expired %(days)s days ago — %(supply)s"
+msgstr "Caducó hace %(days)s días — %(supply)s"
+
+#: apps/core/views/views.py:148
+#, python-format
+msgid "Expires in %(days)s days — %(supply)s"
+msgstr "Caduca en %(days)s días — %(supply)s"
+
+#: apps/core/views/views.py:215
+msgid "Inbounds"
+msgstr "Entradas"
+
+#: apps/core/views/views.py:216
+msgid "Outbounds"
+msgstr "Salidas"
+
+#: apps/core/views/views.py:217
+msgid "Adjustments"
+msgstr "Ajustes"
+
+#: apps/core/views/views.py:242
+msgid "Supplies available"
+msgstr "Insumos disponibles"
+
+#: apps/core/views/views.py:246
+msgid "Total in stock"
+msgstr "Total en stock"
+
+#: apps/core/views/views.py:249 apps/inventory/forms/products.py:242
+#: apps/inventory/templates/movements/detail.html:59
+#: apps/inventory/templates/supplies/detail.html:59
+msgid "Critical stock"
+msgstr "Stock crítico"
+
+#: apps/core/views/views.py:253
+msgid "Attention required"
+msgstr "Se requiere atención"
+
+#: apps/core/views/views.py:256 apps/inventory/forms/products.py:240
+msgid "Low stock"
+msgstr "Stock bajo"
+
+#: apps/core/views/views.py:260
+msgid "Valued inventory"
+msgstr "Inventario valorado"
+
+#: apps/core/views/views.py:263
+msgid "Expiring soon"
+msgstr "Caduca pronto"
+
+#: apps/core/views/views.py:267
+msgid "Next 6 months"
+msgstr "Los próximos 6 meses"
+
+#: apps/core/views/views.py:286 apps/security/views/users.py:412
 msgid "You do not have permission to perform this action."
 msgstr "No tiene permiso para realizar esta acción."
 
@@ -512,49 +545,48 @@ msgstr "No tiene permiso para realizar esta acción."
 msgid "General Information"
 msgstr "Información general"
 
-#: apps/inventory/admin.py:91
+#: apps/inventory/admin.py:96
 msgid "Available stock"
 msgstr "Stock disponible"
 
-#: apps/inventory/admin.py:97
+#: apps/inventory/admin.py:100
 msgid "Batches count"
 msgstr "Recuento de lotes"
 
-#: apps/inventory/admin.py:129
+#: apps/inventory/admin.py:132
 msgid "Batch Details"
 msgstr "Detalles del lote"
 
-#: apps/inventory/admin.py:143
+#: apps/inventory/admin.py:146
 msgid "Calculated Information"
 msgstr "Información calculada"
 
-#: apps/inventory/admin.py:174
+#: apps/inventory/admin.py:177
 msgid "Movement count"
 msgstr "Recuento de movimientos"
 
-#: apps/inventory/admin.py:178 apps/inventory/admin.py:187
-#: apps/inventory/forms/products.py:219 apps/inventory/models/products.py:95
-#: apps/security/models/users.py:189
+#: apps/inventory/admin.py:181 apps/inventory/admin.py:190
+#: apps/inventory/forms/products.py:285 apps/inventory/models/products.py:101
 msgid "Expired"
 msgstr "Vencido"
 
-#: apps/inventory/admin.py:182
+#: apps/inventory/admin.py:185
 msgid "Days until expiry"
-msgstr ""
+msgstr "Días para el vencimiento"
 
-#: apps/inventory/admin.py:191
+#: apps/inventory/admin.py:194
 msgid "Total cost"
 msgstr "Coste total"
 
-#: apps/inventory/admin.py:237
+#: apps/inventory/admin.py:240
 msgid "Movement Details"
 msgstr "Detalles del movimiento"
 
-#: apps/inventory/admin.py:250
+#: apps/inventory/admin.py:253
 msgid "Stock Tracking"
 msgstr "Seguimiento de existencias"
 
-#: apps/inventory/admin.py:261
+#: apps/inventory/admin.py:264
 msgid "Source Documents"
 msgstr "Documentos originales"
 
@@ -563,23 +595,29 @@ msgid "Movement"
 msgstr "Movimiento"
 
 #: apps/inventory/forms/movements.py:43 apps/inventory/models/products.py:55
-#: apps/inventory/models/products.py:127
-#: apps/inventory/templates/inventory_movements/formset.html:5
-#: apps/operations/admin.py:261 apps/operations/admin.py:438
-#: apps/operations/templates/operations/outbound/detail.html:114
+#: apps/inventory/models/products.py:138
+#: apps/inventory/templates/movements/formset.html:5
+#: apps/operations/models/inventory_order.py:278
+#: apps/operations/templates/inbound/detail.html:137
+#: apps/operations/templates/inbound/formset.html:12
+#: apps/operations/templates/outbound/detail.html:109
+#: apps/operations/templates/outbound/formset.html:13
 msgid "Supply"
 msgstr "Insumo"
 
-#: apps/inventory/forms/movements.py:51 apps/inventory/models/products.py:132
+#: apps/inventory/forms/movements.py:51 apps/inventory/models/products.py:151
+#: apps/operations/models/inventory_order.py:284
+#: apps/operations/templates/inbound/formset.html:13
 msgid "Batch"
 msgstr "Lote"
 
 #: apps/inventory/forms/movements.py:92 apps/inventory/models/movements.py:19
+#: apps/security/models/notications.py:30
 msgid "Type"
 msgstr "Tipo"
 
 #: apps/inventory/forms/movements.py:94 apps/inventory/forms/movements.py:100
-#: apps/inventory/forms/products.py:210 apps/inventory/forms/products.py:216
+#: apps/inventory/forms/products.py:276 apps/inventory/forms/products.py:282
 msgid "All"
 msgstr "Todos"
 
@@ -587,8 +625,8 @@ msgstr "Todos"
 msgid "Search by item, batch, or supply"
 msgstr "Buscar por artículo, lote o proveedor"
 
-#: apps/inventory/forms/products.py:16 apps/inventory/forms/products.py:166
-#: apps/inventory/models/products.py:37
+#: apps/inventory/forms/products.py:16 apps/inventory/forms/products.py:232
+#: apps/inventory/models/products.py:41
 msgid "Category"
 msgstr "Categoría"
 
@@ -596,7 +634,7 @@ msgstr "Categoría"
 msgid "Select category"
 msgstr "Selecciona una categoría"
 
-#: apps/inventory/forms/products.py:24 apps/inventory/models/products.py:47
+#: apps/inventory/forms/products.py:24 apps/inventory/models/products.py:48
 msgid "Unit of Measure"
 msgstr "Unidad de medida"
 
@@ -604,67 +642,85 @@ msgstr "Unidad de medida"
 msgid "Select unit of measure"
 msgstr "Selecciona la unidad de medida"
 
-#: apps/inventory/forms/products.py:171
+#: apps/inventory/forms/products.py:164
+msgid "Reason for adjustment"
+msgstr "Motivo del ajuste"
+
+#: apps/inventory/forms/products.py:219
+msgid "Reason for adjustment is required when quantity changes."
+msgstr ""
+"Es necesario indicar el motivo del ajuste cuando se produce un cambio en la "
+"cantidad."
+
+#: apps/inventory/forms/products.py:237
 msgid "Stock"
 msgstr "Stock"
 
-#: apps/inventory/forms/products.py:173
+#: apps/inventory/forms/products.py:239
 msgid "All stocks"
 msgstr "Todas las existencias"
 
-#: apps/inventory/forms/products.py:174
-msgid "Low stock"
-msgstr "Stock bajo"
-
-#: apps/inventory/forms/products.py:175
-#: apps/inventory/templates/inventory_movements/detail.html:63
+#: apps/inventory/forms/products.py:241
+#: apps/inventory/templates/movements/detail.html:63
 #: apps/inventory/templates/supplies/detail.html:63
 msgid "Normal stock"
 msgstr "Stock habitual"
 
-#: apps/inventory/forms/products.py:176
-#: apps/inventory/templates/inventory_movements/detail.html:59
-#: apps/inventory/templates/supplies/detail.html:59
-msgid "Critical stock"
-msgstr "Stock crítico"
-
-#: apps/inventory/forms/products.py:200
+#: apps/inventory/forms/products.py:266
 msgid "All categories"
 msgstr "Todas las categorías"
 
-#: apps/inventory/forms/products.py:214
+#: apps/inventory/forms/products.py:280
 #: apps/inventory/templates/supplies/batches/datatable.html:66
 msgid "Expiration"
 msgstr "Caducidad"
 
-#: apps/inventory/forms/products.py:217
+#: apps/inventory/forms/products.py:283
 msgid "Current"
 msgstr "Vigente"
 
-#: apps/inventory/forms/products.py:218
+#: apps/inventory/forms/products.py:284
 msgid "Expiring"
 msgstr "Por vencer"
 
-#: apps/inventory/forms/products.py:227
+#: apps/inventory/forms/products.py:293
 msgid "Search by batch number"
 msgstr "Buscar por número de lote"
 
-#: apps/inventory/layers/applications/batch_service.py:119
+#: apps/inventory/layers/applications/batch_service.py:120
 msgid "Batch instance is required."
 msgstr "Se requiere una instancia de lote."
 
-#: apps/inventory/layers/applications/supply_service.py:188
+#: apps/inventory/layers/applications/supply_service.py:181
 msgid "Supply instance is required."
 msgstr "Es necesario especificar una instancia de suministro."
+
+#: apps/inventory/layers/builders/batch_builder.py:17
+#: apps/inventory/layers/builders/batch_builder.py:33
+#: apps/inventory/layers/builders/batch_builder.py:102
+#: apps/inventory/layers/builders/supply_builder.py:61
+#: apps/inventory/layers/builders/supply_builder.py:69
+msgid "This field cannot be empty."
+msgstr "Este campo no puede quedar vacío."
+
+#: apps/inventory/layers/builders/batch_builder.py:57
+#: apps/inventory/layers/builders/supply_builder.py:45
+msgid "This field cannot be zero or negative."
+msgstr "Este campo no puede ser cero ni negativo."
+
+#: apps/inventory/layers/builders/supply_builder.py:15
+#: apps/inventory/layers/builders/supply_builder.py:22
+#: apps/inventory/layers/builders/supply_builder.py:32
+msgid "This field cannot be blank."
+msgstr "Este campo no puede quedar en blanco."
 
 #: apps/inventory/models/movements.py:18
 msgid "Concept"
 msgstr "Concepto"
 
 #: apps/inventory/models/movements.py:20
-#: apps/inventory/templates/inventory_movements/formset.html:6
-#: apps/operations/templates/operations/outbound/detail.html:116
-#: apps/operations/templates/operations/outbound/formset.html:6
+#: apps/inventory/templates/movements/formset.html:6
+#: apps/operations/templates/outbound/formset.html:14
 msgid "Quantity"
 msgstr "Cantidad"
 
@@ -688,21 +744,25 @@ msgstr "Incremento"
 msgid "Unit cost at movement"
 msgstr "Coste unitario en el momento del movimiento"
 
-#: apps/inventory/models/movements.py:60
+#: apps/inventory/models/movements.py:53
 msgid "Inventory Movement"
 msgstr "Movimiento de Inventario"
 
-#: apps/inventory/models/movements.py:61
+#: apps/inventory/models/movements.py:54
 msgid "Inventory Movements"
 msgstr "Movimientos de Inventario"
 
-#: apps/inventory/models/movements.py:88
-msgid "Cannot modify existing movements"
-msgstr "No se pueden modificar los movimientos existentes"
+#: apps/inventory/models/products.py:22
+msgid "Unique identifier code, numbers and underscores"
+msgstr "Código identificador único, números y guiones bajos"
 
-#: apps/inventory/models/products.py:27
-msgid "Image URL"
-msgstr "URL de la imagen"
+#: apps/inventory/models/products.py:24
+msgid "Barcode"
+msgstr "Código de barras"
+
+#: apps/inventory/models/products.py:26
+msgid "Image"
+msgstr "Imagen"
 
 #: apps/inventory/models/products.py:30
 msgid "Stock min"
@@ -712,137 +772,195 @@ msgstr "Stock mínimo"
 msgid "Notify me when stock reaches this level"
 msgstr "Informarme cuando las existencias alcancen este nivel"
 
+#: apps/inventory/models/products.py:33
+msgid "Stock max"
+msgstr "Stock máximo"
+
+#: apps/inventory/models/products.py:33
+msgid "Maximum stock"
+msgstr "Stock máximo"
+
 #: apps/inventory/models/products.py:56 apps/inventory/views/batches.py:71
-#: apps/inventory/views/batches.py:116 apps/inventory/views/batches.py:210
-#: templates/partials/sidebar/_sidebar.html:18
+#: apps/inventory/views/batches.py:116 apps/inventory/views/batches.py:198
+#: templates/partials/sidebar/_sidebar.html:32
 msgid "Supplies"
 msgstr "Insumos"
 
-#: apps/inventory/models/products.py:93
+#: apps/inventory/models/products.py:99
 msgid "Discarded"
 msgstr "Desechado"
 
-#: apps/inventory/models/products.py:94
+#: apps/inventory/models/products.py:100
 #: apps/inventory/templates/supplies/batches/datatable.html:14
 msgid "Active"
 msgstr "Activo"
 
-#: apps/inventory/models/products.py:96
+#: apps/inventory/models/products.py:102
 msgid "Depleted"
 msgstr "Agotado"
 
-#: apps/inventory/models/products.py:117
+#: apps/inventory/models/products.py:123
 #: apps/inventory/templates/supplies/batches/detail.html:122
-#: apps/operations/admin.py:446
 msgid "Batch Number"
 msgstr "Número de lote"
 
-#: apps/inventory/models/products.py:118
+#: apps/inventory/models/products.py:124
+msgid "Manufacture date"
+msgstr "Fecha de fabricación"
+
+#: apps/inventory/models/products.py:125
 msgid "Expiry date"
 msgstr "Fecha de caducidad"
 
-#: apps/inventory/models/products.py:119
+#: apps/inventory/models/products.py:127
 msgid "Initial quantity"
 msgstr "Cantidad inicial"
 
-#: apps/inventory/models/products.py:120
+#: apps/inventory/models/products.py:128
 msgid "Current quantity"
 msgstr "Cantidad actual"
 
-#: apps/inventory/models/products.py:121
+#: apps/inventory/models/products.py:129
 #: apps/inventory/templates/supplies/batches/detail.html:134
-#: apps/operations/models/orders.py:51
-#: apps/operations/templates/operations/outbound/detail.html:118
+#: apps/operations/models/inventory_order.py:300
+#: apps/operations/templates/inbound/detail.html:141
+#: apps/operations/templates/outbound/detail.html:112
 msgid "Unit cost"
 msgstr "Costo unitario"
 
-#: apps/inventory/models/products.py:133
+#: apps/inventory/models/products.py:134
+msgid "Notes"
+msgstr "Notas"
+
+#: apps/inventory/models/products.py:144
+#: apps/operations/models/inventory_order.py:82
+#: apps/operations/models/supplier.py:22
+#: apps/operations/templates/inbound/detail.html:83
+msgid "Supplier"
+msgstr "Proveedor"
+
+#: apps/inventory/models/products.py:153
 msgid "Batches"
 msgstr "Lotes"
 
-#: apps/inventory/models/products.py:152
+#: apps/inventory/models/products.py:171
 msgid "A batch with this number already exists for this supply."
 msgstr "Ya existe un lote con este número para este insumo."
 
-#: apps/inventory/templates/inventory_movements/create_or_update.html:29
-#: apps/operations/templates/operations/outbound/create_or_update.html:32
+#: apps/inventory/models/products.py:175
+msgid "Initial quantity cannot be negative."
+msgstr "La cantidad inicial no puede ser negativa."
+
+#: apps/inventory/models/products.py:180
+msgid "Current quantity cannot be negative."
+msgstr "La cantidad actual no puede ser negativa."
+
+#: apps/inventory/templates/movements/create_or_update.html:29
 msgid "Supplies to be moved"
 msgstr "Insumos que se trasladarán"
 
-#: apps/inventory/templates/inventory_movements/datatable.html:83
+#: apps/inventory/templates/movements/datatable.html:83
+#: apps/inventory/templates/movements/datatable2.html:84
 msgid "supply / batch"
 msgstr "insumo / lote"
 
-#: apps/inventory/templates/inventory_movements/datatable.html:86
+#: apps/inventory/templates/movements/datatable.html:86
 msgid "stock"
 msgstr "stock"
 
-#: apps/inventory/templates/inventory_movements/datatable.html:88
+#: apps/inventory/templates/movements/datatable.html:88
+#: apps/inventory/templates/movements/datatable2.html:82
 msgid "date"
 msgstr "fecha"
 
-#: apps/inventory/templates/inventory_movements/detail.html:72
+#: apps/inventory/templates/movements/datatable2.html:14
+msgid "Export to Excel"
+msgstr "Exportar a Excel"
+
+#: apps/inventory/templates/movements/datatable2.html:18
+msgid "Export to CSV"
+msgstr "Exportar a CSV"
+
+#: apps/inventory/templates/movements/datatable2.html:86
+msgid "inflow"
+msgstr "entrada"
+
+#: apps/inventory/templates/movements/datatable2.html:87
+msgid "outflow"
+msgstr "salida"
+
+#: apps/inventory/templates/movements/datatable2.html:88
+msgid "balance"
+msgstr "saldo"
+
+#: apps/inventory/templates/movements/datatable2.html:89
+msgid "reference"
+msgstr "referencia"
+
+#: apps/inventory/templates/movements/datatable2.html:91
+msgid "user"
+msgstr "usuario"
+
+#: apps/inventory/templates/movements/detail.html:72
 #: apps/inventory/templates/supplies/detail.html:72
 msgid "Total stock"
 msgstr "Stock total"
 
-#: apps/inventory/templates/inventory_movements/detail.html:74
+#: apps/inventory/templates/movements/detail.html:74
 #: apps/inventory/templates/supplies/detail.html:74
 msgid "available units"
 msgstr "unidades disponibles"
 
-#: apps/inventory/templates/inventory_movements/detail.html:78
-#: apps/inventory/templates/supplies/detail.html:78
+#: apps/inventory/templates/movements/detail.html:78
+#: apps/inventory/templates/supplies/detail.html:79
 msgid "Stock min."
 msgstr "Stock mínimo."
 
-#: apps/inventory/templates/inventory_movements/detail.html:80
-#: apps/inventory/templates/supplies/detail.html:80
+#: apps/inventory/templates/movements/detail.html:80
 msgid "reorder alert"
 msgstr "alerta de reposición"
 
-#: apps/inventory/templates/inventory_movements/detail.html:84
-#: apps/inventory/templates/supplies/detail.html:84
+#: apps/inventory/templates/movements/detail.html:84
+#: apps/inventory/templates/supplies/detail.html:95
 msgid "Active batches"
 msgstr "Lotes activos"
 
-#: apps/inventory/templates/inventory_movements/detail.html:86
-#: apps/inventory/templates/supplies/detail.html:86
+#: apps/inventory/templates/movements/detail.html:86
+#: apps/inventory/templates/supplies/detail.html:97
 msgid "in stock"
 msgstr "en stock"
 
-#: apps/inventory/templates/inventory_movements/detail.html:90
-#: apps/inventory/templates/supplies/detail.html:90
+#: apps/inventory/templates/movements/detail.html:90
+#: apps/inventory/templates/supplies/detail.html:101
 msgid "Coming due"
 msgstr "Vence próximamente"
 
-#: apps/inventory/templates/inventory_movements/detail.html:92
-#: apps/inventory/templates/supplies/detail.html:92
-#: apps/inventory/views/supplies.py:75
+#: apps/inventory/templates/movements/detail.html:92
+#: apps/inventory/templates/supplies/detail.html:103
 msgid "next 30 days"
 msgstr "los próximos 30 días"
 
-#: apps/inventory/templates/inventory_movements/detail.html:101
-#: apps/inventory/templates/supplies/detail.html:101
+#: apps/inventory/templates/movements/detail.html:101
+#: apps/inventory/templates/supplies/detail.html:112
 msgid "Stock level"
 msgstr "Nivel de existencias"
 
-#: apps/inventory/templates/inventory_movements/detail.html:125
-#: apps/inventory/templates/supplies/detail.html:125
+#: apps/inventory/templates/movements/detail.html:125
+#: apps/inventory/templates/supplies/detail.html:136
 msgid "Supply information"
 msgstr "Información del insumo"
 
-#: apps/inventory/templates/inventory_movements/formset.html:7
-#: apps/operations/templates/operations/outbound/formset.html:7
+#: apps/inventory/templates/movements/formset.html:7
+#: apps/operations/templates/outbound/formset.html:15
 msgid "Current Stock"
 msgstr "Existencias actuales"
 
-#: apps/inventory/templates/inventory_movements/formset.html:38
-#: apps/operations/templates/operations/outbound/formset.html:38
+#: apps/inventory/templates/movements/formset.html:38
 msgid "Add Supply"
 msgstr "Añadir insumo"
 
-#: apps/inventory/templates/supplies/batches/create_or_update.html:23
+#: apps/inventory/templates/supplies/batches/create.html:26
+#: apps/inventory/templates/supplies/batches/update.html:26
 msgid "Inventory and Costs"
 msgstr "Existencias y costes"
 
@@ -876,7 +994,7 @@ msgstr "días restantes"
 msgid "Batch Information"
 msgstr "Información del lote"
 
-#: apps/inventory/templates/supplies/create_or_update.html:25
+#: apps/inventory/templates/supplies/create_or_update.html:28
 msgid "Ranking"
 msgstr "Clasificación"
 
@@ -884,15 +1002,25 @@ msgstr "Clasificación"
 msgid "unit"
 msgstr "unidad"
 
-#: apps/inventory/templates/supplies/datatable.html:76
-msgid "batchs"
-msgstr "lotes"
+#: apps/inventory/templates/supplies/detail.html:82
+msgid "Alert threshold"
+msgstr "Umbral de alerta"
+
+#: apps/inventory/templates/supplies/detail.html:88
+msgid "Stock max."
+msgstr "Stock max."
+
+#: apps/inventory/templates/supplies/detail.html:91
+msgid "Maximum capacity"
+msgstr "Capacidad máxima"
 
 #: apps/inventory/utils/choices.py:6
+#: apps/operations/models/inventory_order.py:31
 msgid "Inbound"
 msgstr "Entrada"
 
 #: apps/inventory/utils/choices.py:7
+#: apps/operations/models/inventory_order.py:32
 msgid "Outbound"
 msgstr "Salida"
 
@@ -900,69 +1028,77 @@ msgstr "Salida"
 msgid "Adjustment"
 msgstr "Ajuste"
 
-#: apps/inventory/utils/choices.py:36 apps/operations/admin.py:460
-#: apps/security/models/users.py:187
+#: apps/inventory/utils/choices.py:36
 msgid "Pending"
 msgstr "Pendiente"
 
-#: apps/inventory/utils/choices.py:37 apps/operations/models/orders.py:63
-#: apps/operations/models/orders.py:106
+#: apps/inventory/utils/choices.py:37
+#: apps/operations/models/inventory_order.py:38
 msgid "Completed"
 msgstr "Completado"
 
-#: apps/inventory/utils/choices.py:38 apps/operations/models/orders.py:64
-#: apps/operations/models/orders.py:107
+#: apps/inventory/utils/choices.py:38
+#: apps/operations/models/inventory_order.py:39
 msgid "Cancelled"
 msgstr "Cancelado"
 
-#: apps/inventory/views/batches.py:174
+#: apps/inventory/views/batches.py:162
+#: apps/operations/layers/applications/inbound_service.py:168
+#: apps/operations/layers/applications/inbound_service.py:201
+#: apps/operations/layers/applications/inbound_service.py:260
 msgid "Initial stock entry"
 msgstr "Registro inicial de existencias"
 
-#: apps/inventory/views/batches.py:177
+#: apps/inventory/views/batches.py:165
+#: apps/operations/layers/applications/inbound_service.py:171
 #, python-brace-format
 msgid "Batch creation with initial quantity: {quantity}"
 msgstr "Creación por lotes con cantidad inicial: {quantity}"
 
-#: apps/inventory/views/movements.py:51
+#: apps/inventory/views/movements.py:49
 msgid "Management of registered inventory movements"
 msgstr "Gestión de los movimientos de inventario registrados"
 
-#: apps/inventory/views/movements.py:60
+#: apps/inventory/views/movements.py:58
 msgid "Register inbound movement"
 msgstr "Registrar movimiento de entrada"
 
-#: apps/inventory/views/movements.py:65
+#: apps/inventory/views/movements.py:63
 msgid "Register outbound movement"
 msgstr "Registrar movimiento de salida"
 
-#: apps/inventory/views/movements.py:70
+#: apps/inventory/views/movements.py:68
 msgid "Register stock adjustment"
 msgstr "Registrar ajuste de existencias"
 
-#: apps/inventory/views/movements.py:135 apps/inventory/views/supplies.py:158
-msgid "Add batch"
-msgstr "Añadir lote"
-
-#: apps/inventory/views/supplies.py:46
+#: apps/inventory/views/supplies.py:39
 msgid "Management of registered supplies"
 msgstr "Gestión de proveedores registrados"
 
-#: apps/inventory/views/supplies.py:52
+#: apps/inventory/views/supplies.py:45
 msgid "Total Supplies"
 msgstr "Total de suministros"
 
-#: apps/inventory/views/supplies.py:54
+#: apps/inventory/views/supplies.py:47
 msgid "registered"
 msgstr "registrado"
 
-#: apps/inventory/views/supplies.py:59
-msgid "Stock OK"
-msgstr "Stock ok"
+#: apps/inventory/views/supplies.py:52
+msgid "Stock normal"
+msgstr "Stock normal"
 
-#: apps/inventory/views/supplies.py:61
+#: apps/inventory/views/supplies.py:54
 msgid "above minimum"
 msgstr "por encima del mínimo"
+
+#: apps/inventory/views/supplies.py:59
+msgid "Stock low"
+msgstr "Stock bajo"
+
+#: apps/inventory/views/supplies.py:61
+#, python-format
+msgid "Below 50% of the minimum"
+msgstr "Por debajo del 50% del mínimo"
 
 #: apps/inventory/views/supplies.py:66
 msgid "Stock Critical"
@@ -972,85 +1108,57 @@ msgstr "Existencias críticas"
 msgid "below minimum"
 msgstr "por debajo del mínimo"
 
-#: apps/inventory/views/supplies.py:73
-msgid "Expiring Batches"
-msgstr "Lotes  por caducar"
+#: apps/inventory/views/supplies.py:147
+msgid "Add batch"
+msgstr "Añadir lote"
 
-#: apps/operations/admin.py:74 apps/operations/admin.py:97
-#: apps/operations/admin.py:267 apps/operations/admin.py:452
-#, fuzzy
-#| msgid "items total"
-msgid "Line Total"
-msgstr "total items"
-
-#: apps/operations/admin.py:121
+#: apps/operations/admin.py:27
 msgid "Contact Information"
 msgstr "Información de contacto"
 
-#: apps/operations/admin.py:122
+#: apps/operations/admin.py:28
 msgid "Business Information"
 msgstr "Datos de la empresa"
 
-#: apps/operations/admin.py:124 apps/operations/admin.py:169
-#: apps/operations/admin.py:301
+#: apps/operations/admin.py:30
+#: apps/operations/templates/inbound/detail.html:108
 msgid "Audit"
 msgstr "Auditoría"
 
-#: apps/operations/admin.py:165 apps/operations/admin.py:297
-msgid "Order Information"
-msgstr "Información sobre el pedido"
+#: apps/operations/forms/inbound.py:166
+#: apps/operations/forms/inventory_orders.py:188
+msgid "Unit cost must be a number"
+msgstr "El coste unitario debe ser un número"
 
-#: apps/operations/admin.py:166
-msgid "Delivery Information"
-msgstr "Información sobre envíos"
+#: apps/operations/forms/inbound.py:169
+#: apps/operations/forms/inventory_orders.py:191
+msgid "Unit cost must be greater than 0"
+msgstr "El coste unitario debe ser superior a 0"
 
-#: apps/operations/admin.py:167 apps/operations/admin.py:299
-msgid "Additional Information"
-msgstr "Información adicional"
+#: apps/operations/forms/inbound.py:172
+#: apps/operations/forms/inventory_orders.py:194
+msgid "Unit cost cannot be greater than 999,999.99"
+msgstr "El coste unitario no puede ser superior a 999 999,99"
 
-#: apps/operations/admin.py:196 apps/operations/models/supplier.py:31
-msgid "Supplier"
-msgstr "Proveedor"
+#: apps/operations/forms/inbound.py:186 apps/operations/forms/inbound.py:189
+#: apps/operations/forms/inventory_orders.py:208
+#: apps/operations/forms/inventory_orders.py:211
+msgid "Batch number already exists for this supply."
+msgstr "El número de lote ya existe para este insumo."
 
-#: apps/operations/admin.py:217 apps/operations/admin.py:346
-msgid "Total Items"
-msgstr "Total de ítems"
+#: apps/operations/forms/inbound.py:215
+msgid "Search by order number, requested, supplier"
+msgstr "Buscar por número de orden, solicitud o proveedor"
 
-#: apps/operations/admin.py:228 apps/operations/admin.py:352
-msgid "Total Amount"
-msgstr "Importe total"
+#: apps/operations/forms/inventory_orders.py:340
+msgid "Expiry date is required for inbound orders."
+msgstr "Es obligatorio indicar la fecha de caducidad en los pedidos entrantes."
 
-#: apps/operations/admin.py:255 apps/operations/admin.py:432
-msgid "Order Number"
-msgstr "Número de Orden"
+#: apps/operations/forms/inventory_orders.py:342
+msgid "Batch is required for inbound orders."
+msgstr "Es obligatorio indicar el lote en los pedidos de entrada."
 
-#: apps/operations/admin.py:298
-msgid "Financial Information"
-msgstr "Información financiera"
-
-#: apps/operations/admin.py:359
-msgid "Items Dispatched"
-msgstr "Insumos despachados"
-
-#: apps/operations/admin.py:389
-msgid "Mark selected orders as completed"
-msgstr "Marca los pedidos como completados"
-
-#: apps/operations/admin.py:396
-#, fuzzy
-#| msgid "Mark selected items as active"
-msgid "Mark selected orders as cancelled"
-msgstr "Marcar elementos seleccionados como activos"
-
-#: apps/operations/admin.py:485
-msgid "Dispatch Progress"
-msgstr "Progreso del pedido"
-
-#: apps/operations/forms/orders.py:111
-msgid "Search by order number or requested"
-msgstr "Buscar por número  o  solicitante"
-
-#: apps/operations/forms/supplier.py:17 apps/operations/models/supplier.py:23
+#: apps/operations/forms/supplier.py:17 apps/operations/models/supplier.py:14
 msgid "Delivery days"
 msgstr "Días de entrega"
 
@@ -1074,229 +1182,419 @@ msgstr "Lento (> 14 días)"
 msgid "Search by name or ruc"
 msgstr "Buscar por nombre o RUC"
 
-#: apps/operations/models/orders.py:11
-msgid "Motive"
-msgstr "Motivo"
+#: apps/operations/layers/applications/inbound_service.py:150
+msgid "Inventory operation"
+msgstr "Operación de inventario"
 
-#: apps/operations/models/orders.py:12
-msgid "Order number"
-msgstr "Número de orden"
+#: apps/operations/layers/applications/inbound_service.py:153
+#, python-brace-format
+msgid "Movement for batch {batch_number}"
+msgstr "Movimiento del lote {batch_number}"
 
-#: apps/operations/models/orders.py:13
-msgid "Observations"
-msgstr "Observaciones"
+#: apps/operations/layers/applications/outbound_service.py:104
+msgid "Out of stock"
+msgstr "Agotado"
 
-#: apps/operations/models/orders.py:50
-msgid "Quantity requested"
-msgstr "Cantidad solicitada"
+#: apps/operations/models/inventory_order.py:33
+msgid "Replenishment"
+msgstr "Reposición"
 
-#: apps/operations/models/orders.py:61 apps/operations/models/orders.py:105
+#: apps/operations/models/inventory_order.py:36
 msgid "Draft"
 msgstr "Borrador"
 
-#: apps/operations/models/orders.py:62
+#: apps/operations/models/inventory_order.py:37
 msgid "Sent"
 msgstr "Enviado"
 
-#: apps/operations/models/orders.py:66
-msgid "Estimated delivery"
-msgstr "Entrega estimada"
+#: apps/operations/models/inventory_order.py:67
+msgid "Order type"
+msgstr "Tipo de orden"
 
-#: apps/operations/models/orders.py:67
-msgid "Actual delivery"
-msgstr "Entrega real"
+#: apps/operations/models/inventory_order.py:70
+msgid "Order number"
+msgstr "Número de orden"
 
-#: apps/operations/models/orders.py:75
-msgid "Purchase Order"
-msgstr "Orden de Compra"
+#: apps/operations/models/inventory_order.py:74
+#: apps/operations/templates/inbound/detail.html:70
+msgid "Motive"
+msgstr "Motivo"
 
-#: apps/operations/models/orders.py:76
-msgid "Purchase Orders"
-msgstr "Órdenes de Compra"
+#: apps/operations/models/inventory_order.py:75
+#: apps/operations/models/inventory_order.py:303
+#: apps/operations/templates/inbound/detail.html:101
+#: apps/operations/templates/inbound/formset.html:20
+#: apps/operations/templates/outbound/formset.html:16
+msgid "Observations"
+msgstr "Observaciones"
 
-#: apps/operations/models/orders.py:84
-msgid "Quantity received"
-msgstr "Cantidad recibida"
+#: apps/operations/models/inventory_order.py:87
+msgid "Schedule date"
+msgstr "Fecha de la pedido"
 
-#: apps/operations/models/orders.py:115
-msgid "Requested by"
-msgstr "Solicitado por"
+#: apps/operations/models/inventory_order.py:89
+msgid "The date the items are expected to arrive."
+msgstr "La fecha prevista de llegada de los insumos."
 
-#: apps/operations/models/orders.py:121
-msgid "Exit Order"
+#: apps/operations/models/inventory_order.py:92
+msgid "Received date"
+msgstr "Fecha de recepción"
+
+#: apps/operations/models/inventory_order.py:93
+msgid "The date the items were received by the supplier."
+msgstr "La fecha en la que el proveedor recibió los artículos."
+
+#: apps/operations/models/inventory_order.py:100
+msgid "Inventory Order"
+msgstr "Pedidos de existencia"
+
+#: apps/operations/models/inventory_order.py:101
+msgid "Inventory Orders"
+msgstr "Pedidos de existencias"
+
+#: apps/operations/models/inventory_order.py:130
+msgid "Completed orders cannot be modified."
+msgstr "Los pedidos ya completados no se pueden modificar."
+
+#: apps/operations/models/inventory_order.py:133
+msgid "Inbound orders require a supplier."
+msgstr "Los pedidos entrantes requieren un proveedor."
+
+#: apps/operations/models/inventory_order.py:136
+msgid "Only inbound orders can have a supplier."
+msgstr "Solo los pedidos entrantes pueden tener un proveedor."
+
+#: apps/operations/models/inventory_order.py:139
+msgid "Only inbound orders can have 'Sent' status."
+msgstr "Solo los pedidos entrantes pueden tener el estado 'Enviado'."
+
+#: apps/operations/models/inventory_order.py:199
+msgid "Inbound Order"
+msgstr "Orden entrante"
+
+#: apps/operations/models/inventory_order.py:200
+#: templates/partials/sidebar/_sidebar.html:57
+msgid "Inbound Orders"
+msgstr "Ordenes entrante"
+
+#: apps/operations/models/inventory_order.py:220
+msgid "Outbound Order"
 msgstr "Orden de salida"
 
-#: apps/operations/models/orders.py:122
-#: templates/partials/sidebar/_sidebar.html:42
-msgid "Exit Orders"
-msgstr "Órdenes de salida"
+#: apps/operations/models/inventory_order.py:221
+#: templates/partials/sidebar/_sidebar.html:64
+msgid "Outbound Orders"
+msgstr "Ordenes de salida"
 
-#: apps/operations/models/orders.py:143
-msgid "Quantity dispatched"
-msgstr "Cantidad despachada"
+#: apps/operations/models/inventory_order.py:241
+msgid "Replenishment Order"
+msgstr "Orden de reposición"
 
-#: apps/operations/models/supplier.py:16
-msgid "RUC / DNI"
-msgstr "RUC / DNI"
+#: apps/operations/models/inventory_order.py:242
+msgid "Replenishment Orders"
+msgstr "Ordenes de reposición"
 
-#: apps/operations/models/supplier.py:21
-msgid "Contact name"
-msgstr "Nombre de contacto"
+#: apps/operations/models/inventory_order.py:272
+msgid "Order"
+msgstr "Orden"
 
-#: apps/operations/models/supplier.py:22
-#: apps/operations/templates/operations/detail.html:30
-#: apps/operations/templates/suppliers/detail.html:30
+#: apps/operations/models/inventory_order.py:291
+msgid "Quantity requested"
+msgstr "Cantidad solicitada"
+
+#: apps/operations/models/inventory_order.py:294
+msgid "Quantity fulfilled"
+msgstr "Cantidad suministrada"
+
+#: apps/operations/models/inventory_order.py:296
+msgid "Received (inbound) or dispatched (outbound/replenishment)"
+msgstr "Recibido (entrada) o enviado (salida/reposición)"
+
+#: apps/operations/models/inventory_order.py:307
+msgid "Order detail"
+msgstr "Detalle de orden"
+
+#: apps/operations/models/inventory_order.py:308
+#: apps/operations/templates/inbound/formset.html:5
+#: apps/operations/templates/outbound/formset.html:7
+msgid "Order details"
+msgstr "Detalles de orden"
+
+#: apps/operations/models/inventory_order.py:327
+msgid "Fulfilled quantity cannot exceed requested quantity."
+msgstr "La cantidad suministrada no puede superar la cantidad solicitada."
+
+#: apps/operations/models/inventory_order.py:334
+msgid "Fulfilled quantity cannot be negative."
+msgstr "La cantidad suministrada no puede ser negativa."
+
+#: apps/operations/models/inventory_order.py:339
+msgid "Batch must belong to the same supply as the order detail."
+msgstr "El lote debe pertenecer al mismo insumo que los datos del pedido."
+
+#: apps/operations/models/supplier.py:13
+#: apps/operations/templates/suppliers/detail.html:50
 msgid "Business name"
 msgstr "Razón social"
 
-#: apps/operations/models/supplier.py:25 apps/security/models/users.py:103
+#: apps/operations/models/supplier.py:16 apps/security/models/users.py:103
 msgid "Email address"
 msgstr "Correo electrónico"
 
-#: apps/operations/models/supplier.py:26 apps/security/models/users.py:42
-msgid "Phone number"
-msgstr "Teléfono"
-
-#: apps/operations/models/supplier.py:27
+#: apps/operations/models/supplier.py:18
 msgid "Address"
 msgstr "Dirección"
 
-#: apps/operations/models/supplier.py:32
-#: templates/partials/sidebar/_sidebar.html:47
+#: apps/operations/models/supplier.py:23
+#: templates/partials/sidebar/_sidebar.html:71
 msgid "Suppliers"
 msgstr "Proveedores"
 
-#: apps/operations/templates/operations/datatable.html:23
+#: apps/operations/templates/inbound/datatable.html:55
+msgid "order number"
+msgstr "número de orden"
+
+#: apps/operations/templates/inbound/datatable.html:59
+msgid "Total lines"
+msgstr "# total de líneas"
+
+#: apps/operations/templates/inbound/detail.html:51
+#: apps/operations/templates/outbound/detail.html:19
+msgid "lines"
+msgstr "lineas"
+
+#: apps/operations/templates/inbound/detail.html:59
+msgid "General reception"
+msgstr "Recepción general"
+
+#: apps/operations/templates/inbound/detail.html:91
+#: apps/operations/templates/suppliers/detail.html:65
+msgid "Contact"
+msgstr "Contacto"
+
+#: apps/operations/templates/inbound/detail.html:96
+#: apps/operations/templates/suppliers/detail.html:54
+msgid "Tax ID"
+msgstr "RUC"
+
+#: apps/operations/templates/inbound/detail.html:130
+#: apps/operations/templates/outbound/detail.html:102
+msgid "Supply lines"
+msgstr "Líneas de insumos"
+
+#: apps/operations/templates/inbound/detail.html:138
+#: apps/operations/templates/outbound/detail.html:110
+msgid "Assigned batch"
+msgstr "Lote asignado"
+
+#: apps/operations/templates/inbound/detail.html:139
+#: apps/operations/templates/inbound/detail.html:175
+#: apps/operations/templates/outbound/detail.html:111
+#: apps/operations/templates/outbound/detail.html:145
+#, fuzzy
+#| msgid "Quantity requested"
+msgid "Qty requested"
+msgstr "Cantidad solicitada"
+
+#: apps/operations/templates/inbound/detail.html:140
+#: apps/operations/templates/inbound/detail.html:177
+#: apps/operations/templates/outbound/detail.html:147
+#, fuzzy
+#| msgid "Quantity received"
+msgid "Qty received"
+msgstr "Cantidad recibida"
+
+#: apps/operations/templates/inbound/detail.html:142
+#: apps/operations/templates/outbound/detail.html:113
+msgid "Line total"
+msgstr "Total de la línea"
+
+#: apps/operations/templates/inbound/detail.html:143
+#: apps/operations/templates/outbound/detail.html:114
+msgid "Reception"
+msgstr "Recepción"
+
+#: apps/operations/templates/inbound/detail.html:159
+#: apps/operations/templates/outbound/detail.html:129
+msgid "Complete"
+msgstr "Completo"
+
+#: apps/operations/templates/inbound/detail.html:161
+#: apps/operations/templates/outbound/detail.html:131
+msgid "Partial"
+msgstr "Parcial"
+
+#: apps/operations/templates/inbound/detail.html:172
+#: apps/operations/templates/outbound/detail.html:142
+msgid "Lines"
+msgstr "Lineas"
+
+#: apps/operations/templates/inbound/detail.html:180
+#: apps/operations/templates/outbound/detail.html:150
+msgid "Order total"
+msgstr "Total del pedido"
+
+#: apps/operations/templates/inbound/formset.html:14
+msgid "Expiry"
+msgstr "Caducidad"
+
+#: apps/operations/templates/inbound/formset.html:15
+msgid "Request"
+msgstr "Solicitud"
+
+#: apps/operations/templates/inbound/formset.html:17
+msgid "Fulfilled"
+msgstr "Cumplido"
+
+#: apps/operations/templates/inbound/formset.html:19
+msgid "Cost"
+msgstr "Costo"
+
+#: apps/operations/templates/outbound/datatable.html:59
+msgid "total items"
+msgstr "total de items"
+
+#: apps/operations/templates/outbound/datatable.html:60
+msgid "total"
+msgstr "total"
+
+#: apps/operations/templates/outbound/detail.html:53
+msgid "requested by"
+msgstr "solicitado por"
+
 #: apps/operations/templates/suppliers/datatable.html:23
 msgid "Number of records"
 msgstr "Número de registros"
 
-#: apps/operations/templates/operations/datatable.html:25
 #: apps/operations/templates/suppliers/datatable.html:25
 msgid "suppliers"
 msgstr "proveedores"
 
-#: apps/operations/templates/operations/datatable.html:38
 #: apps/operations/templates/suppliers/datatable.html:38
 msgid "Fast Delivery"
 msgstr "Entrega Rápida"
 
-#: apps/operations/templates/operations/datatable.html:53
 #: apps/operations/templates/suppliers/datatable.html:53
 msgid "Medium Delivery"
 msgstr "Entrega Media"
 
-#: apps/operations/templates/operations/datatable.html:68
 #: apps/operations/templates/suppliers/datatable.html:68
 msgid "Slow Delivery"
 msgstr "Entrega Lenta"
 
-#: apps/operations/templates/operations/datatable.html:113
-#: apps/operations/templates/suppliers/datatable.html:113
+#: apps/operations/templates/suppliers/datatable.html:114
 msgid "supplier"
 msgstr "proveedor"
 
-#: apps/operations/templates/operations/datatable.html:115
 #: apps/operations/templates/suppliers/datatable.html:115
+msgid "document"
+msgstr "documento"
+
+#: apps/operations/templates/suppliers/datatable.html:116
 msgid "delivery"
 msgstr "entrega"
 
-#: apps/operations/templates/operations/detail.html:27
-#: apps/operations/templates/suppliers/detail.html:27
+#: apps/operations/templates/suppliers/detail.html:47
 msgid "Identification"
 msgstr "Identificación"
 
-#: apps/operations/templates/operations/detail.html:34
-#: apps/operations/templates/suppliers/detail.html:34
-msgid "Tax ID"
-msgstr "RUC"
+#: apps/operations/templates/suppliers/detail.html:52
+msgid "Contact name"
+msgstr "Nombre de contacto"
 
-#: apps/operations/templates/operations/detail.html:45
-#: apps/operations/templates/suppliers/detail.html:45
-msgid "Contact"
-msgstr "Contacto"
-
-#: apps/operations/templates/operations/detail.html:50
-#: apps/operations/templates/suppliers/detail.html:50
+#: apps/operations/templates/suppliers/detail.html:70
 msgid "Email"
 msgstr "Correo electrónico"
 
-#: apps/operations/templates/operations/detail.html:56
-#: apps/operations/templates/suppliers/detail.html:56
+#: apps/operations/templates/suppliers/detail.html:76
 msgid "Phone"
 msgstr "Teléfono"
 
-#: apps/operations/templates/operations/detail.html:69
-#: apps/operations/templates/suppliers/detail.html:69
+#: apps/operations/templates/suppliers/detail.html:89
 msgid "Delivery deadline"
 msgstr "Plazo de entrega"
 
-#: apps/operations/templates/operations/detail.html:76
-#: apps/operations/templates/suppliers/detail.html:76
+#: apps/operations/templates/suppliers/detail.html:96
 msgid "Delivery time"
 msgstr "Tiempo de entrega"
 
-#: apps/operations/templates/operations/detail.html:77
-#: apps/operations/templates/suppliers/detail.html:77
+#: apps/operations/templates/suppliers/detail.html:97
 msgid "days"
 msgstr "días"
 
-#: apps/operations/templates/operations/detail.html:96
-#: apps/operations/templates/suppliers/detail.html:96
+#: apps/operations/templates/suppliers/detail.html:116
 msgid "Fast"
 msgstr "Rápido"
 
-#: apps/operations/templates/operations/detail.html:100
-#: apps/operations/templates/suppliers/detail.html:100
+#: apps/operations/templates/suppliers/detail.html:120
 msgid "Medium"
 msgstr "Medio"
 
-#: apps/operations/templates/operations/detail.html:104
-#: apps/operations/templates/suppliers/detail.html:104
+#: apps/operations/templates/suppliers/detail.html:124
 msgid "Slow"
 msgstr "Lento"
 
-#: apps/operations/templates/operations/outbound/datatable.html:55
-msgid "order"
-msgstr "orden"
+#: apps/operations/views/inbound_orders.py:43
+msgid "Management of inbound orders"
+msgstr "Gestión de órdenes entrantes"
 
-#: apps/operations/templates/operations/outbound/datatable.html:58
-msgid "items"
-msgstr "items"
+#: apps/operations/views/inbound_orders.py:63
+msgid "Register entry"
+msgstr "Registrar entrada"
 
-#: apps/operations/templates/operations/outbound/detail.html:107
-msgid "Supplies Shipped"
-msgstr "Insumos enviados"
+#: apps/operations/views/inbound_orders.py:96
+msgid "Purchase Order Details"
+msgstr "Detalles de la orden de compra"
 
-#: apps/operations/templates/operations/outbound/detail.html:120
-msgid "Total"
-msgstr "Total"
+#: apps/operations/views/inbound_orders.py:112
+msgid "Mark as completed"
+msgstr "Marcar como completado"
 
-#: apps/operations/templates/operations/outbound/formset.html:5
-msgid "supply"
-msgstr "insumo"
+#: apps/operations/views/inbound_orders.py:124
+msgid "Cancel order"
+msgstr "Cancelar pedido"
 
-#: apps/operations/views/exit_order.py:40
-msgid "Management of exit orders"
-msgstr "Gestión de las órdenes de salida"
+#: apps/operations/views/inbound_orders.py:294
+msgid "Order already completed."
+msgstr "El pedido ya se ha completado."
 
-#: apps/operations/views/exit_order.py:60
-msgid "Register exit"
-msgstr "Salida del registro"
+#: apps/operations/views/inbound_orders.py:299
+msgid "Order completed successfully."
+msgstr "El pedido se ha completado correctamente."
 
-#: apps/operations/views/exit_order.py:79
+#: apps/operations/views/inbound_orders.py:302
+msgid "Failed to complete order."
+msgstr "No se ha podido completar el pedido."
+
+#: apps/operations/views/inbound_orders.py:314
+msgid "Order cancel successfully."
+msgstr "El pedido se ha cancelado correctamente."
+
+#: apps/operations/views/inbound_orders.py:317
+msgid "Failed to cancel order."
+msgstr "No se ha podido cancelar el pedido."
+
+#: apps/operations/views/outbound_orders.py:36
+msgid "Management of outbound orders"
+msgstr "Gestión de ordenes de salida"
+
+#: apps/operations/views/outbound_orders.py:57
+msgid "Register outbound"
+msgstr "Registrar salida"
+
+#: apps/operations/views/outbound_orders.py:75
 msgid "Exit Order Details"
 msgstr "Detalles de la orden de salida"
 
-#: apps/operations/views/suppliers.py:41
+#: apps/operations/views/suppliers.py:36
 msgid "Management of registered suppliers"
 msgstr "Gestión de proveedores registrados"
 
-#: apps/operations/views/suppliers.py:93
+#: apps/operations/views/suppliers.py:80
 msgid "Supplier Details"
 msgstr "Detalles del Proveedor"
 
-#: apps/operations/views/suppliers.py:178 apps/security/views/users.py:387
+#: apps/operations/views/suppliers.py:153 apps/security/views/users.py:327
 msgid "Change Status"
 msgstr "Cambiar Estado"
 
@@ -1328,42 +1626,53 @@ msgstr "Nombre de usuario"
 msgid "Password"
 msgstr "Contraseña"
 
-#: apps/security/forms/user.py:17 apps/security/forms/user.py:71
-#: apps/security/forms/user.py:95
+#: apps/security/forms/user.py:18 apps/security/forms/user.py:73
+#: apps/security/forms/user.py:103
 msgid "Group"
 msgstr "Grupo"
 
-#: apps/security/forms/user.py:28
+#: apps/security/forms/user.py:29
 msgid "Search by names, username, email"
 msgstr "Buscar por nombres, usuario o correo"
 
-#: apps/security/forms/user.py:124
+#: apps/security/forms/user.py:132
 msgid "Current Password"
 msgstr "Contraseña Actual"
 
-#: apps/security/forms/user.py:130
+#: apps/security/forms/user.py:138
 msgid "New Password"
 msgstr "Nueva Contraseña"
 
-#: apps/security/forms/user.py:136
+#: apps/security/forms/user.py:144
 msgid "Confirm New Password"
 msgstr "Confirmar Nueva Contraseña"
 
-#: apps/security/layers/applications/user_service.py:143
+#: apps/security/forms/user.py:170 apps/security/utils/constants.py:20
+msgid "Current password is incorrect"
+msgstr "La contraseña actual es incorrecta"
+
+#: apps/security/forms/user.py:174
+msgid "New password cannot be the same as the current password"
+msgstr "La nueva contraseña no puede ser igual que la actual"
+
+#: apps/security/forms/user.py:178 apps/security/forms/user.py:179
+msgid "Passwords do not match"
+msgstr "Las contraseñas no coinciden"
+
+#: apps/security/layers/applications/user_service.py:79
+#: apps/security/layers/applications/user_service.py:167
+#: apps/security/layers/applications/user_service.py:191
+msgid "Password must be at least 8 characters long"
+msgstr "La contraseña debe tener al menos 8 caracteres."
+
+#: apps/security/layers/applications/user_service.py:111
+#: apps/security/layers/applications/user_service.py:121
+msgid "User instance is required to update"
+msgstr "Es necesario actualizar la instancia de usuario"
+
+#: apps/security/layers/applications/user_service.py:165
 msgid "You are not authorized to change this password"
 msgstr "No está autorizado para cambiar esta contraseña"
-
-#: apps/security/layers/dto/user_dto.py:37
-msgid "The passwords do not match."
-msgstr "Las contraseñas no coinciden."
-
-#: apps/security/layers/dto/user_dto.py:45
-msgid "The new password cannot be the same as the current password."
-msgstr "La nueva contraseña no puede ser igual a la actual."
-
-#: apps/security/layers/dto/user_dto.py:53
-msgid "The current password is incorrect."
-msgstr "La contraseña actual es incorrecta."
 
 #: apps/security/management/management.py:16
 msgid "Username is required."
@@ -1381,6 +1690,43 @@ msgstr "El superusuario debe tener is_staff=True."
 msgid "Superuser must have is_superuser=True."
 msgstr "El superusuario debe tener is_superuser=True."
 
+#: apps/security/models/notications.py:25
+msgid "Alert"
+msgstr "Alerta"
+
+#: apps/security/models/notications.py:26
+#: apps/security/models/notications.py:41
+msgid "Notification"
+msgstr "Notificación"
+
+#: apps/security/models/notications.py:28
+msgid "Subject"
+msgstr "Asunto"
+
+#: apps/security/models/notications.py:32
+msgid "Message"
+msgstr "Mensaje"
+
+#: apps/security/models/notications.py:35
+msgid "Reference URL"
+msgstr ""
+
+#: apps/security/models/notications.py:36
+#, fuzzy
+#| msgid "Email"
+msgid "Send Email"
+msgstr "Correo electrónico"
+
+#: apps/security/models/notications.py:37
+msgid "Email Sent Date"
+msgstr ""
+
+#: apps/security/models/notications.py:42
+#, fuzzy
+#| msgid "Identification"
+msgid "Notifications"
+msgstr "Identificación"
+
 #: apps/security/models/users.py:27
 msgid "First name"
 msgstr "Nombres"
@@ -1392,6 +1738,10 @@ msgstr "Apellidos"
 #: apps/security/models/users.py:35
 msgid "Document number"
 msgstr "Número de documento"
+
+#: apps/security/models/users.py:42
+msgid "Phone number"
+msgstr "Teléfono"
 
 #: apps/security/models/users.py:46
 msgid "Person"
@@ -1425,87 +1775,58 @@ msgstr "Intentos de inicio de sesión fallidos"
 msgid "Locked at"
 msgstr "Bloqueado el"
 
-#: apps/security/models/users.py:129 apps/security/models/users.py:195
+#: apps/security/models/users.py:129
 msgid "User"
 msgstr "Usuario"
 
 #: apps/security/models/users.py:130
-#: templates/partials/sidebar/_sidebar.html:69
+#: templates/partials/sidebar/_sidebar.html:93
 msgid "Users"
 msgstr "Usuarios"
 
-#: apps/security/models/users.py:144
-#: apps/security/templates/users/detail.html:70
+#: apps/security/models/users.py:145
+#: apps/security/templates/users/detail.html:73
 msgid "Verified"
 msgstr "Verificado"
 
-#: apps/security/models/users.py:144
-#: apps/security/templates/users/detail.html:72
+#: apps/security/models/users.py:145
+#: apps/security/templates/users/detail.html:75
 msgid "Not verified"
 msgstr "No verificado"
 
-#: apps/security/models/users.py:181
-msgid "Email verification"
-msgstr "Verificación de correo"
+#: apps/security/permissions.py:14
+msgid "administrator"
+msgstr "administrador"
 
-#: apps/security/models/users.py:182
-msgid "Password reset"
-msgstr "Restablecer contraseña"
-
-#: apps/security/models/users.py:188
-msgid "Used"
-msgstr "Usado"
-
-#: apps/security/models/users.py:198
-msgid "Token"
-msgstr "Token"
-
-#: apps/security/models/users.py:203
-msgid "Token type"
-msgstr "Tipo de token"
-
-#: apps/security/models/users.py:204
-msgid "Expires at"
-msgstr "Expira el"
-
-#: apps/security/models/users.py:208
-msgid "Used at"
-msgstr "Usado el"
-
-#: apps/security/models/users.py:214
-msgid "User token"
-msgstr "Token de usuario"
-
-#: apps/security/models/users.py:215
-msgid "User tokens"
-msgstr "Tokens de usuario"
-
-#: apps/security/models/users.py:249
-#, python-format
-msgid "Token is no longer valid: %(status)s"
-msgstr "El token ya no es válido: %(status)s"
+#: apps/security/permissions.py:71
+msgid "specialist"
+msgstr "especialista"
 
 #: apps/security/templates/auth/sign_in.html:38
 msgid "Sign in"
 msgstr "Iniciar sesión"
 
+#: apps/security/templates/users/datatable.html:52
+msgid "RUC / DNI"
+msgstr "RUC / DNI"
+
 #: apps/security/templates/users/datatable.html:54
 msgid "group"
 msgstr "grupo"
 
-#: apps/security/templates/users/detail.html:34
+#: apps/security/templates/users/detail.html:35
 msgid "Account information"
 msgstr "Información de cuenta"
 
-#: apps/security/templates/users/detail.html:80
+#: apps/security/templates/users/detail.html:83
 msgid "Yes"
 msgstr "Sí"
 
-#: apps/security/templates/users/detail.html:82
+#: apps/security/templates/users/detail.html:85
 msgid "No"
 msgstr "No"
 
-#: apps/security/templates/users/detail.html:111
+#: apps/security/templates/users/detail.html:114
 msgid "Personal information"
 msgstr "Información personal"
 
@@ -1586,10 +1907,6 @@ msgstr ""
 msgid "The password has been changed"
 msgstr "La contraseña ha sido cambiada"
 
-#: apps/security/utils/constants.py:20
-msgid "Current password is incorrect"
-msgstr "La contraseña actual es incorrecta"
-
 #: apps/security/utils/constants.py:21
 msgid "The password needs to be updated. To continue browsing."
 msgstr "La contraseña necesita ser actualizada para continuar navegando."
@@ -1649,48 +1966,48 @@ msgstr "Iniciar Sesión"
 msgid "Log in to your account"
 msgstr "Inicie sesión en su cuenta"
 
-#: apps/security/views/users.py:53
+#: apps/security/views/users.py:51
 msgid "Management of registered users"
 msgstr "Gestión de usuarios registrados"
 
-#: apps/security/views/users.py:129
+#: apps/security/views/users.py:93
 msgid "You do not have permission to view this user's details."
 msgstr "No tiene permiso para ver los detalles de este usuario."
 
-#: apps/security/views/users.py:136
+#: apps/security/views/users.py:102
 msgid "User Details"
 msgstr "Detalles del Usuario"
 
-#: apps/security/views/users.py:155 apps/security/views/users.py:156
+#: apps/security/views/users.py:113 apps/security/views/users.py:114
 msgid "Profile"
 msgstr "Perfil"
 
-#: apps/security/views/users.py:162
+#: apps/security/views/users.py:126
 msgid "Reset Password"
 msgstr "Restablecer Contraseña"
 
-#: apps/security/views/users.py:167
+#: apps/security/views/users.py:126
 msgid "Update Password"
 msgstr "Actualizar Contraseña"
 
-#: apps/security/views/users.py:273 apps/security/views/users.py:381
+#: apps/security/views/users.py:213 apps/security/views/users.py:321
 msgid "You do not have permission to edit this user."
 msgstr "No tiene permiso para editar este usuario."
 
-#: apps/security/views/users.py:303
+#: apps/security/views/users.py:243
 msgid "Update User"
 msgstr "Actualizar Usuario"
 
-#: apps/security/views/users.py:388
+#: apps/security/views/users.py:328
 msgid "Are you sure you want to change the status of this user?"
 msgstr "¿Está seguro de que quiere cambiar el estado de este usuario?"
 
-#: apps/security/views/users.py:418 apps/security/views/users.py:437
-#: apps/security/views/users.py:439
+#: apps/security/views/users.py:358 apps/security/views/users.py:377
+#: apps/security/views/users.py:379
 msgid "Update password"
 msgstr "Actualizar contraseña"
 
-#: apps/security/views/users.py:421
+#: apps/security/views/users.py:361
 msgid ""
 "To update your password, please keep the following security guidelines in "
 "mind:"
@@ -1698,35 +2015,41 @@ msgstr ""
 "Para actualizar su contraseña, tenga en cuenta las siguientes pautas de "
 "seguridad:"
 
-#: apps/security/views/users.py:424
+#: apps/security/views/users.py:364
 msgid "Must be at least <strong>8</strong> characters long."
 msgstr "Debe tener al menos <strong>8</strong> caracteres."
 
-#: apps/security/views/users.py:425
+#: apps/security/views/users.py:365
 msgid "Cannot be entirely numeric."
 msgstr "No puede ser completamente numérica."
 
-#: apps/security/views/users.py:426
+#: apps/security/views/users.py:366
 msgid "Cannot be a commonly used password."
 msgstr "No puede ser una contraseña de uso común."
 
-#: apps/security/views/users.py:427
+#: apps/security/views/users.py:367
 msgid "Must include at least one special character (@, #, $, !)."
 msgstr "Debe incluir al menos un carácter especial (@, #, $, !)."
 
-#: apps/security/views/users.py:428
+#: apps/security/views/users.py:368
 msgid "Cannot be too similar to your other personal information."
 msgstr "No puede ser demasiado similar a su otra información personal."
 
-#: apps/security/views/users.py:447
+#: apps/security/views/users.py:387
 msgid "You do not have permission to edit other users' accounts."
 msgstr "No tiene permiso para editar cuentas de otros usuarios."
 
-#: apps/security/views/users.py:498
+#: apps/security/views/users.py:407
+#, fuzzy
+#| msgid "The password has been changed"
+msgid "Your password has been successfully updated."
+msgstr "La contraseña ha sido cambiada"
+
+#: apps/security/views/users.py:425
 msgid "Password Reset Request"
 msgstr "Solicitud de Restablecimiento de Contraseña"
 
-#: apps/security/views/users.py:518
+#: apps/security/views/users.py:445
 msgid "Reset email sent successfully."
 msgstr "Correo de restablecimiento enviado correctamente."
 
@@ -1836,6 +2159,46 @@ msgstr ""
 "El sitio web no está disponible actualmente. Intente más tarde o contacte al "
 "desarrollador."
 
+#: templates/layouts/base.html:65
+msgid "Movimientos del último mes"
+msgstr ""
+
+#: templates/layouts/base.html:70
+msgid "Entradas"
+msgstr ""
+
+#: templates/layouts/base.html:75
+msgid "Salidas"
+msgstr ""
+
+#: templates/layouts/base.html:80
+#, fuzzy
+#| msgid "Adjustment"
+msgid "Ajustes"
+msgstr "Ajuste"
+
+#: templates/layouts/base.html:94
+msgid "Alert panel"
+msgstr ""
+
+#: templates/layouts/base.html:101
+#, fuzzy
+#| msgid "Critical stock"
+msgid "Críticas"
+msgstr "Stock crítico"
+
+#: templates/layouts/base.html:119
+msgid "Sin alertas críticas"
+msgstr ""
+
+#: templates/layouts/base.html:131
+msgid "Advertencia"
+msgstr ""
+
+#: templates/layouts/base.html:149
+msgid "Sin alertas de advertencia"
+msgstr ""
+
 #: templates/layouts/email.html:27
 msgid "This email was sent by the center (COES)."
 msgstr "Este correo ha sido enviado por el centro (COES)."
@@ -1864,41 +2227,154 @@ msgstr "Mi Perfil"
 msgid "Logout"
 msgstr "Cerrar Sesión"
 
-#: templates/partials/sidebar/_sidebar.html:14
+#: templates/partials/sidebar/_sidebar.html:27
 msgid "Inventory"
 msgstr "Inventario"
 
-#: templates/partials/sidebar/_sidebar.html:23
+#: templates/partials/sidebar/_sidebar.html:39
 msgid "Kardex"
 msgstr "Kardex"
 
-#: templates/partials/sidebar/_sidebar.html:33
+#: templates/partials/sidebar/_sidebar.html:52
 msgid "Operations"
 msgstr "Operaciones"
 
-#: templates/partials/sidebar/_sidebar.html:37
-msgid "Inbound Orders"
-msgstr "Órdenes de compra"
-
-#: templates/partials/sidebar/_sidebar.html:52
+#: templates/partials/sidebar/_sidebar.html:76
 msgid "Reports"
 msgstr "Informes"
 
-#: templates/partials/sidebar/_sidebar.html:56
+#: templates/partials/sidebar/_sidebar.html:80
 msgid "Stock Reports"
 msgstr ""
 
-#: templates/partials/sidebar/_sidebar.html:61
+#: templates/partials/sidebar/_sidebar.html:85
 msgid "Operational Reports"
 msgstr "Informes operativos"
 
-#: templates/partials/sidebar/_sidebar.html:66
+#: templates/partials/sidebar/_sidebar.html:90
 msgid "Administration"
 msgstr "Administración"
 
-#: templates/partials/sidebar/_sidebar.html:75
+#: templates/partials/sidebar/_sidebar.html:99
 msgid "Admin Site"
 msgstr "Sitio de administración"
+
+#, fuzzy
+#~| msgid "Order number"
+#~ msgid "order_number"
+#~ msgstr "Número de orden"
+
+#~ msgid "Code can only contain letters, numbers and underscores"
+#~ msgstr "El código solo puede contener letras, números y guiones bajos"
+
+#~ msgid "Name cannot be empty or only whitespace"
+#~ msgstr "El nombre no puede estar vacío ni contener solo espacios"
+
+#~ msgid "Priority must be between 1 and 100000"
+#~ msgstr "La prioridad debe estar entre 1 y 100000"
+
+#~ msgid "Code can only contain uppercase letters, numbers and underscores"
+#~ msgstr ""
+#~ "El código solo puede contener letras mayúsculas, números y guiones bajos"
+
+#~ msgid "Priority must be between 1 and 10000"
+#~ msgstr "La prioridad debe estar entre 1 y 10000"
+
+#~ msgid "Cannot modify existing movements"
+#~ msgstr "No se pueden modificar los movimientos existentes"
+
+#~ msgid "batchs"
+#~ msgstr "lotes"
+
+#~ msgid "Stock OK"
+#~ msgstr "Stock ok"
+
+#~ msgid "Expiring Batches"
+#~ msgstr "Lotes  por caducar"
+
+#~ msgid "Order Information"
+#~ msgstr "Información sobre el pedido"
+
+#~ msgid "Delivery Information"
+#~ msgstr "Información sobre envíos"
+
+#~ msgid "Additional Information"
+#~ msgstr "Información adicional"
+
+#~ msgid "Total Amount"
+#~ msgstr "Importe total"
+
+#~ msgid "Financial Information"
+#~ msgstr "Información financiera"
+
+#~ msgid "Items Dispatched"
+#~ msgstr "Insumos despachados"
+
+#, fuzzy
+#~| msgid "Mark selected items as active"
+#~ msgid "Mark selected orders as cancelled"
+#~ msgstr "Marcar elementos seleccionados como activos"
+
+#~ msgid "Dispatch Progress"
+#~ msgstr "Progreso del pedido"
+
+#~ msgid "Estimated delivery"
+#~ msgstr "Entrega estimada"
+
+#~ msgid "Actual delivery"
+#~ msgstr "Entrega real"
+
+#~ msgid "Purchase Order"
+#~ msgstr "Orden de Compra"
+
+#~ msgid "Exit Order"
+#~ msgstr "Orden de salida"
+
+#~ msgid "Exit Orders"
+#~ msgstr "Órdenes de salida"
+
+#~ msgid "Quantity dispatched"
+#~ msgstr "Cantidad despachada"
+
+#~ msgid "items"
+#~ msgstr "items"
+
+#~ msgid "supply"
+#~ msgstr "insumo"
+
+#~ msgid "The current password is incorrect."
+#~ msgstr "La contraseña actual es incorrecta."
+
+#~ msgid "Email verification"
+#~ msgstr "Verificación de correo"
+
+#~ msgid "Password reset"
+#~ msgstr "Restablecer contraseña"
+
+#~ msgid "Used"
+#~ msgstr "Usado"
+
+#~ msgid "Token"
+#~ msgstr "Token"
+
+#~ msgid "Token type"
+#~ msgstr "Tipo de token"
+
+#~ msgid "Expires at"
+#~ msgstr "Expira el"
+
+#~ msgid "Used at"
+#~ msgstr "Usado el"
+
+#~ msgid "User token"
+#~ msgstr "Token de usuario"
+
+#~ msgid "User tokens"
+#~ msgstr "Tokens de usuario"
+
+#, python-format
+#~ msgid "Token is no longer valid: %(status)s"
+#~ msgstr "El token ya no es válido: %(status)s"
 
 #~ msgid "Purchase unit cost"
 #~ msgstr "Costo unitario de compra"
@@ -1917,9 +2393,6 @@ msgstr "Sitio de administración"
 
 #~ msgid "Tax id"
 #~ msgstr "RUC"
-
-#~ msgid "Order detail"
-#~ msgstr "Detalle de orden"
 
 #~ msgid "Update Supplier"
 #~ msgstr "Actualizar Proveedor"
@@ -1945,6 +2418,3 @@ msgstr "Sitio de administración"
 
 #~ msgid "New user"
 #~ msgstr "Nuevo usuario"
-
-#~ msgid "user"
-#~ msgstr "usuario"

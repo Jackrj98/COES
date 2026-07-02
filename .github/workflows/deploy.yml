@@ -1,8 +1,8 @@
 name: Deploy to Digital Ocean
 
 on:
-  push:
-    branches: [ main ]
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -17,6 +17,9 @@ jobs:
 
       - name: Set lowercase owner
         run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Set release version
+        run: echo "RELEASE_VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -33,6 +36,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/coes-web:latest
+            ghcr.io/${{ env.OWNER_LC }}/coes-web:${{ env.RELEASE_VERSION }}
             ghcr.io/${{ env.OWNER_LC }}/coes-web:${{ github.sha }}
 
       - name: Deploy to Droplet via SSH
@@ -41,18 +45,19 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: GHCR_TOKEN,GHCR_ACTOR
+          envs: GHCR_TOKEN,GHCR_ACTOR,RELEASE_VERSION
           script: |
             cd ~/COES
             cat <<EOF > .env
             # Application settings
             ENV=production
+            RELEASE_VERSION=$RELEASE_VERSION
             DOMAIN=${{ secrets.DOMAIN }}
             ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
             SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
             CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}
             DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}
-            
+
             # Database settings
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
@@ -61,7 +66,7 @@ jobs:
             DB_ENGINE=${{ secrets.DB_ENGINE }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_VOLUME_PATH=${{ secrets.DB_VOLUME_PATH }}
-            
+
             # Email settings
             EMAIL_PORT=${{ secrets.EMAIL_PORT }}
             EMAIL_HOST=${{ secrets.EMAIL_HOST }}
@@ -72,13 +77,13 @@ jobs:
             DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}
             EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
             CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
-            
+
             # Redis settings
             REDIS_HOST=${{ secrets.REDIS_HOST }}
             REDIS_PORT=${{ secrets.REDIS_PORT }}
             REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             REDIS_PORT_HOST=${{ secrets.REDIS_PORT_HOST }}
-            
+
             # Security settings
             CSRF_COOKIE_SECURE=${{ secrets.CSRF_COOKIE_SECURE }}
             SECURE_SSL_REDIRECT=${{ secrets.SECURE_SSL_REDIRECT }}
@@ -89,13 +94,20 @@ jobs:
             CSRF_COOKIE_HTTPONLY=${{ secrets.CSRF_COOKIE_HTTPONLY }}
             SESSION_COOKIE_HTTPONLY=${{ secrets.SESSION_COOKIE_HTTPONLY }}
             EOF
-            
-            git pull origin main
+
+            git fetch --tags
+            git checkout $RELEASE_VERSION
+
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
+
+            export IMAGE_TAG=$RELEASE_VERSION
             docker compose -f docker-compose.yml pull
-            make docker-prod-up
+            docker compose -f docker-compose.yml up -d --remove-orphans
             docker image prune -f
+
+            echo "Deployed with release: $RELEASE_VERSION"
             docker compose -f docker-compose.yml ps
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_ACTOR: ${{ github.actor }}
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}

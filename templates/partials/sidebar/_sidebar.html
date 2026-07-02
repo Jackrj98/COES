@@ -73,8 +73,8 @@
                     </li>
                 {% endif %}
 
-                <li class="sidebar-title">{% trans 'Reports'|capfirst %}</li>
-                {% if request.user|has_group:"administrator,specialist" %}
+                {% if request.user|has_group:"develop" %}
+                    <li class="sidebar-title">{% trans 'Reports'|capfirst %}</li>
                     <li class="sidebar-item">
                         <a href="#" class='sidebar-link'>
                             <i class="bi bi-graph-up"></i> <span>{% trans 'Stock Reports'|capfirst %}</span>
