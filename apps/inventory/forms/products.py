@@ -92,6 +92,18 @@ class SupplyBaseForm(forms.ModelForm):
             f"{obj.name} ({obj.extra})" if obj.extra else obj.name
         )
 
+    def clean_barcode(self):
+        barcode = self.cleaned_data.get("barcode")
+
+        if not barcode:
+            raise forms.ValidationError(_("Barcode is required."))
+
+        barcode = barcode.strip()
+        if len(barcode) < 5:
+            raise forms.ValidationError(_("Barcode must be at least 5 characters."))
+
+        return barcode
+
     def get_service_payload(self):
         data = self.cleaned_data.copy()
 
