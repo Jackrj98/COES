@@ -2,7 +2,7 @@ name: Deploy to Digital Ocean
 
 on:
   release:
-    types: [published]
+    types: [ published ]
 
 permissions:
   contents: read
@@ -95,15 +95,19 @@ jobs:
             SESSION_COOKIE_HTTPONLY=${{ secrets.SESSION_COOKIE_HTTPONLY }}
             EOF
             
-            # Login a GHCR
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-            docker pull ghcr.io/$GHCR_ACTOR/coes-web:$RELEASE_VERSION
+
+            docker pull ghcr.io/$OWNER_LC/coes-web:$RELEASE_VERSION  
+            
             export IMAGE_TAG=$RELEASE_VERSION
+            export OWNER_LC=$OWNER_LC
+            
             docker compose -f docker-compose.yml up -d --remove-orphans --pull always
-            docker image prune -f      
+            docker image prune -f
             echo "Deployed: $RELEASE_VERSION"
             docker compose -f docker-compose.yml ps
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_ACTOR: ${{ github.actor }}
+          OWNER_LC: ${{ env.OWNER_LC }}
           RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
