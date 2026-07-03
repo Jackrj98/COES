@@ -213,6 +213,8 @@ class InboundOrderService:
                     "quantity_fulfilled": qty,
                     "unit_cost": detail["unit_cost"],
                     "observations": detail.get("observations", ""),
+                    "is_active": True,
+                    "status": Batch.BatchStatus.ACTIVE,
                 },
             )
             processed_detail_ids.append(order_detail.id)
@@ -253,6 +255,7 @@ class InboundOrderService:
             detail.quantity_fulfilled = detail.quantity_requested
             detail.batch.current_quantity = detail.quantity_fulfilled
             detail.batch.status = Batch.BatchStatus.ACTIVE
+            detail.is_active = True
             detail.batch.save()
             detail.save()
             batch = detail.batch
