@@ -139,7 +139,7 @@ class InboundOrderService:
         )
 
     @staticmethod
-    def _build_movement(batch, order_id, movement_type, concept=None, quantity=None):
+    def _build_movement(batch, order_id, movement_type, created_by, concept=None, quantity=None):
         qty = quantity if quantity is not None else batch.current_quantity
 
         InventoryMovementAppService().register_movement(
@@ -156,11 +156,12 @@ class InboundOrderService:
                 "after_stock": batch.current_quantity,
                 "unit_cost_at_movement": batch.unit_cost,
                 "status": InventoryMovement.MovementStatusChoices.COMPLETED,
+                "created_by": created_by,
             }
         )
 
     @staticmethod
-    def _build_movements(batch):
+    def _build_movements(batch, created_by):
         InventoryMovementAppService().register_movement(
             payload={
                 "batch_id": batch.id,
@@ -176,6 +177,7 @@ class InboundOrderService:
                 "after_stock": batch.initial_quantity,
                 "unit_cost_at_movement": batch.unit_cost,
                 "status": InventoryMovement.MovementStatusChoices.COMPLETED,
+                "created_by": created_by or "system",
             }
         )
 
@@ -200,6 +202,7 @@ class InboundOrderService:
                     movement_type=InventoryMovement.Type.INBOUND,
                     concept=_("Initial stock entry"),
                     quantity=qty,
+                    created_by=inventory_order.created_by,
                 )
             # 2. Update/Create OrderDetail
             order_detail, create = inventory_order.details.update_or_create(
@@ -259,6 +262,7 @@ class InboundOrderService:
                 movement_type=InventoryMovement.Type.INBOUND,
                 concept=str(_("Initial stock entry")),
                 quantity=batch.current_quantity,
+                created_by=inventory_order.created_by,
             )
         return inventory_order
 

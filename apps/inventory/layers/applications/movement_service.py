@@ -86,6 +86,7 @@ class InventoryMovementAppService(BaseAppService):
                 .set_stock_data(payload.get("previous_stock"), payload.get("after_stock"))
                 .set_unit_cost(payload.get("unit_cost_at_movement"))
                 .set_status(payload.get("status"))
+                .set_created_by(payload.get("created_by", "system"))
                 .save()
                 .build()
             )

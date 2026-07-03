@@ -9,13 +9,14 @@ from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.styles.numbers import FORMAT_NUMBER_COMMA_SEPARATED1
 
 from apps.inventory.models import InventoryMovement
 
 HEADERS = [
     "Fecha",
     "Tipo Movimiento",
-    "Producto",
+    "Insumo",
     "Lote",
     "Concepto",
     "Entrada",
@@ -24,7 +25,7 @@ HEADERS = [
     "Estado",
     "Creado por",
     "Costo Unitario",
-    "N° Orden",
+    "N° Orden",  # Corregido: N° Orden
 ]
 
 
@@ -74,65 +75,111 @@ class ExcelExportService:
             cell.border = thin_border
 
     def _add_data(self):
+        # Definir formatos de números
+        number_format = FORMAT_NUMBER_COMMA_SEPARATED1
+
         for row_idx, item in enumerate(self.report_data["data"], 2):
-            entrada = item.get("quantity") if item.get("is_increment") else 0
-            salida = item.get("quantity") if not item.get("is_increment") else 0
+            # Determinar entrada y salida
+            is_increment = item.get("is_increment", False)
+            quantity = item.get("quantity", 0)
+            entrada = quantity if is_increment else 0
+            salida = quantity if not is_increment else 0
+            balance = item.get("after_stock", 0)
 
-            self.ws.cell(row=row_idx, column=1, value=str(item.get("created_at", "")))
-            self.ws.cell(row=row_idx, column=2, value=item.get("movement_type", ""))
-            self.ws.cell(row=row_idx, column=3, value=item.get("product_name", ""))
-            self.ws.cell(row=row_idx, column=4, value=item.get("batch_number", ""))
-            self.ws.cell(row=row_idx, column=5, value=item.get("concept", ""))
+            # Obtener fecha formateada
+            created_at = item.get("created_at", "")
+            if hasattr(created_at, "strftime"):
+                fecha = created_at.strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                fecha = str(created_at)
 
-            # Formato de celdas numéricas
-            self.ws.cell(row=row_idx, column=6, value=entrada).font = (
-                Font(color="27AE60") if entrada > 0 else Font()
+            # Mapeo de columnas (12 columnas en total)
+            data = [
+                fecha,  # Columna 1: Fecha
+                item.get("movement_type", ""),  # Columna 2: Tipo Movimiento
+                item.get("product_name", ""),  # Columna 3: Insumo
+                item.get("batch_number", ""),  # Columna 4: Lote
+                item.get("concept", ""),  # Columna 5: Concepto
+                entrada,  # Columna 6: Entrada
+                salida,  # Columna 7: Salida
+                balance,  # Columna 8: Balance
+                item.get("status", ""),  # Columna 9: Estado
+                item.get("created_by", "system"),  # Columna 10: Creado por
+                float(item.get("unit_cost", 0)),  # Columna 11: Costo Unitario
+                item.get("order_number", ""),  # Columna 12: N° Orden
+            ]
+
+            # Escribir datos en la fila
+            for col, value in enumerate(data, 1):
+                cell = self.ws.cell(row=row_idx, column=col, value=value)
+
+                # Aplicar formato a números
+                if col in [6, 7, 8, 11]:  # Entrada, Salida, Balance, Costo Unitario
+                    cell.number_format = number_format
+
+                # Colores para entrada y salida
+                if col == 6 and entrada > 0:  # Entrada (verde)
+                    cell.font = Font(color="27AE60")
+                if col == 7 and salida > 0:  # Salida (rojo)
+                    cell.font = Font(color="E74C3C")
+
+            # Aplicar bordes a toda la fila
+            thin_border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin"),
             )
-            self.ws.cell(row=row_idx, column=7, value=salida).font = (
-                Font(color="E74C3C") if salida > 0 else Font()
-            )
-
-            self.ws.cell(row=row_idx, column=9, value=item.get("after_stock", 0))
-            self.ws.cell(row=row_idx, column=10, value=item.get("status", ""))
-            self.ws.cell(row=row_idx, column=11, value=item.get("created_by", "system"))
-            self.ws.cell(row=row_idx, column=12, value=float(item.get("unit_cost", 0)))
-            self.ws.cell(row=row_idx, column=13, value=item.get("order_number", ""))
+            for col in range(1, len(HEADERS) + 1):
+                self.ws.cell(row=row_idx, column=col).border = thin_border
 
     def _add_summary(self):
+        if not self.report_data["data"]:
+            return
+
         summary_row = len(self.report_data["data"]) + 3
         summary = self.report_data["summary"]
 
+        # Encabezado del resumen
         self.ws.merge_cells(f"A{summary_row}:E{summary_row}")
         cell = self.ws.cell(row=summary_row, column=1, value="RESUMEN DEL PERÍODO")
-        cell.font = Font(bold=True, color="FFFFFF")
+        cell.font = Font(bold=True, color="FFFFFF", size=12)
         cell.fill = PatternFill(start_color="2C3E50", end_color="2C3E50", fill_type="solid")
+        cell.alignment = Alignment(horizontal="center", vertical="center")
 
-        # Totales en columnas específicas
+        # Métricas del resumen
         metrics = [
-            (6, f"Entradas: {summary['total_entries']}"),
-            (7, f"Salidas: {summary['total_exits']}"),
-            (9, f"Balance Neto: {summary['net_balance']}"),
+            (6, f"Entradas: {summary.get('total_entries', 0)}"),
+            (7, f"Salidas: {summary.get('total_exits', 0)}"),
+            (8, f"Balance Final: {summary.get('net_balance', 0)}"),
+            (10, f"Total Movimientos: {summary.get('total_movements', 0)}"),
         ]
+
         for col, text in metrics:
-            self.ws.cell(row=summary_row, column=col, value=text).font = Font(bold=True)
+            cell = self.ws.cell(row=summary_row, column=col, value=text)
+            cell.font = Font(bold=True, size=11)
+            cell.alignment = Alignment(horizontal="left", vertical="center")
 
     def _adjust_column_widths(self):
         widths = {
-            "A": 18,
-            "B": 18,
-            "C": 30,
-            "D": 15,
-            "E": 30,
-            "F": 12,
-            "G": 12,
-            "H": 15,
-            "I": 12,
-            "J": 15,
-            "K": 15,
-            "L": 15,
+            "A": 20,  # Fecha
+            "B": 18,  # Tipo Movimiento
+            "C": 35,  # Insumo
+            "D": 15,  # Lote
+            "E": 35,  # Concepto
+            "F": 14,  # Entrada
+            "G": 14,  # Salida
+            "H": 14,  # Balance
+            "I": 15,  # Estado
+            "J": 18,  # Creado por
+            "K": 18,  # Costo Unitario
+            "L": 15,  # N° Orden
         }
         for col, width in widths.items():
             self.ws.column_dimensions[col].width = width
+
+        # Ajustar altura de la fila de encabezados
+        self.ws.row_dimensions[1].height = 25
 
 
 class CSVExportService:
@@ -169,7 +216,6 @@ class CSVExportService:
                 ]
             )
 
-        # Resumen CSV
         writer.writerow([])
         s = self.report_data["summary"]
         writer.writerow(

@@ -60,6 +60,10 @@ class InventoryMovementBuilder:
             self.movement.movement_date = datetime.strptime(movement_date, "%Y-%m-%d").date()
         return self
 
+    def set_created_by(self, created_by):
+        self.movement.created_by = created_by
+        return self
+
     def save(self) -> "InventoryMovementBuilder":
         self.movement.save()
         return self
