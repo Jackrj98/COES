@@ -121,6 +121,8 @@ class BatchAppService(BaseAppService):
 
         if payload["current_quantity"] == 0:
             payload["status"] = self.model.BatchStatus.DEPLETED.value
+
+        payload["initial_quantity"] = payload["current_quantity"] or 0
         return self.save_batch(payload, instance=instance)
 
     @staticmethod
