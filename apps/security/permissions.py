@@ -8,7 +8,6 @@ GROUP_NAMES = {
 }
 
 ALL_GROUP_NAMES = list(GROUP_NAMES.values())
-
 ROLES = {
     "administrator": {
         "name": _("administrator"),
@@ -59,8 +58,14 @@ ROLES = {
                     "add_inventoryorder",
                     "change_inventoryorder",
                     "view_inventoryorder",
-                    "view_inbound_orders",
+                    "add_outboundorder",
+                    "change_outboundorder",
+                    "view_outboundorder",
                     "view_outbound_orders",
+                    "add_inboundorder",
+                    "change_inboundorder",
+                    "view_inboundorder",
+                    "view_inbound_orders",
                     "view_replenishment_orders",
                 ]
             },
@@ -103,9 +108,6 @@ ROLES = {
             },
             "operations": {
                 "details": [
-                    "add_exitorder",
-                    "change_exitorder",
-                    "view_exitorder",
                     "add_supplier",
                     "change_supplier",
                     "view_supplier",
@@ -113,8 +115,14 @@ ROLES = {
                     "add_inventoryorder",
                     "change_inventoryorder",
                     "view_inventoryorder",
-                    "view_inbound_orders",
+                    "add_outboundorder",
+                    "change_outboundorder",
+                    "view_outboundorder",
                     "view_outbound_orders",
+                    "add_inboundorder",
+                    "change_inboundorder",
+                    "view_inboundorder",
+                    "view_inbound_orders",
                     "view_replenishment_orders",
                 ]
             },

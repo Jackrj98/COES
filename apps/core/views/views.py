@@ -17,7 +17,7 @@ from apps.inventory.models import Batch, InventoryMovement, Supply
 
 class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "layouts/base.html"
-    extra_context = {"title": "Home"}
+    extra_context = {"title": _("Home")}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

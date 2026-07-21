@@ -55,6 +55,10 @@ class UserBuilder:
         self._pending_groups = group_names
         return self
 
+    def set_raw_pasword(self, password):
+        self.user.password = password
+        return self
+
     def build(self):
         # self.user.full_clean()
         if self.user.pk is None:

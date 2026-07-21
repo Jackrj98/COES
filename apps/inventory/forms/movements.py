@@ -94,12 +94,6 @@ class InventoryMovementFilterForm(BaseFilterForm, BaseFormHelperMixin):
         choices=[("", _("All"))] + list(InventoryMovement.Type.choices),
         widget=forms.Select(attrs={"class": "form-select"}),
     )
-    status = forms.ChoiceField(
-        label=_("Status"),
-        required=False,
-        choices=[("", _("All"))] + list(InventoryMovement.MovementStatusChoices.choices),
-        widget=forms.Select(attrs={"class": "form-select"}),
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

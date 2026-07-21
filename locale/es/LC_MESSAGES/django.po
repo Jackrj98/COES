@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-01 22:42-0500\n"
-"PO-Revision-Date: 2026-07-01 22:43-0500\n"
+"POT-Creation-Date: 2026-07-20 23:03-0500\n"
+"PO-Revision-Date: 2026-07-20 23:08-0500\n"
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -40,12 +40,11 @@ msgid "Basic Information"
 msgstr "Información Básica"
 
 #: apps/catalogs/admin.py:53 apps/catalogs/admin.py:138
-#: apps/core/forms/base.py:46 apps/inventory/forms/movements.py:98
-#: apps/inventory/forms/products.py:286 apps/inventory/models/movements.py:23
-#: apps/inventory/models/products.py:132 apps/operations/forms/inbound.py:207
-#: apps/operations/forms/supplier.py:11
+#: apps/core/forms/base.py:46 apps/inventory/forms/products.py:286
+#: apps/inventory/models/movements.py:23 apps/inventory/models/products.py:132
+#: apps/operations/forms/inbound.py:207 apps/operations/forms/supplier.py:11
 #: apps/operations/models/inventory_order.py:72 apps/security/forms/user.py:13
-#: apps/security/models/users.py:113
+#: apps/security/models/users.py:112
 msgid "Status"
 msgstr "Estado"
 
@@ -195,7 +194,7 @@ msgstr "Limpiar filtros"
 
 #: apps/catalogs/templates/catalogs/datatable.html:49
 #: apps/catalogs/templates/catalogs/items/datatable.html:53
-#: apps/inventory/templates/movements/datatable2.html:90
+#: apps/inventory/templates/movements/datatable2.html:87
 #: apps/inventory/templates/movements/detail.html:147
 #: apps/inventory/templates/supplies/datatable.html:77
 #: apps/inventory/templates/supplies/detail.html:162
@@ -405,12 +404,12 @@ msgid "Select date"
 msgstr "Seleccionar fecha"
 
 #: apps/core/forms/base.py:48 apps/core/models.py:23
-#: apps/security/models/users.py:82
+#: apps/security/models/users.py:81
 msgid "Enabled"
 msgstr "Habilitado"
 
 #: apps/core/forms/base.py:48 apps/core/models.py:22
-#: apps/security/models/users.py:83
+#: apps/security/models/users.py:82
 msgid "Disabled"
 msgstr "Deshabilitado"
 
@@ -471,6 +470,10 @@ msgstr "Creado por"
 #: apps/core/models.py:47
 msgid "Updated by"
 msgstr "Actualizado por"
+
+#: apps/core/views/views.py:20
+msgid "Home"
+msgstr "Inicio"
 
 #: apps/core/views/views.py:95
 #, python-format
@@ -612,16 +615,16 @@ msgid "Batch"
 msgstr "Lote"
 
 #: apps/inventory/forms/movements.py:92 apps/inventory/models/movements.py:19
-#: apps/security/models/notications.py:30
+#: apps/security/models/notications.py:18
 msgid "Type"
 msgstr "Tipo"
 
-#: apps/inventory/forms/movements.py:94 apps/inventory/forms/movements.py:100
-#: apps/inventory/forms/products.py:288 apps/inventory/forms/products.py:294
+#: apps/inventory/forms/movements.py:94 apps/inventory/forms/products.py:288
+#: apps/inventory/forms/products.py:294
 msgid "All"
 msgstr "Todos"
 
-#: apps/inventory/forms/movements.py:106
+#: apps/inventory/forms/movements.py:100
 msgid "Search by item, batch, or supply"
 msgstr "Buscar por artículo, lote o proveedor"
 
@@ -868,7 +871,7 @@ msgid "Supplies to be moved"
 msgstr "Insumos que se trasladarán"
 
 #: apps/inventory/templates/movements/datatable.html:83
-#: apps/inventory/templates/movements/datatable2.html:84
+#: apps/inventory/templates/movements/datatable2.html:81
 msgid "supply / batch"
 msgstr "insumo / lote"
 
@@ -877,7 +880,7 @@ msgid "stock"
 msgstr "stock"
 
 #: apps/inventory/templates/movements/datatable.html:88
-#: apps/inventory/templates/movements/datatable2.html:82
+#: apps/inventory/templates/movements/datatable2.html:79
 msgid "date"
 msgstr "fecha"
 
@@ -889,23 +892,23 @@ msgstr "Exportar a Excel"
 msgid "Export to CSV"
 msgstr "Exportar a CSV"
 
-#: apps/inventory/templates/movements/datatable2.html:86
+#: apps/inventory/templates/movements/datatable2.html:83
 msgid "inflow"
 msgstr "entrada"
 
-#: apps/inventory/templates/movements/datatable2.html:87
+#: apps/inventory/templates/movements/datatable2.html:84
 msgid "outflow"
 msgstr "salida"
 
-#: apps/inventory/templates/movements/datatable2.html:88
+#: apps/inventory/templates/movements/datatable2.html:85
 msgid "balance"
 msgstr "saldo"
 
-#: apps/inventory/templates/movements/datatable2.html:89
+#: apps/inventory/templates/movements/datatable2.html:86
 msgid "reference"
 msgstr "referencia"
 
-#: apps/inventory/templates/movements/datatable2.html:91
+#: apps/inventory/templates/movements/datatable2.html:88
 msgid "user"
 msgstr "usuario"
 
@@ -1051,14 +1054,14 @@ msgid "Cancelled"
 msgstr "Cancelado"
 
 #: apps/inventory/views/batches.py:162
-#: apps/operations/layers/applications/inbound_service.py:168
-#: apps/operations/layers/applications/inbound_service.py:201
-#: apps/operations/layers/applications/inbound_service.py:260
+#: apps/operations/layers/applications/inbound_service.py:169
+#: apps/operations/layers/applications/inbound_service.py:203
+#: apps/operations/layers/applications/inbound_service.py:266
 msgid "Initial stock entry"
 msgstr "Registro inicial de existencias"
 
 #: apps/inventory/views/batches.py:165
-#: apps/operations/layers/applications/inbound_service.py:171
+#: apps/operations/layers/applications/inbound_service.py:172
 #, python-brace-format
 msgid "Batch creation with initial quantity: {quantity}"
 msgstr "Creación por lotes con cantidad inicial: {quantity}"
@@ -1345,7 +1348,7 @@ msgstr "El lote debe pertenecer al mismo insumo que los datos del pedido."
 msgid "Business name"
 msgstr "Razón social"
 
-#: apps/operations/models/supplier.py:16 apps/security/models/users.py:103
+#: apps/operations/models/supplier.py:16 apps/security/models/users.py:102
 msgid "Email address"
 msgstr "Correo electrónico"
 
@@ -1399,16 +1402,12 @@ msgstr "Lote asignado"
 #: apps/operations/templates/inbound/detail.html:175
 #: apps/operations/templates/outbound/detail.html:111
 #: apps/operations/templates/outbound/detail.html:145
-#, fuzzy
-#| msgid "Quantity requested"
 msgid "Qty requested"
 msgstr "Cantidad solicitada"
 
 #: apps/operations/templates/inbound/detail.html:140
 #: apps/operations/templates/inbound/detail.html:177
 #: apps/operations/templates/outbound/detail.html:147
-#, fuzzy
-#| msgid "Quantity received"
 msgid "Qty received"
 msgstr "Cantidad recibida"
 
@@ -1626,7 +1625,7 @@ msgstr "Nombre Completo"
 msgid "Username or email"
 msgstr "Usuario o correo electrónico"
 
-#: apps/security/forms/auth.py:11 apps/security/models/users.py:105
+#: apps/security/forms/auth.py:11 apps/security/models/users.py:104
 msgid "Username"
 msgstr "Nombre de usuario"
 
@@ -1698,115 +1697,115 @@ msgstr "El superusuario debe tener is_staff=True."
 msgid "Superuser must have is_superuser=True."
 msgstr "El superusuario debe tener is_superuser=True."
 
-#: apps/security/models/notications.py:25
+#: apps/security/models/notications.py:14
 msgid "Alert"
 msgstr "Alerta"
 
-#: apps/security/models/notications.py:26
-#: apps/security/models/notications.py:41
+#: apps/security/models/notications.py:15
+#: apps/security/models/notications.py:28
 msgid "Notification"
 msgstr "Notificación"
 
-#: apps/security/models/notications.py:28
+#: apps/security/models/notications.py:17
 msgid "Subject"
 msgstr "Asunto"
 
-#: apps/security/models/notications.py:32
+#: apps/security/models/notications.py:19
 msgid "Message"
 msgstr "Mensaje"
 
-#: apps/security/models/notications.py:35
+#: apps/security/models/notications.py:22
 msgid "Reference URL"
 msgstr ""
 
-#: apps/security/models/notications.py:36
+#: apps/security/models/notications.py:23
 #, fuzzy
 #| msgid "Email"
 msgid "Send Email"
 msgstr "Correo electrónico"
 
-#: apps/security/models/notications.py:37
+#: apps/security/models/notications.py:24
 msgid "Email Sent Date"
 msgstr ""
 
-#: apps/security/models/notications.py:42
+#: apps/security/models/notications.py:29
 #, fuzzy
 #| msgid "Identification"
 msgid "Notifications"
 msgstr "Identificación"
 
-#: apps/security/models/users.py:27
+#: apps/security/models/users.py:26
 msgid "First name"
 msgstr "Nombres"
 
-#: apps/security/models/users.py:30
+#: apps/security/models/users.py:29
 msgid "Last name"
 msgstr "Apellidos"
 
-#: apps/security/models/users.py:35
+#: apps/security/models/users.py:34
 msgid "Document number"
 msgstr "Número de documento"
 
-#: apps/security/models/users.py:42
+#: apps/security/models/users.py:41
 msgid "Phone number"
 msgstr "Teléfono"
 
-#: apps/security/models/users.py:46
+#: apps/security/models/users.py:45
 msgid "Person"
 msgstr "Persona"
 
-#: apps/security/models/users.py:48
+#: apps/security/models/users.py:47
 msgid "People"
 msgstr "Personas"
 
-#: apps/security/models/users.py:84
+#: apps/security/models/users.py:83
 msgid "Locked"
 msgstr "Bloqueado"
 
-#: apps/security/models/users.py:109
+#: apps/security/models/users.py:108
 msgid "Email verified"
 msgstr "Correo verificado"
 
-#: apps/security/models/users.py:110
+#: apps/security/models/users.py:109
 msgid "Force password change"
 msgstr "Forzar cambio de contraseña"
 
-#: apps/security/models/users.py:111
+#: apps/security/models/users.py:110
 msgid "Last password change"
 msgstr "Último cambio de contraseña"
 
-#: apps/security/models/users.py:114
+#: apps/security/models/users.py:113
 msgid "Failed login attempts"
 msgstr "Intentos de inicio de sesión fallidos"
 
-#: apps/security/models/users.py:115
+#: apps/security/models/users.py:114
 msgid "Locked at"
 msgstr "Bloqueado el"
 
-#: apps/security/models/users.py:129
+#: apps/security/models/users.py:128
 msgid "User"
 msgstr "Usuario"
 
-#: apps/security/models/users.py:130
+#: apps/security/models/users.py:129
 #: templates/partials/sidebar/_sidebar.html:93
 msgid "Users"
 msgstr "Usuarios"
 
-#: apps/security/models/users.py:145
+#: apps/security/models/users.py:144
 #: apps/security/templates/users/detail.html:73
 msgid "Verified"
 msgstr "Verificado"
 
-#: apps/security/models/users.py:145
+#: apps/security/models/users.py:144
 #: apps/security/templates/users/detail.html:75
 msgid "Not verified"
 msgstr "No verificado"
 
-#: apps/security/permissions.py:14
+#: apps/security/permissions.py:13
 msgid "administrator"
 msgstr "administrador"
 
-#: apps/security/permissions.py:71
+#: apps/security/permissions.py:76
 msgid "specialist"
 msgstr "especialista"
 

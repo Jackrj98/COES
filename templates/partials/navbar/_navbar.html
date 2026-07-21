@@ -11,7 +11,7 @@
                         <ol class="breadcrumb mb-0">
                             <li class="breadcrumb-item">
                                 <a href="{% url 'core:home' %}" class="text-decoration-none">
-                                    <span>Dashboard</span>
+                                    <span>{% trans 'Home'|capfirst %}</span>
                                 </a>
                             </li>
                             {% block breadcrumb %}
@@ -44,9 +44,9 @@
             </div>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ms-auto mb-lg-0">
-                    {% include 'partials/navbar/_notifications.html' %}
-                </ul>
+               <!--<ul class="navbar-nav ms-auto mb-lg-0">
+                    {# include 'partials/navbar/_notifications.html' #}
+                </ul>-->
                 {% include 'partials/navbar/_menu.html' %}
             </div>
         </div>

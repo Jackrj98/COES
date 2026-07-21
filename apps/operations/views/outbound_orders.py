@@ -88,7 +88,7 @@ class OutboundOrderCreateView(CustomCreateView):
     second_form_class = OutboundOrderDetailFormSet
     success_url: str = DEFAULT_LIST_URL
     template_name = "outbound/create_or_update.html"
-    permission_required = "operations.add_outboundorderr"
+    permission_required = "operations.add_outboundorder"
 
     def get_formset(self):
         if self.request.method == "POST":

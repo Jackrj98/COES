@@ -28,7 +28,7 @@ class UserAppService(BaseAppService):
         try:
             from django.contrib.auth.models import Group
 
-            return [(g.name, g.name) for g in Group.objects.all()]
+            return [(g.name, _(g.name).capitalize()) for g in Group.objects.all()]
         except Exception:
             return []
 
@@ -81,7 +81,7 @@ class UserAppService(BaseAppService):
         return (
             builder.set_username(person.document_number)
             .set_email(data.get("email"))
-            .set_password(person.document_number)
+            .set_raw_pasword(person.document_number)
             .set_person(person.id)
             .set_groups(data.get("groups"))
             .build()
