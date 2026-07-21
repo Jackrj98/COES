@@ -45,10 +45,11 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: GHCR_TOKEN,GHCR_ACTOR,RELEASE_VERSION
+          envs: GHCR_TOKEN,GHCR_ACTOR,RELEASE_VERSION,OWNER_LC
           script: |
             cd ~/COES
             cat <<EOF > .env
+            OWNER_LC=$OWNER_LC
             # Application settings
             ENV=production
             RELEASE_VERSION=$RELEASE_VERSION
