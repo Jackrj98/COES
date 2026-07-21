@@ -49,19 +49,16 @@
     {% if filter_form %}
         <form method="GET" id="filter" class="mb-4">
             <div class="row align-items-end g-3">
-                <div class="col-12 col-sm-6 col-md-8 col-lg-4">
+                <div class="col-12 col-sm-6 col-md-8 col-lg-6">
                     {{ filter_form.search|as_crispy_field }}
                 </div>
                 <div class="col-12 col-sm-6 col-md-8 col-lg-3">
                     {{ filter_form.date_from|as_crispy_field }}
                 </div>
-                <div class="col-12 col-sm-6 col-md-8 col-lg-3">
-                    {{ filter_form.movement_type|as_crispy_field }}
-                </div>
-                <div class="col-6 col-sm-6 col-md-4 col-lg-2">
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3">
                     <div class="d-flex align-items-end gap-2">
                         <div class="flex-grow-1">
-                            {{ filter_form.status|as_crispy_field }}
+                            {{ filter_form.movement_type|as_crispy_field }}
                         </div>
                         <div class="mb-3">
                             <button type="button"

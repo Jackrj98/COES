@@ -1,6 +1,6 @@
 # services/report_service.py
-# services/export_service.py
 import csv
+from datetime import datetime
 from typing import Any
 
 import openpyxl
@@ -25,7 +25,7 @@ HEADERS = [
     "Estado",
     "Creado por",
     "Costo Unitario",
-    "N° Orden",  # Corregido: N° Orden
+    "N° Orden",
 ]
 
 
@@ -75,55 +75,44 @@ class ExcelExportService:
             cell.border = thin_border
 
     def _add_data(self):
-        # Definir formatos de números
         number_format = FORMAT_NUMBER_COMMA_SEPARATED1
 
         for row_idx, item in enumerate(self.report_data["data"], 2):
-            # Determinar entrada y salida
             is_increment = item.get("is_increment", False)
             quantity = item.get("quantity", 0)
-            entrada = quantity if is_increment else 0
-            salida = quantity if not is_increment else 0
+            inbound = quantity if is_increment else 0
+            outbound = quantity if not is_increment else 0
             balance = item.get("after_stock", 0)
 
-            # Obtener fecha formateada
-            created_at = item.get("created_at", "")
-            if hasattr(created_at, "strftime"):
-                fecha = created_at.strftime("%Y-%m-%d %H:%M:%S")
-            else:
-                fecha = str(created_at)
+            created_at = item.get("created_at")
+            date_str = datetime.fromisoformat(created_at).strftime("%Y-%m-%d")
 
-            # Mapeo de columnas (12 columnas en total)
             data = [
-                fecha,  # Columna 1: Fecha
-                item.get("movement_type", ""),  # Columna 2: Tipo Movimiento
-                item.get("product_name", ""),  # Columna 3: Insumo
-                item.get("batch_number", ""),  # Columna 4: Lote
-                item.get("concept", ""),  # Columna 5: Concepto
-                entrada,  # Columna 6: Entrada
-                salida,  # Columna 7: Salida
-                balance,  # Columna 8: Balance
-                item.get("status", ""),  # Columna 9: Estado
-                item.get("created_by", "system"),  # Columna 10: Creado por
-                float(item.get("unit_cost", 0)),  # Columna 11: Costo Unitario
-                item.get("order_number", ""),  # Columna 12: N° Orden
+                date_str,
+                item.get("movement_type", ""),
+                item.get("product_name", ""),
+                item.get("batch_number", ""),
+                item.get("concept", ""),
+                inbound,
+                outbound,
+                balance,
+                item.get("status", ""),
+                item.get("created_by", "system"),
+                float(item.get("unit_cost", 0)),
+                item.get("order_number", ""),
             ]
 
-            # Escribir datos en la fila
             for col, value in enumerate(data, 1):
                 cell = self.ws.cell(row=row_idx, column=col, value=value)
 
-                # Aplicar formato a números
-                if col in [6, 7, 8, 11]:  # Entrada, Salida, Balance, Costo Unitario
+                if col in [6, 7, 8, 11]:
                     cell.number_format = number_format
 
-                # Colores para entrada y salida
-                if col == 6 and entrada > 0:  # Entrada (verde)
+                if col == 6 and inbound > 0:
                     cell.font = Font(color="27AE60")
-                if col == 7 and salida > 0:  # Salida (rojo)
+                if col == 7 and outbound > 0:
                     cell.font = Font(color="E74C3C")
 
-            # Aplicar bordes a toda la fila
             thin_border = Border(
                 left=Side(style="thin"),
                 right=Side(style="thin"),
@@ -140,14 +129,12 @@ class ExcelExportService:
         summary_row = len(self.report_data["data"]) + 3
         summary = self.report_data["summary"]
 
-        # Encabezado del resumen
         self.ws.merge_cells(f"A{summary_row}:E{summary_row}")
         cell = self.ws.cell(row=summary_row, column=1, value="RESUMEN DEL PERÍODO")
         cell.font = Font(bold=True, color="FFFFFF", size=12)
         cell.fill = PatternFill(start_color="2C3E50", end_color="2C3E50", fill_type="solid")
         cell.alignment = Alignment(horizontal="center", vertical="center")
 
-        # Métricas del resumen
         metrics = [
             (6, f"Entradas: {summary.get('total_entries', 0)}"),
             (7, f"Salidas: {summary.get('total_exits', 0)}"),
@@ -162,23 +149,22 @@ class ExcelExportService:
 
     def _adjust_column_widths(self):
         widths = {
-            "A": 20,  # Fecha
-            "B": 18,  # Tipo Movimiento
-            "C": 35,  # Insumo
-            "D": 15,  # Lote
-            "E": 35,  # Concepto
-            "F": 14,  # Entrada
-            "G": 14,  # Salida
-            "H": 14,  # Balance
-            "I": 15,  # Estado
-            "J": 18,  # Creado por
-            "K": 18,  # Costo Unitario
-            "L": 15,  # N° Orden
+            "A": 20,
+            "B": 18,
+            "C": 35,
+            "D": 15,
+            "E": 35,
+            "F": 14,
+            "G": 14,
+            "H": 14,
+            "I": 15,
+            "J": 18,
+            "K": 18,
+            "L": 15,
         }
         for col, width in widths.items():
             self.ws.column_dimensions[col].width = width
 
-        # Ajustar altura de la fila de encabezados
         self.ws.row_dimensions[1].height = 25
 
 
@@ -201,7 +187,7 @@ class CSVExportService:
             salida = item.get("quantity") if not item.get("is_increment") else 0
             writer.writerow(
                 [
-                    item.get("created_at"),
+                    item.get("created_at").format("%Y-%m-%d"),
                     item.get("movement_type"),
                     item.get("product_name"),
                     item.get("batch_number"),
@@ -245,8 +231,6 @@ class MovementFilterService:
     @staticmethod
     def _extract_from_post(request: HttpRequest) -> dict[str, Any]:
         filters = {}
-
-        # Mapeo de campos
         field_mapping = {
             "status": "status",
             "movement_type": "movement_type",
@@ -335,7 +319,7 @@ class InventoryReportService:
         return {
             "id": movement.id,
             "external_id": str(movement.external_id),
-            "created_at": movement.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "created_at": movement.created_at.strftime("%Y-%m-%d"),
             "movement_type": movement.get_movement_type_display(),
             "concept": movement.concept,
             "quantity": movement.quantity,
