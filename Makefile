@@ -202,7 +202,7 @@ format:
 # =============================================================================
 dev-up:
 	@printf "${GREEN} Starting development containers...${NC}\n"
-	docker compose -f docker-compose.dev.yml up
+	docker compose -f compose.dev.yml up
 	@printf "${GREEN}Development environment ready${NC}\n"
 	@printf "Web: http://localhost:$(PORT)\n"
 	@printf "Mailhog: http://localhost:8026\n"
@@ -210,24 +210,24 @@ dev-up:
 
 dev-down:
 	@printf "${YELLOW} Stopping development containers...${NC}\n"
-	docker compose -f docker-compose.dev.yml down
+	docker compose -f compose.dev.yml down
 	@printf "${GREEN}Development containers stopped${NC}\n"
 
 dev-logs:
-	docker compose -f docker-compose.dev.yml logs -f
+	docker compose -f compose.dev.yml logs -f
 
 dev-shell:
-	docker compose -f docker-compose.dev.yml exec web bash
+	docker compose -f compose.dev.yml exec web bash
 
 dev-rebuild:
 	@printf "${YELLOW} Rebuilding development containers...${NC}\n"
-	docker compose -f docker-compose.dev.yml up -d --build
+	docker compose -f compose.dev.yml up -d --build
 	@printf "${GREEN}Development containers rebuilt${NC}\n"
 
 dev-rebuild-no-cache:
 	@printf "${YELLOW} Rebuilding development containers (no cache)...${NC}\n"
-	docker compose -f docker-compose.dev.yml build --no-cache
-	docker compose -f docker-compose.dev.yml up -d
+	docker compose -f compose.dev.yml build --no-cache
+	docker compose -f compose.dev.yml up -d
 	@printf "${GREEN} Development containers rebuilt (no cache)${NC}\n"
 
 # =============================================================================
@@ -235,43 +235,43 @@ dev-rebuild-no-cache:
 # =============================================================================
 prod-up:
 	@printf "${GREEN} Starting production containers...${NC}\n"
-	docker compose -f docker-compose.yml up -d
+	docker compose -f compose.yml up -d
 	@printf "${GREEN}Production environment ready${NC}\n"
-	docker compose -f docker-compose.yml ps
+	docker compose -f compose.yml ps
 
 prod-down:
 	@printf "${YELLOW} Stopping production containers...${NC}\n"
-	docker compose -f docker-compose.yml down
+	docker compose -f compose.yml down
 	@printf "${GREEN}Production containers stopped${NC}\n"
 
 prod-logs:
-	docker compose -f docker-compose.yml logs -f
+	docker compose -f compose.yml logs -f
 
 prod-shell:
-	docker compose -f docker-compose.yml exec web bash
+	docker compose -f compose.yml exec web bash
 
 prod-rebuild:
 	@printf "${YELLOW} Rebuilding production containers...${NC}\n"
-	docker compose -f docker-compose.yml up -d --build
+	docker compose -f compose.yml up -d --build
 	@printf "${GREEN}Production containers rebuilt${NC}\n"
 
 # =============================================================================
 # Docker Legacy (Backward Compatibility)
 # =============================================================================
 docker-build:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker compose -f compose.yml -f compose.dev.yml build
 	@echo "This is legacy. Use 'make dev-up' for development"
 
 docker-build-no-cache:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache --pull
+	docker compose -f compose.yml -f compose.dev.yml build --no-cache --pull
 	@echo "This is legacy. Use 'make dev-rebuild' for development"
 
 docker-up:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+	docker compose -f compose.yml -f compose.dev.yml up
 	@echo "This is legacy. Use 'make dev-up' for development"
 
 docker-up-build:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	docker compose -f compose.yml -f compose.dev.yml up --build
 	@echo "This is legacy. Use 'make dev-rebuild' for development"
 
 docker-down:
@@ -283,27 +283,27 @@ docker-logs:
 	@echo "This is legacy. Use 'make dev-logs' for development"
 
 docker-prod-build:
-	docker compose -f docker-compose.yml build
+	docker compose -f compose.yml build
 	@echo "This is legacy. Use 'make prod-rebuild' for production"
 
 docker-prod-build-no-cache:
-	docker compose -f docker-compose.yml build --no-cache
+	docker compose -f compose.yml build --no-cache
 	@echo "This is legacy. Use 'make prod-rebuild' for production"
 
 docker-prod-up:
 	@printf "${GREEN} Starting production containers...${NC}\n"
-	docker compose -f docker-compose.yml up -d --force-recreate --remove-orphans
+	docker compose -f compose.yml up -d --force-recreate --remove-orphans
 	@printf "${GREEN}Production containers started${NC}\n"
-	docker compose -f docker-compose.yml ps
+	docker compose -f compose.yml ps
 
 docker-prod-down:
 	@printf "${YELLOW} Stopping production containers...${NC}\n"
-	docker compose -f docker-compose.yml down
+	docker compose -f compose.yml down
 	@printf "${GREEN}Production containers stopped${NC}\n"
 
 docker-prod-restart:
 	@printf "${YELLOW} Restarting production containers...${NC}\n"
-	docker compose -f docker-compose.yml restart
+	docker compose -f compose.yml restart
 	@printf "${GREEN}Production containers restarted${NC}\n"
 
 # =============================================================================

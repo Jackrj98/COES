@@ -1,21 +1,20 @@
-# ─────────────────────────────────────────
+# =============================================
 # Dockerfile.dev
-# ─────────────────────────────────────────
+# =============================================
 
-# Builder stage
+# ---------- Builder stage ----------
 FROM python:3.11-slim AS builder
 
-ENV APP_HOME=/app/coes
+ENV APP_HOME=/app/coes \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
 
-RUN chmod 1777 /tmp
-
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     build-essential \
     pkg-config \
     libpq-dev \
-    gettext \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR $APP_HOME
@@ -24,22 +23,21 @@ COPY requirements/base.txt requirements/base.txt
 COPY requirements/dev.txt  requirements/dev.txt
 
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements/dev.txt
+    && pip install --no-cache-dir -r requirements/dev.txt gunicorn
 
 COPY . .
 
-# Final stage
+# ---------- Final stage ----------
 FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV APP_HOME=/app/coes
-ENV PATH="/usr/local/bin:${PATH}"
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    APP_HOME=/app/coes
 
-RUN apt-get update && apt-get install -y \
-    libpq-dev make\
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    make \
     gettext \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR $APP_HOME
@@ -48,11 +46,6 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder $APP_HOME $APP_HOME
 
-RUN pip install --no-cache-dir \
-    gunicorn \
-    pydevd-pycharm==251.25410.159
-
-RUN rm -rf /root/.cache/pip
-
 EXPOSE 8005 5679
 
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8005"]
