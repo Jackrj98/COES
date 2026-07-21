@@ -81,6 +81,12 @@ services:
     volumes:
       - ./staticfiles:/app/coes/staticfiles
       - ./media:/app/coes/media
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://http://157.245.135.17/:8000/health/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy
