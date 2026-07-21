@@ -81,11 +81,6 @@ services:
     volumes:
       - ./staticfiles:/app/coes/staticfiles
       - ./media:/app/coes/media
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8000/health/ || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       db:
         condition: service_healthy
