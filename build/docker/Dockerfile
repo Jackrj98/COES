@@ -27,7 +27,6 @@ RUN pip install --upgrade pip \
     && pip install --user --no-cache-dir -r requirements/prod.txt
 
 COPY manage.py ./
-COPY coes/ ./coes/
 COPY apps/ ./apps/
 COPY build/ ./build/
 COPY cfg/ ./cfg/
