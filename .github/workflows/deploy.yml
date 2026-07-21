@@ -103,10 +103,10 @@ jobs:
             export IMAGE_TAG=$RELEASE_VERSION
             export OWNER_LC=$OWNER_LC
             
-            docker compose -f docker-compose.yml up -d --remove-orphans --pull always
+            docker compose -f compose.yml up -d --remove-orphans --pull always
             docker image prune -f
             echo "Deployed: $RELEASE_VERSION"
-            docker compose -f docker-compose.yml ps
+            docker compose -f compose.yml ps
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_ACTOR: ${{ github.actor }}
