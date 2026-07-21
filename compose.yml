@@ -67,7 +67,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./build/docker/Dockerfile
       args:
         - ENV=production
     image: coes-web:latest
@@ -102,7 +102,7 @@ services:
   celery:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./build/docker/Dockerfile
       args:
         - ENV=production
     image: coes-web:latest
@@ -131,7 +131,7 @@ services:
   celery-beat:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./build/docker/Dockerfile
       args:
         - ENV=production
     image: coes-web:latest
