@@ -28,7 +28,7 @@ class UserAppService(BaseAppService):
         try:
             from django.contrib.auth.models import Group
 
-            return [(g.name, g.name) for g in Group.objects.all()]
+            return [(g.name, _(g.name).capitalize()) for g in Group.objects.all()]
         except Exception:
             return []
 
