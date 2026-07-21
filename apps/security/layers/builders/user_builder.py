@@ -58,6 +58,7 @@ class UserBuilder:
     def set_raw_pasword(self, password):
         self.user.password = password
         return self
+
     def build(self):
         # self.user.full_clean()
         if self.user.pk is None:
