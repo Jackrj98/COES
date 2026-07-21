@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: COES Web\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-20 23:03-0500\n"
-"PO-Revision-Date: 2026-07-01 22:43-0500\n"
+"PO-Revision-Date: 2026-07-20 23:08-0500\n"
 "Last-Translator: Steven <12758steven@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es_EC\n"
@@ -472,10 +472,8 @@ msgid "Updated by"
 msgstr "Actualizado por"
 
 #: apps/core/views/views.py:20
-#, fuzzy
-#| msgid "Go Home"
 msgid "Home"
-msgstr "Ir al Inicio"
+msgstr "Inicio"
 
 #: apps/core/views/views.py:95
 #, python-format
@@ -1404,16 +1402,12 @@ msgstr "Lote asignado"
 #: apps/operations/templates/inbound/detail.html:175
 #: apps/operations/templates/outbound/detail.html:111
 #: apps/operations/templates/outbound/detail.html:145
-#, fuzzy
-#| msgid "Quantity requested"
 msgid "Qty requested"
 msgstr "Cantidad solicitada"
 
 #: apps/operations/templates/inbound/detail.html:140
 #: apps/operations/templates/inbound/detail.html:177
 #: apps/operations/templates/outbound/detail.html:147
-#, fuzzy
-#| msgid "Quantity received"
 msgid "Qty received"
 msgstr "Cantidad recibida"
 
