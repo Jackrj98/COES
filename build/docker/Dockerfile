@@ -30,7 +30,7 @@ COPY manage.py ./
 COPY apps/ ./apps/
 COPY build/ ./build/
 COPY cfg/ ./cfg/
-COPY makefile/ ./makefile/
+COPY Makefile/ ./
 COPY locale/ ./locale/
 COPY templates/ ./templates/
 COPY static/ ./static/
