@@ -95,7 +95,7 @@ services:
         max-file: "3"
 
   celery:
-#    image: ghcr.io/${OWNER_LC}/coes-web:${IMAGE_TAG:-latest}
+    image: ghcr.io/${OWNER_LC}/coes-web:${IMAGE_TAG:-latest}
     container_name: coes_celery
     restart: unless-stopped
     command: make celery ENV=production
@@ -119,7 +119,7 @@ services:
         max-file: "3"
 
   celery-beat:
-    #image: ghcr.io/${OWNER_LC}/coes-web:${IMAGE_TAG:-latest}
+    image: ghcr.io/${OWNER_LC}/coes-web:${IMAGE_TAG:-latest}
     container_name: coes_celery_beat
     command: make celery-beat ENV=production
     restart: unless-stopped
