@@ -1,58 +1,64 @@
-# ---------- Builder stage ----------
+# Builder stage
 FROM python:3.11-slim AS builder
 
-ENV APP_HOME=/app/coes \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+# Set environment variables
+ENV APP_HOME=/app/coes
 
-# Dependencias de compilación (solo existen en esta etapa, no llegan a la imagen final)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN chmod 1777 /tmp
+
+# Install system dependencies for PostgreSQL
+RUN apt-get update && apt-get install -y \
+    python3-dev \
     build-essential \
     pkg-config \
     libpq-dev \
+    gettext \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Set the working directory
 WORKDIR $APP_HOME
 
-# Copiar solo requirements primero -> aprovecha cache de Docker si el código cambia pero no las deps
+# Copy the requirements file into the container
 COPY requirements/base.txt requirements/base.txt
 COPY requirements/prod.txt requirements/prod.txt
 
-# gunicorn se instala aquí junto con el resto -> una sola capa, mismo --user
 RUN pip install --upgrade pip \
-    && pip install --user --no-cache-dir -r requirements/prod.txt gunicorn
+    && pip install --user --no-cache-dir -r requirements/prod.txt
 
-# Copiar el resto del código (usa un .dockerignore para excluir .git, tests, __pycache__, etc.)
+# Copy the current directory contents into the container
 COPY . .
 
-
-# ---------- Final stage ----------
+# Final stage
 FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    APP_HOME=/app/coes \
-    PATH="/home/appuser/.local/bin:${PATH}"
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV APP_HOME=/app/coes
+ENV PATH="/root/.local/bin:${PATH}"
 
-# Solo la librería runtime de PostgreSQL (libpq5), NO libpq-dev (que trae headers de compilación)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    make \
-    gettext \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd -r appuser && useradd -r -g appuser -d /home/appuser -m appuser
+# Install PostgreSQL runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libpq-dev make\
+     gettext \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
+# Set work directory
 WORKDIR $APP_HOME
 
-COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
-COPY --from=builder --chown=appuser:appuser $APP_HOME $APP_HOME
+# Copy installed Python packages from builder
+COPY --from=builder /root/.local /root/.local
 
-USER appuser
+# Copy application code
+COPY --from=builder $APP_HOME $APP_HOME
 
+# Install gunicorn
+RUN pip install --no-cache-dir gunicorn
+
+# Clean up
+RUN rm -rf /root/.cache/pip
+
+# Expose port
 EXPOSE 8000
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health/', timeout=3).status==200 else 1)" || exit 1
-
-#CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]
