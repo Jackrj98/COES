@@ -3,28 +3,58 @@ name: Deploy to Digital Ocean
 on:
   release:
     types: [ published ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 permissions:
   contents: read
   packages: write
 
+env:
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: coes-web
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    outputs:
+      owner_lc: ${{ steps.lowercase.outputs.owner_lc }}
+      release_version: ${{ steps.version.outputs.release_version }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set lowercase owner
-        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+        id: lowercase
+        run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
 
       - name: Set release version
-        run: echo "RELEASE_VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "release_version=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -34,10 +64,25 @@ jobs:
           context: .
           file: build/docker/Dockerfile
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
-            ghcr.io/${{ env.OWNER_LC }}/coes-web:latest
-            ghcr.io/${{ env.OWNER_LC }}/coes-web:${{ env.RELEASE_VERSION }}
-            ghcr.io/${{ env.OWNER_LC }}/coes-web:${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/${{ steps.lowercase.outputs.owner_lc }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ steps.lowercase.outputs.owner_lc }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.release_version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ steps.lowercase.outputs.owner_lc }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.version.outputs.release_version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+  deploy:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || github.event.inputs.environment == 'production'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Deploy to Droplet via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -45,20 +90,40 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
-          envs: GHCR_TOKEN,GHCR_ACTOR,RELEASE_VERSION,OWNER_LC
+          port: ${{ secrets.DROPLET_SSH_PORT || 22 }}
           script: |
-            cd ~/COES
+            set -e
+            
+            echo "🚀 Starting deployment..."
+            
+            # Definir variables
+            OWNER_LC="${{ needs.build-and-deploy.outputs.owner_lc }}"
+            RELEASE_VERSION="${{ needs.build-and-deploy.outputs.release_version }}"
+            DEPLOY_PATH="/home/${{ secrets.DROPLET_USER }}/COES"
+            
+            echo "📁 Deploy path: $DEPLOY_PATH"
+            echo "🏷️  Version: $RELEASE_VERSION"
+            
+            # Crear directorio si no existe
+            mkdir -p $DEPLOY_PATH
+            
+            # Navegar al directorio
+            cd $DEPLOY_PATH
+            
+            # Crear/Actualizar .env
             cat <<EOF > .env
+            # Docker Registry
             OWNER_LC=$OWNER_LC
+            IMAGE_TAG=$RELEASE_VERSION
+            
             # Application settings
             ENV=production
-            RELEASE_VERSION=$RELEASE_VERSION
             DOMAIN=${{ secrets.DOMAIN }}
             ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
             SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
             CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}
             DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}
-
+            
             # Database settings
             DB_NAME=${{ secrets.DB_NAME }}
             DB_USER=${{ secrets.DB_USER }}
@@ -66,8 +131,7 @@ jobs:
             DB_PORT=${{ secrets.DB_PORT }}
             DB_ENGINE=${{ secrets.DB_ENGINE }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_VOLUME_PATH=${{ secrets.DB_VOLUME_PATH }}
-
+            
             # Email settings
             EMAIL_PORT=${{ secrets.EMAIL_PORT }}
             EMAIL_HOST=${{ secrets.EMAIL_HOST }}
@@ -78,13 +142,13 @@ jobs:
             DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}
             EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
             CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
-
+            
             # Redis settings
             REDIS_HOST=${{ secrets.REDIS_HOST }}
             REDIS_PORT=${{ secrets.REDIS_PORT }}
             REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
             REDIS_PORT_HOST=${{ secrets.REDIS_PORT_HOST }}
-
+            
             # Security settings
             CSRF_COOKIE_SECURE=${{ secrets.CSRF_COOKIE_SECURE }}
             SECURE_SSL_REDIRECT=${{ secrets.SECURE_SSL_REDIRECT }}
@@ -96,19 +160,155 @@ jobs:
             SESSION_COOKIE_HTTPONLY=${{ secrets.SESSION_COOKIE_HTTPONLY }}
             EOF
             
-            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-
-            docker pull ghcr.io/$OWNER_LC/coes-web:$RELEASE_VERSION  
+            echo "✅ .env file created"
             
-            export IMAGE_TAG=$RELEASE_VERSION
+            # Login a GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            
+            # Descargar la imagen específica
+            echo "📦 Pulling image: ghcr.io/$OWNER_LC/coes-web:$RELEASE_VERSION"
+            docker pull ghcr.io/$OWNER_LC/coes-web:$RELEASE_VERSION
+            
+            # Verificar si hay un compose.yml o docker-compose.yml
+            if [ -f "docker-compose.yml" ]; then
+              COMPOSE_FILE="docker-compose.yml"
+            elif [ -f "compose.yml" ]; then
+              COMPOSE_FILE="compose.yml"
+            else
+              echo "❌ No docker-compose file found"
+              exit 1
+            fi
+            
+            # Exportar variables para docker-compose
             export OWNER_LC=$OWNER_LC
+            export IMAGE_TAG=$RELEASE_VERSION
             
-            docker compose -f compose.yml up -d --remove-orphans --pull always
+            # Detener contenedores antiguos
+            echo "🛑 Stopping old containers..."
+            docker compose -f $COMPOSE_FILE down || true
+            
+            # Limpiar volúmenes antiguos (opcional)
+            # docker compose -f $COMPOSE_FILE down -v || true
+            
+            # Levantar con la nueva imagen
+            echo "🚀 Starting new containers..."
+            docker compose -f $COMPOSE_FILE up -d
+            
+            # Esperar a que los servicios estén saludables
+            echo "⏳ Waiting for services to be healthy..."
+            sleep 10
+            
+            # Limpiar imágenes antiguas
+            echo "🧹 Cleaning up old images..."
             docker image prune -f
-            echo "Deployed: $RELEASE_VERSION"
-            docker compose -f compose.yml ps
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GHCR_ACTOR: ${{ github.actor }}
-          OWNER_LC: ${{ env.OWNER_LC }}
-          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+            docker system prune -f
+            
+            # Verificar estado
+            echo "📊 Deployment status:"
+            docker compose -f $COMPOSE_FILE ps
+            
+            # Mostrar logs recientes
+            echo "📋 Recent logs:"
+            docker compose -f $COMPOSE_FILE logs --tail=20
+            
+            echo "✅ Deployment completed successfully!"
+            echo "🔗 Application URL: https://${{ secrets.DOMAIN }}"
+
+  rollback:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Rollback on failure
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.DROPLET_USER }}/COES
+            
+            echo "⚠️ Deployment failed. Rolling back..."
+            
+            # Usar la imagen anterior (latest anterior)
+            docker compose down || true
+            docker compose up -d
+            
+            echo "🔄 Rollback completed"
+
+  health-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.DROPLET_USER }}/COES
+            
+            echo "🔍 Running health checks..."
+            
+            # Verificar que todos los contenedores están ejecutándose
+            RUNNING=$(docker compose ps --status running | wc -l)
+            if [ $RUNNING -lt 5 ]; then
+              echo "❌ Not all containers are running"
+              docker compose ps
+              exit 1
+            fi
+            
+            # Verificar healthcheck del web
+            HEALTH=$(docker inspect --format='{{.State.Health.Status}}' coes_web 2>/dev/null || echo "unhealthy")
+            if [ "$HEALTH" != "healthy" ]; then
+              echo "❌ Web service is not healthy"
+              docker compose logs --tail=50 web
+              exit 1
+            fi
+            
+            # Verificar que la aplicación responde
+            if ! curl -f -s -o /dev/null "https://${{ secrets.DOMAIN }}/health/"; then
+              echo "❌ Application is not responding"
+              exit 1
+            fi
+            
+            echo "✅ All health checks passed!"
+
+  notify:
+    needs: [deploy, health-check]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = "${{ needs.health-check.result }}";
+            const version = "${{ needs.build-and-deploy.outputs.release_version }}";
+            const domain = "${{ secrets.DOMAIN }}";
+            
+            let message = `🚀 Deployment ${status === 'success' ? '✅ Success' : '❌ Failed'}\n`;
+            message += `📦 Version: ${version}\n`;
+            message += `🔗 URL: https://${domain}\n`;
+            
+            if (status === 'success') {
+              message += `\n✅ All services are healthy and running!`;
+            } else {
+              message += `\n❌ Please check the deployment logs for details.`;
+            }
+            
+    
+            if (context.eventName === 'release') {
+              const releaseId = context.payload.release.id;
+              await github.rest.repos.createReleaseComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: releaseId,
+                body: message
+              });
+            }
